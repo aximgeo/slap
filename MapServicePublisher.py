@@ -69,7 +69,7 @@ class MapServicePublisher:
             self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
 
     def set_data_sources(self, mxd, path_to_db_connection_file):
-        mxd.findAndReplaceWorkspacePaths ('', path_to_db_connection_file, True)
+        mxd.replaceWorkspaces('', 'NONE', path_to_db_connection_file, 'SDE_WORKSPACE')
 
     def analysis_successful(self, analysis_errors):
         if analysis_errors == {}:
