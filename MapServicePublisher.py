@@ -53,6 +53,7 @@ class MapServicePublisher:
         filename = os.path.splitext(os.path.split(self.currentDirectory + config_entry["input"])[1])[0]
         sddraft, sd = self.get_filenames(filename, self.currentDirectory + config_entry["output"])
         mxd = arcpy.mapping.MapDocument(self.currentDirectory + config_entry["input"])
+        self.set_data_sources(mxd, config_entry["dbConnectionFilePath"])
 
         analysis = arcpy.mapping.CreateMapSDDraft(map_document=mxd,
                                                   out_sddraft=sddraft,
@@ -66,6 +67,9 @@ class MapServicePublisher:
 
         if self.analysis_successful(analysis['errors']):
             self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
+
+    def set_data_sources(self, mxd, path_to_db_connection_file):
+        mxd.findAndReplaceWorkspacePaths ('', path_to_db_connection_file, True)
 
     def analysis_successful(self, analysis_errors):
         if analysis_errors == {}:
@@ -116,6 +120,7 @@ def main(argv):
     else:
         usage()
         sys.exit()
+
 
 def usage():
     print ("python MapServicePublisher.py path_to_config")
