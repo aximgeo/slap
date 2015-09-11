@@ -53,7 +53,7 @@ class MapServicePublisher:
         filename = os.path.splitext(os.path.split(self.currentDirectory + config_entry["input"])[1])[0]
         sddraft, sd = self.get_filenames(filename, self.currentDirectory + config_entry["output"])
         mxd = arcpy.mapping.MapDocument(self.currentDirectory + config_entry["input"])
-        self.set_data_sources(mxd, config_entry["dbConnectionFilePath"])
+        self.set_data_sources(mxd, self.currentDirectory + config_entry["dbConnectionFilePath"])
 
         analysis = arcpy.mapping.CreateMapSDDraft(map_document=mxd,
                                                   out_sddraft=sddraft,
