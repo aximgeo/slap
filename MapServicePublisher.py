@@ -98,6 +98,7 @@ class MapServicePublisher:
 
     def publish(self, services):
         for service_config in services:
+            self.message("Publishing " + service_config["input"])
             extension = os.path.splitext(self.currentDirectory + service_config["input"])[1]
             self.get_publication_method_by_service_type(extension)(service_config)
             print service_config["input"] + " published successfully"
