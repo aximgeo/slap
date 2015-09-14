@@ -19,6 +19,7 @@ class MapServicePublisher:
         sddraft, sd = self.get_filenames(filename, self.currentDirectory + config_entry["output"])
         result = self.get_result(self.currentDirectory + config_entry["input"], config_entry["toolbox"], config_entry["tool"])
 
+        self.message("Generating service definition draft for gp tool...")
         arcpy.CreateGPSDDraft(result=result,
                               out_sddraft=sddraft,
                               service_name=config_entry["serviceName"],
@@ -55,6 +56,7 @@ class MapServicePublisher:
         mxd = arcpy.mapping.MapDocument(self.currentDirectory + config_entry["input"])
         self.set_data_sources(mxd, self.currentDirectory + config_entry["dbConnectionFilePath"])
 
+        self.message("Generating service definition draft for mxd...")
         arcpy.mapping.CreateMapSDDraft(map_document=mxd,
                                        out_sddraft=sddraft,
                                        service_name=config_entry["serviceName"],
@@ -89,7 +91,9 @@ class MapServicePublisher:
         return new_name
 
     def publish_service(self, sddraft, sd, server):
+        self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
+        self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, server)
 
     def publish(self, services):
@@ -107,6 +111,9 @@ class MapServicePublisher:
 
     def slashes_to_dots(self, path):
         return path.replace('/', '.').replace('\\', '.')
+
+    def message(self, message):
+        print message
 
 
 def main(argv):
