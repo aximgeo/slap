@@ -55,15 +55,17 @@ class MapServicePublisher:
         mxd = arcpy.mapping.MapDocument(self.currentDirectory + config_entry["input"])
         self.set_data_sources(mxd, self.currentDirectory + config_entry["dbConnectionFilePath"])
 
-        analysis = arcpy.mapping.CreateMapSDDraft(map_document=mxd,
-                                                  out_sddraft=sddraft,
-                                                  service_name=config_entry["serviceName"],
-                                                  server_type=config_entry["serverType"],
-                                                  connection_file_path=self.currentDirectory + config_entry["connectionFilePath"],
-                                                  copy_data_to_server=config_entry["copyDataToServer"],
-                                                  folder_name=config_entry["folderName"],
-                                                  summary=config_entry["summary"]
-                                                  )
+        arcpy.mapping.CreateMapSDDraft(map_document=mxd,
+                                       out_sddraft=sddraft,
+                                       service_name=config_entry["serviceName"],
+                                       server_type=config_entry["serverType"],
+                                       connection_file_path=self.currentDirectory + config_entry["connectionFilePath"],
+                                       copy_data_to_server=config_entry["copyDataToServer"],
+                                       folder_name=config_entry["folderName"],
+                                       summary=config_entry["summary"]
+                                       )
+
+        analysis = arcpy.mapping.AnalyzeForSD(sddraft)
 
         if self.analysis_successful(analysis['errors']):
             self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
