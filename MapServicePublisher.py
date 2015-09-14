@@ -54,7 +54,7 @@ class MapServicePublisher:
         filename = os.path.splitext(os.path.split(self.currentDirectory + config_entry["input"])[1])[0]
         sddraft, sd = self.get_filenames(filename, self.currentDirectory + config_entry["output"])
         mxd = arcpy.mapping.MapDocument(self.currentDirectory + config_entry["input"])
-        self.set_data_sources(mxd, self.currentDirectory + config_entry["dbConnectionFilePath"])
+        self.set_data_sources(mxd, config_entry)
 
         self.message("Generating service definition draft for mxd...")
         arcpy.mapping.CreateMapSDDraft(map_document=mxd,
@@ -72,9 +72,19 @@ class MapServicePublisher:
         if self.analysis_successful(analysis['errors']):
             self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
 
-    def set_data_sources(self, mxd, path_to_db_connection_file):
-        mxd.replaceWorkspaces('', 'NONE', path_to_db_connection_file, 'SDE_WORKSPACE')
+    def set_data_sources(self, mxd, config):
+        database_path = self.getDatabasePath(config)
+        if self.is_file_geodatabase(config):
+            mxd.replaceWorkspaces('', 'NONE', database_path, 'FILEGDB_WORKSPACE')
+        else:
+            mxd.replaceWorkspaces('', 'NONE', database_path, 'SDE_WORKSPACE')
         mxd.save()
+
+    def getDatabasePath(self, config):
+        return config['fgdbPath'] if self.is_file_geodatabase(config) else self.currentDirectory + config["dbConnectionFilePath"]
+
+    def is_file_geodatabase(self, config):
+        return config['fgdbPath'] != ''
 
     def analysis_successful(self, analysis_errors):
         if analysis_errors == {}:
