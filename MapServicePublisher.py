@@ -74,6 +74,7 @@ class MapServicePublisher:
 
     def set_data_sources(self, mxd, path_to_db_connection_file):
         mxd.replaceWorkspaces('', 'NONE', path_to_db_connection_file, 'SDE_WORKSPACE')
+        mxd.save()
 
     def analysis_successful(self, analysis_errors):
         if analysis_errors == {}:
