@@ -75,8 +75,10 @@ class MapServicePublisher:
     def set_data_sources(self, mxd, config):
         database_path = self.getDatabasePath(config)
         if self.is_file_geodatabase(config):
+            self.message('Replacing data sources with FGDB')
             mxd.replaceWorkspaces('', 'NONE', database_path, 'FILEGDB_WORKSPACE')
         else:
+            self.message('Replacing data sources with SDE')
             mxd.replaceWorkspaces('', 'NONE', database_path, 'SDE_WORKSPACE')
         mxd.save()
 
@@ -84,7 +86,7 @@ class MapServicePublisher:
         return config['fgdbPath'] if self.is_file_geodatabase(config) else self.currentDirectory + config["dbConnectionFilePath"]
 
     def is_file_geodatabase(self, config):
-        return config['fgdbPath'] != ''
+        return 'fgdbPath' in config and config['fgdbPath'] != ''
 
     def analysis_successful(self, analysis_errors):
         if analysis_errors == {}:
