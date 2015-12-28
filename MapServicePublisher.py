@@ -1,6 +1,6 @@
 import os
 import sys
-import getopt
+import argparse
 import imp
 import arcpy
 
@@ -54,7 +54,9 @@ class MapServicePublisher:
         filename = os.path.splitext(os.path.split(self.currentDirectory + config_entry["input"])[1])[0]
         sddraft, sd = self.get_filenames(filename, self.currentDirectory + config_entry["output"])
         mxd = arcpy.mapping.MapDocument(self.currentDirectory + config_entry["input"])
-        self.set_data_sources(mxd, config_entry)
+
+        if config_entry.data_sources:
+            self.set_data_sources(mxd, config_entry)
 
         self.message("Generating service definition draft for mxd...")
         arcpy.mapping.CreateMapSDDraft(map_document=mxd,
@@ -131,22 +133,16 @@ class MapServicePublisher:
 
 
 def main(argv):
-    try:
-        opts, args = getopt.getopt(argv, "h")
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
-    if len(args) == 1:
-        publisher = MapServicePublisher()
-        config = imp.load_source('config', args[0])
-        publisher.publish(config.services)
-    else:
-        usage()
-        sys.exit()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--config", help="full path to config file (ex: -m c:/configs/int_config.json)")
+    args = parser.parse_args()
 
+    if not args.config:
+        parser.error("Full path to config file is required")
 
-def usage():
-    print ("python MapServicePublisher.py path_to_config")
+    publisher = MapServicePublisher()
+    config = imp.load_source('config', args.config)
+    publisher.publish(config.services)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
