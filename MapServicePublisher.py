@@ -24,7 +24,6 @@ class MapServicePublisher:
                               out_sddraft=sddraft,
                               service_name=config_entry["serviceName"],
                               server_type=config_entry["serverType"],
-                              connection_file_path=self.currentDirectory + config_entry["connectionFilePath"],
                               copy_data_to_server=config_entry["copyDataToServer"],
                               folder_name=config_entry["folderName"],
                               summary=config_entry["summary"],
@@ -56,14 +55,13 @@ class MapServicePublisher:
         mxd = arcpy.mapping.MapDocument(self.currentDirectory + config_entry["input"])
 
         if config_entry.data_sources:
-            self.set_data_sources(mxd, config_entry)
+            self.set_data_sources(mxd, config_entry.data_sources)
 
         self.message("Generating service definition draft for mxd...")
         arcpy.mapping.CreateMapSDDraft(map_document=mxd,
                                        out_sddraft=sddraft,
                                        service_name=config_entry["serviceName"],
                                        server_type=config_entry["serverType"],
-                                       connection_file_path=self.currentDirectory + config_entry["connectionFilePath"],
                                        copy_data_to_server=config_entry["copyDataToServer"],
                                        folder_name=config_entry["folderName"],
                                        summary=config_entry["summary"]
@@ -74,21 +72,11 @@ class MapServicePublisher:
         if self.analysis_successful(analysis['errors']):
             self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
 
-    def set_data_sources(self, mxd, config):
-        database_path = self.getDatabasePath(config)
-        if self.is_file_geodatabase(config):
-            self.message('Replacing data sources with FGDB')
-            mxd.replaceWorkspaces('', 'NONE', database_path, 'FILEGDB_WORKSPACE')
-        else:
-            self.message('Replacing data sources with SDE')
-            mxd.replaceWorkspaces('', 'NONE', database_path, 'SDE_WORKSPACE')
+    def set_data_sources(self, mxd, workspaces):
+        mxd.relativePaths = True
+        for workspace in workspaces:
+            mxd.findAndReplaceWorkspacePaths(workspace.old, workspace.new, True)
         mxd.save()
-
-    def getDatabasePath(self, config):
-        return config['fgdbPath'] if self.is_file_geodatabase(config) else self.currentDirectory + config["dbConnectionFilePath"]
-
-    def is_file_geodatabase(self, config):
-        return 'fgdbPath' in config and config['fgdbPath'] != ''
 
     def analysis_successful(self, analysis_errors):
         if analysis_errors == {}:
