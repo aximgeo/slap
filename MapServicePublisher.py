@@ -54,8 +54,8 @@ class MapServicePublisher:
         sddraft, sd = self.get_filenames(filename, self.currentDirectory + config_entry["output"])
         mxd = arcpy.mapping.MapDocument(self.currentDirectory + config_entry["input"])
 
-        if config_entry.data_sources:
-            self.set_data_sources(mxd, config_entry.data_sources)
+        if config_entry["workspaces"]:
+            self.set_workspaces(mxd, config_entry["workspaces"])
 
         self.message("Generating service definition draft for mxd...")
         arcpy.mapping.CreateMapSDDraft(map_document=mxd,
@@ -72,10 +72,10 @@ class MapServicePublisher:
         if self.analysis_successful(analysis['errors']):
             self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
 
-    def set_data_sources(self, mxd, workspaces):
+    def set_workspaces(self, mxd, workspaces):
         mxd.relativePaths = True
         for workspace in workspaces:
-            mxd.findAndReplaceWorkspacePaths(workspace.old, workspace.new, True)
+            mxd.findAndReplaceWorkspacePaths(workspace["old"], workspace["new"], True)
         mxd.save()
 
     def analysis_successful(self, analysis_errors):
