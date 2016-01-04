@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 import imp
+import xml.dom.minidom as DOM
 import arcpy
 
 arcpy.env.overwriteOutput = True
@@ -72,6 +73,20 @@ class MapServicePublisher:
         if self.analysis_successful(analysis['errors']):
             self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
 
+    def set_as_replacement_service(self, sddraft):
+        newType = 'esriServiceDefinitionType_Replacement'
+        xml = sddraft
+        doc = DOM.parse(xml)
+        descriptions = doc.getElementsByTagName('Type')
+        for desc in descriptions:
+            if desc.parentNode.tagName == 'SVCManifest':
+                if desc.hasChildNodes():
+                    desc.firstChild.data = newType
+        outXml = xml
+        f = open(outXml, 'w')
+        doc.writexml(f)
+        f.close()
+
     def set_workspaces(self, mxd, workspaces):
         mxd.relativePaths = True
         for workspace in workspaces:
@@ -94,6 +109,8 @@ class MapServicePublisher:
         return new_name
 
     def publish_service(self, sddraft, sd, server):
+        self.message("Setting draft as replacement...")
+        self.set_as_replacement_service(sddraft)
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
         self.message("Uploading service definition...")
