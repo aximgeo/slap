@@ -90,7 +90,7 @@ class MapServicePublisher:
     def set_workspaces(self, mxd, workspaces):
         mxd.relativePaths = True
         for workspace in workspaces:
-            mxd.findAndReplaceWorkspacePaths(workspace["old"], workspace["new"], True)
+            mxd.findAndReplaceWorkspacePaths(workspace["old"], workspace["new"], False)
         mxd.save()
 
     def analysis_successful(self, analysis_errors):
