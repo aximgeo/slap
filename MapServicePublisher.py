@@ -62,11 +62,11 @@ class MapServicePublisher:
         analysis = arcpy.mapping.CreateMapSDDraft(
             map_document=mxd,
             out_sddraft=sddraft,
-            service_name=config_entry["serviceName"],
-            server_type=config_entry["serverType"] or 'ARCGIS_SERVER',
-            copy_data_to_server=config_entry["copyDataToServer"] if True else False,
-            folder_name=config_entry["folderName"],
-            summary=config_entry["summary"]
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else os.path.splitext(filename)[0],
+            server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
+            copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
+            folder_name=config_entry["folderName"] if "folderName" in config_entry else '',
+            summary=config_entry["summary"] if "summary" in config_entry else '',
         )
 
         if self.analysis_successful(analysis['errors']):
