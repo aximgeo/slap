@@ -63,8 +63,8 @@ class MapServicePublisher:
             map_document=mxd,
             out_sddraft=sddraft,
             service_name=config_entry["serviceName"],
-            server_type=config_entry["serverType"],
-            copy_data_to_server=config_entry["copyDataToServer"],
+            server_type=config_entry["serverType"] or 'ARCGIS_SERVER',
+            copy_data_to_server=config_entry["copyDataToServer"] if True else False,
             folder_name=config_entry["folderName"],
             summary=config_entry["summary"]
         )
