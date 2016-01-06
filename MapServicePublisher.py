@@ -59,16 +59,15 @@ class MapServicePublisher:
             self.set_workspaces(mxd, config_entry["workspaces"])
 
         self.message("Generating service definition draft for mxd...")
-        arcpy.mapping.CreateMapSDDraft(map_document=mxd,
-                                       out_sddraft=sddraft,
-                                       service_name=config_entry["serviceName"],
-                                       server_type=config_entry["serverType"],
-                                       copy_data_to_server=config_entry["copyDataToServer"],
-                                       folder_name=config_entry["folderName"],
-                                       summary=config_entry["summary"]
-                                       )
-
-        analysis = arcpy.mapping.AnalyzeForSD(sddraft)
+        analysis = arcpy.mapping.CreateMapSDDraft(
+            map_document=mxd,
+            out_sddraft=sddraft,
+            service_name=config_entry["serviceName"],
+            server_type=config_entry["serverType"],
+            copy_data_to_server=config_entry["copyDataToServer"],
+            folder_name=config_entry["folderName"],
+            summary=config_entry["summary"]
+        )
 
         if self.analysis_successful(analysis['errors']):
             self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
