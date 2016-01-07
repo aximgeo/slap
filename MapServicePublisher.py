@@ -55,7 +55,7 @@ class MapServicePublisher:
         sddraft, sd = self.get_filenames(filename, self.currentDirectory + config_entry["output"])
         mxd = arcpy.mapping.MapDocument(self.currentDirectory + config_entry["input"])
 
-        if config_entry["workspaces"]:
+        if "workspaces" in config_entry:
             self.set_workspaces(mxd, config_entry["workspaces"])
 
         self.message("Generating service definition draft for mxd...")
