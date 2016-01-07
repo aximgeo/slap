@@ -59,7 +59,7 @@ class MapServicePublisher:
             self.set_workspaces(mxd, config_entry["workspaces"])
 
         self.message("Generating service definition draft for mxd...")
-        analysis = arcpy.mapping.CreateMapSDDraft(
+        arcpy.mapping.CreateMapSDDraft(
             map_document=mxd,
             out_sddraft=sddraft,
             service_name=config_entry["serviceName"] if "serviceName" in config_entry else os.path.splitext(filename)[0],
@@ -68,6 +68,8 @@ class MapServicePublisher:
             folder_name=config_entry["folderName"] if "folderName" in config_entry else '',
             summary=config_entry["summary"] if "summary" in config_entry else '',
         )
+
+        analysis = arcpy.mapping.AnalyzeForSD(sddraft)
 
         if self.analysis_successful(analysis['errors']):
             self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
