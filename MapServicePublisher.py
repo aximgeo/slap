@@ -18,26 +18,33 @@ class MapServicePublisher:
     def publish_gp(self, config_entry):
         filename = os.path.splitext(os.path.split(self.currentDirectory + config_entry["input"])[1])[0]
         sddraft, sd = self.get_filenames(filename, self.currentDirectory + config_entry["output"])
+
         result = self.get_result(self.currentDirectory + config_entry["input"], config_entry["toolbox"], config_entry["tool"])
+        # if "result" in config_entry:
+        #     result = os.path.join(self.currentDirectory, "gp", config_entry["result"])
+        #     print result
+        # else:
+        #     raise Exception("Result must be included in config for publishing a GP tool")
 
         self.message("Generating service definition draft for gp tool...")
-        arcpy.CreateGPSDDraft(result=result,
-                              out_sddraft=sddraft,
-                              service_name=config_entry["serviceName"],
-                              server_type=config_entry["serverType"],
-                              copy_data_to_server=config_entry["copyDataToServer"],
-                              folder_name=config_entry["folderName"],
-                              summary=config_entry["summary"],
-                              tags="gp",
-                              executionType=config_entry["executionType"],
-                              resultMapServer=False,
-                              showMessages="INFO",
-                              maximumRecords=5000,
-                              minInstances=2,
-                              maxInstances=3,
-                              maxUsageTime=100,
-                              maxWaitTime=10,
-                              maxIdleTime=180)
+        arcpy.CreateGPSDDraft(
+            result=result,
+            out_sddraft=sddraft,
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else os.path.splitext(filename)[0],
+            server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
+            copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
+            folder_name=config_entry["folderName"] if "folderName" in config_entry else '',
+            summary=config_entry["summary"] if "summary" in config_entry else '',
+            executionType=config_entry["executionType"] if "executionType" in config_entry else 'Asynchronous',
+            resultMapServer=False,
+            showMessages="INFO",
+            maximumRecords=5000,
+            minInstances=2,
+            maxInstances=3,
+            maxUsageTime=100,
+            maxWaitTime=10,
+            maxIdleTime=180
+        )
 
         analysis = arcpy.mapping.AnalyzeForSD(sddraft)
 
@@ -87,6 +94,12 @@ class MapServicePublisher:
         f = open(outXml, 'w')
         doc.writexml(f)
         f.close()
+
+    def list_service_definition_keys(self, sddraft):
+        doc = DOM.parse(sddraft)
+        keys = doc.getElementsByTagName('Key')
+        for key in keys:
+            print key
 
     def set_workspaces(self, mxd, workspaces):
         mxd.relativePaths = True
