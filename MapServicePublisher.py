@@ -10,7 +10,7 @@ arcpy.env.overwriteOutput = True
 
 class MapServicePublisher:
 
-    currentDirectory = os.path.dirname(os.path.abspath(__file__)) + '/'
+    currentDirectory = os.path.dirname(os.path.abspath(__file__)) + os.path.sep
 
     def __init__(self):
         pass
@@ -19,12 +19,10 @@ class MapServicePublisher:
         filename = os.path.splitext(os.path.split(self.currentDirectory + config_entry["input"])[1])[0]
         sddraft, sd = self.get_filenames(filename, self.currentDirectory + config_entry["output"])
 
-        result = self.get_result(self.currentDirectory + config_entry["input"], config_entry["toolbox"], config_entry["tool"])
-        # if "result" in config_entry:
-        #     result = os.path.join(self.currentDirectory, "gp", config_entry["result"])
-        #     print result
-        # else:
-        #     raise Exception("Result must be included in config for publishing a GP tool")
+        if "result" in config_entry:
+            result = os.path.join(self.currentDirectory, config_entry["result"])
+        else:
+            raise Exception("Result must be included in config for publishing a GP tool")
 
         self.message("Generating service definition draft for gp tool...")
         arcpy.CreateGPSDDraft(
@@ -48,8 +46,8 @@ class MapServicePublisher:
 
         analysis = arcpy.mapping.AnalyzeForSD(sddraft)
 
-        if self.analysis_successful(analysis['errors']):
-            self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
+        # if self.analysis_successful(analysis['errors']):
+        #     self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
 
     def get_result(self, path_to_toolbox, toolbox, tool):
         arcpy.ImportToolbox(path_to_toolbox, toolbox)
