@@ -46,14 +46,8 @@ class MapServicePublisher:
 
         analysis = arcpy.mapping.AnalyzeForSD(sddraft)
 
-        # if self.analysis_successful(analysis['errors']):
-        #     self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
-
-    def get_result(self, path_to_toolbox, toolbox, tool):
-        arcpy.ImportToolbox(path_to_toolbox, toolbox)
-        exetoolexp = 'arcpy.' + tool + '_' + toolbox
-        exetool = eval(exetoolexp)
-        return exetool()
+        if self.analysis_successful(analysis['errors']):
+            self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
 
     def publish_mxd(self, config_entry):
         filename = os.path.splitext(os.path.split(self.currentDirectory + config_entry["input"])[1])[0]
