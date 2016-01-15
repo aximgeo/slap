@@ -73,6 +73,30 @@ class MapServicePublisher:
         if self.analysis_successful(analysis['errors']):
             self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
 
+    def publish_image_service(self, config_entry):
+        filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
+        sddraft, sd = self.get_filenames(filename, self.currentDirectory + config_entry["output"])
+
+        self.message("Generating service definition draft for image service...")
+        arcpy.CreateImageSDDraft(
+            raster_or_mosaic_layer=config_entry["input"],
+            out_sddraft=sddraft,
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else os.path.splitext(filename)[0],
+            connection_file_path=self.currentDirectory + config_entry["connectionFilePath"],
+            server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
+            copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
+            folder_name=config_entry["folderName"] if "folderName" in config_entry else '',
+            summary=config_entry["summary"] if "summary" in config_entry else '',
+            tags=''
+        )
+
+        analysis = arcpy.mapping.AnalyzeForSD(sddraft)
+
+        if self.analysis_successful(analysis['errors']):
+            self.publish_service(sddraft, sd, self.currentDirectory + config_entry["connectionFilePath"])
+
+
+
     def set_as_replacement_service(self, sddraft):
         newType = 'esriServiceDefinitionType_Replacement'
         xml = sddraft
@@ -86,12 +110,6 @@ class MapServicePublisher:
         f = open(outXml, 'w')
         doc.writexml(f)
         f.close()
-
-    def list_service_definition_keys(self, sddraft):
-        doc = DOM.parse(sddraft)
-        keys = doc.getElementsByTagName('Key')
-        for key in keys:
-            print key
 
     def set_workspaces(self, mxd, workspaces):
         mxd.relativePaths = True
@@ -123,18 +141,18 @@ class MapServicePublisher:
         arcpy.UploadServiceDefinition_server(sd, server)
 
     def publish(self, services):
-        for service_config in services:
-            self.message("Publishing " + service_config["input"])
-            extension = os.path.splitext(self.currentDirectory + service_config["input"])[1]
-            self.get_publication_method_by_service_type(extension)(service_config)
-            print service_config["input"] + " published successfully"
+        for config_entry in services:
+            self.message("Publishing " + config_entry["input"])
+            self.get_publication_method_by_service_type(config_entry["type"] if "type" in config_entry else 'map',)(config_entry)
+            print config_entry["input"] + " published successfully"
 
-    def get_publication_method_by_service_type(self, extension):
+    def get_publication_method_by_service_type(self, type):
         publication_methods = {
-            '.mxd': self.publish_mxd,
-            '.tbx': self.publish_gp
+            'map': self.publish_mxd,
+            'gp': self.publish_gp,
+            'image': self.publish_image_service
         }
-        return publication_methods[extension.lower()]
+        return publication_methods[type.lower()]
 
     def slashes_to_dots(self, path):
         return path.replace('/', '.').replace('\\', '.')
