@@ -23,7 +23,7 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version='0.0.0',
 
-    description='A set of scripts for publish ESRI services',
+    description='A set of scripts for publishing ESRI services',
     long_description=long_description,
 
     # The project's main homepage.
