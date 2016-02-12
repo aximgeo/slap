@@ -100,7 +100,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'MapServicePublisher=MapServicePublisher:main',
+            'MapServicePublisher=ags_publishing_tools:MapServicePublisher.main',
         ],
     },
 )
