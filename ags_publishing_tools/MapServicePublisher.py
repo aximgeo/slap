@@ -120,13 +120,9 @@ class MapServicePublisher:
             raise RuntimeError('Analysis contained errors: ', analysis_errors)
 
     def get_filenames(self, original_name, output_path):
-        sddraft = self.swap_extension(original_name, output_path, 'sddraft')
-        sd = self.swap_extension(original_name, output_path, 'sd')
+        sddraft = os.path.join(output_path, '{}.' + 'sddraft').format(original_name)
+        sd = os.path.join(output_path, '{}.' + 'sd').format(original_name)
         return sddraft, sd
-
-    def swap_extension(self, mxd_name, output_path, extension):
-        new_name = os.path.join(output_path, '{}.' + extension).format(mxd_name)
-        return new_name
 
     def get_connection_file_path(self, type_key, config_entry):
         connection_key = "connectionFilePath"

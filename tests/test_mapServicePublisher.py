@@ -80,6 +80,9 @@ class TestMapServicePublisher(TestCase):
         with self.assertRaises(RuntimeError):
             self.m.analysis_successful({'foo': 'bar'})
 
+    def test_get_filenames(self):
+        self.assertEqual(self.m.get_filenames('foo', 'output/'), ('output/foo.sddraft', 'output/foo.sd'))
+
 if __name__ == '__main__':
 
     unittest.main()
