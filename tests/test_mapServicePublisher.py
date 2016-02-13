@@ -73,9 +73,12 @@ class TestMapServicePublisher(TestCase):
         self.m.config = json.loads('{"imageServices": {"services": [{"input": "\\\\foo\\bar\\baz","connectionFilePath": "my/service/connection"}]}}')
         self.assertTrue(self.m.check_service_type('imageServices', '\\foo\bar\baz', test_method))
 
-    # class TestAnalysis(TestCase):
-    #     def test_Analysis_Successful(self):
-    #         pass
+    def test_analysis_successful_true(self):
+        self.assertTrue(self.m.analysis_successful({}))
+
+    def test_analysis_successful_raises_exception(self):
+        with self.assertRaises(RuntimeError):
+            self.m.analysis_successful({'foo': 'bar'})
 
 if __name__ == '__main__':
 
