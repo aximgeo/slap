@@ -187,14 +187,10 @@ class MapServicePublisher:
     def _publish_service(self, type_key, method, config_entry):
         self.message("Publishing " + config_entry["input"])
         method(config_entry, self.get_connection_file_path(type_key, config_entry))
-        print config_entry["input"] + " published successfully"
-
-    def slashes_to_dots(self, path):
-        return path.replace('/', '.').replace('\\', '.')
+        self.message(config_entry["input"] + " published successfully")
 
     def message(self, message):
         print message
-
 
 def main(argv):
     parser = argparse.ArgumentParser()
