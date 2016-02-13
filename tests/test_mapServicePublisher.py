@@ -1,10 +1,14 @@
 import json
 import unittest
 from unittest import TestCase
-from ags_publishing_tools import MapServicePublisher
+from mock import MagicMock, patch
+mock_arcpy = MagicMock()
+patch.dict("sys.modules", arcpy=mock_arcpy).start()
 
+from ags_publishing_tools.MapServicePublisher import MapServicePublisher
 
 class TestMapServicePublisher(TestCase):
+    m = None
 
     def setUp(self):
         self.m = MapServicePublisher()
@@ -68,6 +72,10 @@ class TestMapServicePublisher(TestCase):
         self.m._publish_service = fake_publish
         self.m.config = json.loads('{"imageServices": {"services": [{"input": "\\\\foo\\bar\\baz","connectionFilePath": "my/service/connection"}]}}')
         self.assertTrue(self.m.check_service_type('imageServices', '\\foo\bar\baz', test_method))
+
+    # class TestAnalysis(TestCase):
+    #     def test_Analysis_Successful(self):
+    #         pass
 
 if __name__ == '__main__':
 

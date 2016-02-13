@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 import json
-from SdDraftParser import SdDraftParser
+from ags_publishing_tools.SdDraftParser import SdDraftParser
 import arcpy
 
 arcpy.env.overwriteOutput = True

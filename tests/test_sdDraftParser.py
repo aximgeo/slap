@@ -1,7 +1,7 @@
 import unittest
 import xml.etree.ElementTree as ET
 from unittest import TestCase
-from ags_publishing_tools import SdDraftParser
+from ags_publishing_tools.SdDraftParser import SdDraftParser
 
 
 class TestSdDraftParser(TestCase):
