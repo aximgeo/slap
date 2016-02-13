@@ -1,7 +1,7 @@
 import json
 import unittest
 from unittest import TestCase
-from MapServicePublisher import MapServicePublisher
+from ags_publishing_tools import MapServicePublisher
 
 
 class TestMapServicePublisher(TestCase):
