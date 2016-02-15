@@ -6,6 +6,8 @@ from ags_publishing_tools.SdDraftParser import SdDraftParser
 
 class TestSdDraftParser(TestCase):
 
+    m = None
+
     def setUp(self):
         self.m = SdDraftParser()
 

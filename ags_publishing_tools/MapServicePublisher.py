@@ -1,8 +1,8 @@
 import os
 import sys
 import argparse
-import json
 from ags_publishing_tools.SdDraftParser import SdDraftParser
+from ags_publishing_tools.ConfigParser import ConfigParser
 import arcpy
 
 arcpy.env.overwriteOutput = True
@@ -13,13 +13,13 @@ class MapServicePublisher:
     config = None
     currentDirectory = str(os.path.dirname(os.path.abspath(__file__)) + os.path.sep).replace("\\", "/")
     draft_parser = SdDraftParser()
+    config_parser = ConfigParser()
 
     def __init__(self):
         pass
 
     def load_config(self, path_to_config):
-        with open(path_to_config) as config_file:
-            self.config = json.load(config_file)
+        self.config = self.config_parser.load_config(path_to_config)
 
     def publish_gp(self, config_entry, connection_file_path):
         filename = os.path.splitext(os.path.split(self.currentDirectory + config_entry["input"])[1])[0]
@@ -124,20 +124,6 @@ class MapServicePublisher:
         sd = os.path.join(output_path, '{}.' + 'sd').format(original_name)
         return sddraft, sd
 
-    def get_connection_file_path(self, type_key, config_entry):
-        connection_key = "connectionFilePath"
-        if connection_key in config_entry:
-            connection_file_path = config_entry["connectionFilePath"]
-        elif connection_key in self.config[type_key]:
-            connection_file_path = self.config[type_key]["connectionFilePath"]
-        elif connection_key in self.config:
-            connection_file_path = self.config["connectionFilePath"]
-        else:
-            raise ValueError('connectionFilePath not specified for ' + config_entry)
-        if not os.path.isabs(connection_file_path):
-            connection_file_path = os.path.join(self.currentDirectory, connection_file_path)
-        return connection_file_path
-
     def publish_input(self, input_value):
         input_was_published = self.check_service_type('mapServices', input_value, self.publish_mxd)
         if not input_was_published:
@@ -182,7 +168,7 @@ class MapServicePublisher:
 
     def _publish_service(self, type_key, method, config_entry):
         self.message("Publishing " + config_entry["input"])
-        method(config_entry, self.get_connection_file_path(type_key, config_entry))
+        method(config_entry, self.config_parser.get_connection_file_path(type_key, config_entry))
         self.message(config_entry["input"] + " published successfully")
 
     def message(self, message):

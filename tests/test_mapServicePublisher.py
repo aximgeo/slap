@@ -23,41 +23,6 @@ class TestMapServicePublisher(TestCase):
             }
         }
 
-    def connection_file_paths_match(self, path, config):
-        self.assertEqual(self.m.currentDirectory + path, self.m.get_connection_file_path('mapServices', config))
-
-    def test_get_top_level_connection_file_path(self):
-        self.connection_file_paths_match('my/connection', {'input': 'foo'})
-
-    def test_get_type_level_connection_file_path(self):
-        self.m.config = {
-            'mapServices': {
-                'connectionFilePath': 'my/type/connection',
-                'services': [
-                    {
-                        'input': 'foo'
-                    }
-                ]
-            }
-        }
-        self.connection_file_paths_match('my/type/connection', {'input': 'foo'})
-
-    def test_get_service_level_connection_file_path(self):
-        self.m.config = {
-            'mapServices': {
-                'services': [
-                    {
-                        'input': 'foo',
-                        'connectionFilePath': 'my/service/connection'
-                    }
-                ]
-            }
-        }
-        self.connection_file_paths_match('my/service/connection', {
-            'input': 'foo',
-            'connectionFilePath': 'my/service/connection'
-        })
-
     def test_raise_exception_when_input_not_found(self):
         with self.assertRaises(ValueError):
             self.m.publish_input('bar')
