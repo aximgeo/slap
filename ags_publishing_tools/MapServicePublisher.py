@@ -125,20 +125,20 @@ class MapServicePublisher:
         return sddraft, sd
 
     def publish_input(self, input_value):
-        input_was_published = self.check_service_type('mapServices', input_value, self.publish_mxd)
+        input_was_published = self.check_service_type('mapServices', input_value)
         if not input_was_published:
-            input_was_published = self.check_service_type('gpServices', input_value, self.publish_gp)
+            input_was_published = self.check_service_type('gpServices', input_value)
         if not input_was_published:
-            input_was_published = self.check_service_type('imageServices', input_value, self.publish_image_service)
+            input_was_published = self.check_service_type('imageServices', input_value)
         if not input_was_published:
             raise ValueError('Input ' + input_value + ' was not found in config.')
 
-    def check_service_type(self, type, value, method):
+    def check_service_type(self, type, value):
         ret = False
         if type in self.config:
             for config in self.config[type]['services']:
                 if config["input"] == value:
-                    self._publish_service('mapServices', method, config)
+                    self._publish_service(type, config)
                     ret = True
                     break
         return ret
@@ -158,17 +158,22 @@ class MapServicePublisher:
         self.draft_parser.save_sd_draft()
 
     def publish_all(self):
-        self._publish_services('mapServices', self.publish_mxd)
-        self._publish_services('imageServices', self.publish_image_service)
-        self._publish_services('gpServices', self.publish_gp)
+        for type in self.config_parser.types:
+            self._publish_services(type)
 
-    def _publish_services(self, type_key, method):
-        for config_entry in self.config[type_key]['services']:
-            self._publish_service(type_key, method, config_entry)
+    def _get_method_by_type(self, type):
+        if type == 'mapServices': return self.publish_mxd
+        if type == 'imageServices': return self.publish_image_service
+        if type == 'gpServices': return self.publish_gp
+        raise ValueError('Invalid type: ' + type)
 
-    def _publish_service(self, type_key, method, config_entry):
+    def _publish_services(self, type):
+        for config_entry in self.config[type]['services']:
+            self._publish_service(type, config_entry)
+
+    def _publish_service(self, type, config_entry):
         self.message("Publishing " + config_entry["input"])
-        method(config_entry, self.config_parser.get_connection_file_path(type_key, config_entry))
+        self._get_method_by_type(type)(config_entry)
         self.message(config_entry["input"] + " published successfully")
 
     def message(self, message):

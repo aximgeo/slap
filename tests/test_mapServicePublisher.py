@@ -28,15 +28,12 @@ class TestMapServicePublisher(TestCase):
             self.m.publish_input('bar')
 
     def test_check_service_type_with_backslashes_in_input(self):
-        def test_method():
-            return True
-
-        def fake_publish(type, method, config):
+        def fake_publish(type, config):
             return True
 
         self.m._publish_service = fake_publish
         self.m.config = json.loads('{"imageServices": {"services": [{"input": "\\\\foo\\bar\\baz","connectionFilePath": "my/service/connection"}]}}')
-        self.assertTrue(self.m.check_service_type('imageServices', '\\foo\bar\baz', test_method))
+        self.assertTrue(self.m.check_service_type('imageServices', '\\foo\bar\baz'))
 
     def test_analysis_successful_true(self):
         self.assertTrue(self.m.analysis_successful({}))
@@ -47,6 +44,13 @@ class TestMapServicePublisher(TestCase):
 
     def test_get_filenames(self):
         self.assertEqual(self.m.get_filenames('foo', 'output/'), ('output/foo.sddraft', 'output/foo.sd'))
+
+    def test_get_method_by_type(self):
+        self.assertEqual(self.m.publish_mxd, self.m._get_method_by_type('mapServices'))
+        self.assertEqual(self.m.publish_gp, self.m._get_method_by_type('gpServices'))
+        self.assertEqual(self.m.publish_image_service, self.m._get_method_by_type('imageServices'))
+        with self.assertRaises(ValueError):
+            self.m._get_method_by_type('foo')
 
 if __name__ == '__main__':
 

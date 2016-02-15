@@ -5,6 +5,7 @@ class ConfigParser:
 
     config = None
     types = ['mapServices', 'gpServices', 'imageServices']
+    _required_keys = ['input', 'connectionFilePath']
 
     def __init__(self):
         pass
