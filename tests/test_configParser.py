@@ -118,81 +118,34 @@ class TestConfigParser(TestCase):
                                                          }
                          )
 
-class TestSdDraftParser_properties(TestCase):
-    m = None
+    def check_missing_key(self, config):
+        self.m.config = config
+        with self.assertRaises(KeyError):
+            self.m.check_required_keys()
 
-    def setUp(self):
-        self.m = ConfigParser()
-        self.m.config = {
-            'properties': {
-                'foo': 'bar',
-                'baz': 'quux'
+    def test_raises_for_missing_connection_file_path(self):
+        self.check_missing_key( {
+            'mapServices': {
+                'services': [{'input': 'foo'}]
             },
-            'mapServices': {
-                'services': [
-                    {
-                        'input': '1stInput',
-                    },
-                    {
-                        'input': '2ndInput',
-                        'properties': {
-                            'foo': 'newFoo'
-                        }
-                    }
-                ]
+            'gpServices': {
+                'services': []
+            },
+            'imageServices': {
+                'services': []
             }
-        }
-
-class TestSdDraftParser_connection_file_path(TestCase):
-    m = None
-
-    def setUp(self):
-        self.m = ConfigParser()
-        self.m.config = {
-            'connectionFilePath': 'my/connection',
-            'mapServices': {
-                'services': [
-                    {
-                        'input': 'foo'
-                    }
-                ]
-            }
-        }
-
-    def connection_file_paths_match(self, path, config):
-        self.assertEqual(os.getcwd() + '\\' +  path, self.m.get_connection_file_path('mapServices', config))
-
-
-    def test_get_top_level_connection_file_path(self):
-        self.connection_file_paths_match('my/connection', {'input': 'foo'})
-
-
-    def test_get_type_level_connection_file_path(self):
-        self.m.config = {
-            'mapServices': {
-                'connectionFilePath': 'my/type/connection',
-                'services': [
-                    {
-                        'input': 'foo'
-                    }
-                ]
-            }
-        }
-        self.connection_file_paths_match('my/type/connection', {'input': 'foo'})
-
-
-    def test_get_service_level_connection_file_path(self):
-        self.m.config = {
-            'mapServices': {
-                'services': [
-                    {
-                        'input': 'foo',
-                        'connectionFilePath': 'my/service/connection'
-                    }
-                ]
-            }
-        }
-        self.connection_file_paths_match('my/service/connection', {
-            'input': 'foo',
-            'connectionFilePath': 'my/service/connection'
         })
+
+    def test_raises_for_missing_input(self):
+        self.check_missing_key( {
+            'mapServices': {
+                'services': [{'connectionFilePath': 'foo'}]
+            },
+            'gpServices': {
+                'services': []
+            },
+            'imageServices': {
+                'services': []
+            }
+        })
+

@@ -5,7 +5,7 @@ class ConfigParser:
 
     config = None
     types = ['mapServices', 'gpServices', 'imageServices']
-    _required_keys = ['input', 'connectionFilePath']
+    required_keys = ['input', 'connectionFilePath']
 
     def __init__(self):
         pass
@@ -41,17 +41,12 @@ class ConfigParser:
                         new_keys[type_key] = config[key][type_key]
         return new_keys
 
-
-    def get_connection_file_path(self, type_key, config_entry):
-        connection_key = "connectionFilePath"
-        if connection_key in config_entry:
-            connection_file_path = config_entry["connectionFilePath"]
-        elif connection_key in self.config[type_key]:
-            connection_file_path = self.config[type_key]["connectionFilePath"]
-        elif connection_key in self.config:
-            connection_file_path = self.config["connectionFilePath"]
-        else:
-            raise ValueError('connectionFilePath not specified for ' + config_entry)
-        if not os.path.isabs(connection_file_path):
-            connection_file_path = os.path.join(os.getcwd(), connection_file_path)
+    def get_connection_file_path(self, config_entry):
+        connection_file_path = config_entry['connectionFilePath']
+        if not os.path.isabs(config_entry['connectionFilePath']):
+            connection_file_path = os.path.join(os.getcwd(), config_entry['connectionFilePath'])
         return connection_file_path
+
+    def check_required_keys(self):
+        for key in self.required_keys:
+            test = self.config[key]
