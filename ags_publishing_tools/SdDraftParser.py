@@ -22,14 +22,20 @@ class SdDraftParser:
         root.set("xmlns:typens", "http://www.esri.com/schemas/ArcGIS/10.1")
         root.set("xmlns:xs", "http://www.w3.org/2001/XMLSchema")
 
+    def _get_nodes(self, xpath):
+        nodes = self._tree.findall(xpath)
+        if not nodes:
+            raise KeyError("No node found using '" + xpath + "'")
+        return nodes
+
     def set_as_replacement_service(self):
-        for node in self._tree.findall("Type"):  # All 'Type' nodes that are children of root
+        for node in self._get_nodes("Type"):  # All 'Type' nodes that are children of root
             node.text = 'esriServiceDefinitionType_Replacement'
 
     def disable_schema_locking(self):
         self.set_configuration_property('schemaLockingEnabled', 'false')
 
     def set_configuration_property(self, key, value):
-        for node in self._tree.findall(str.format("./Configurations/SVCConfiguration/Definition/ConfigurationProperties/"
+        for node in self._get_nodes(str.format("./Configurations/SVCConfiguration/Definition/ConfigurationProperties/"
                                        "PropertyArray/PropertySetProperty[Key='{}']/Value", key)):
             node.text = value

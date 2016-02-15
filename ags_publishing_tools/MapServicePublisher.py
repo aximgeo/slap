@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import traceback
 from ags_publishing_tools.SdDraftParser import SdDraftParser
 from ags_publishing_tools.ConfigParser import ConfigParser
 import arcpy
@@ -151,28 +152,29 @@ class MapServicePublisher:
         self.message("Publishing " + config_entry["input"])
         analysis = self._get_method_by_type(type)(config_entry, filename, sddraft)
         if self.analysis_successful(analysis['errors']):
-            self.publish_draft(sddraft, config_entry["connectionFilePath"])
+            self.publish_draft(sddraft, config_entry)
             self.message(config_entry["input"] + " published successfully")
         else:
             self.message("Error publishing " + config_entry['input'] + analysis)
 
-    def publish_draft(self, sddraft, server):
+    def publish_draft(self, sddraft, config):
         sd = self.swap_extension(sddraft, 'sd')
         self.message("Setting service configuration...")
-        self.set_draft_configuration(sddraft)
+        self.set_draft_configuration(sddraft, config["properties"] if "properties" in config else {})
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
         self.message("Uploading service definition...")
-        arcpy.UploadServiceDefinition_server(sd, server)
+        arcpy.UploadServiceDefinition_server(sd, config["connectionFilePath"])
 
     def swap_extension(self, input, extension):
         file, ext = os.path.splitext(input)
         return file + extension
 
-    def set_draft_configuration(self, sddraft):
+    def set_draft_configuration(self, sddraft, properties):
         self.draft_parser.parse_sd_draft(sddraft)
         self.draft_parser.set_as_replacement_service()
-        self.draft_parser.disable_schema_locking()
+        for key, value in properties:
+            self.draft_parser.set_configuration_property(key, value)
         self.draft_parser.save_sd_draft()
 
     def message(self, message):

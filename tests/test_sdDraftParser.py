@@ -14,6 +14,17 @@ class TestSdDraftParser(TestCase):
     def strip_whitespace(self, string):
         return "".join(string.split())
 
+    def test_raise_exception_when_no_nodes_found(self):
+        xml = """
+        <SVCManifest>
+            <ItemInfo>
+            </ItemInfo>
+        </SVCManifest>
+        """
+        self.m._tree = ET.fromstring(xml)
+        with self.assertRaises(KeyError):
+            self.m._get_nodes("Type")
+
     def test_set_replacement_service(self):
         xml = """
         <SVCManifest>
