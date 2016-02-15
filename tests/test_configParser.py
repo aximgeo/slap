@@ -86,7 +86,7 @@ class TestConfigParser(TestCase):
             }
         })
 
-    def test_get_extra_keys(self):
+    def test_get_root_keys(self):
         config = {
             'root_level': 'root',
             'mapServices': {
@@ -96,10 +96,19 @@ class TestConfigParser(TestCase):
                 }]
             }
         }
-        self.assertEqual(self.m.get_non_type_keys(config, 'mapServices'), {
-                                                             'root_level': 'root',
-                                                             'type_level': 'type'
-        })
+        self.assertEqual(self.m.get_root_keys(config), {'root_level': 'root'})
+
+    def test_get_type_keys(self):
+        config = {
+            'root_level': 'root',
+            'mapServices': {
+                'type_level': 'type',
+                'services': [{
+                    'input': 'map'
+                }]
+            }
+        }
+        self.assertEqual(self.m.get_type_keys(config, 'mapServices'), {'type_level': 'type'})
 
     def test_flattening_keys(self):
         config = {
@@ -117,6 +126,36 @@ class TestConfigParser(TestCase):
                                                              'type_level': 'type'
                                                          }
                          )
+
+    def test_flattening_nested_keys(self):
+        config = {
+            'root_level': 'root',
+            'properties': {
+                'myRootProp': 'someValue'
+            },
+            'mapServices': {
+                'type_level': 'type',
+                'properties': {
+                    'myTypeProp': 'someOtherValue'
+                },
+                'services': [{
+                    'input': 'map',
+                    'properties': {
+                        'myServiceProp': 'someThirdValue'
+                    }
+                }]
+            }
+        }
+        self.assertEqual(self.m.parse_config(config)['mapServices']['services'][0], {
+                                                             'input': 'map',
+                                                             'root_level': 'root',
+                                                             'type_level': 'type',
+                                                             'properties': {
+                                                                 'myRootProp': 'someValue',
+                                                                 'myTypeProp': 'someOtherValue',
+                                                                 'myServiceProp': 'someThirdValue'
+                                                             }
+                                                         })
 
     def check_missing_key(self, config):
         self.m.config = config
@@ -148,4 +187,3 @@ class TestConfigParser(TestCase):
                 'services': []
             }
         })
-
