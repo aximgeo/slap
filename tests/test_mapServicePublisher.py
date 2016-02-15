@@ -42,8 +42,11 @@ class TestMapServicePublisher(TestCase):
         with self.assertRaises(RuntimeError):
             self.m.analysis_successful({'foo': 'bar'})
 
-    def test_get_filenames(self):
-        self.assertEqual(self.m.get_filenames('foo', 'output/'), ('output/foo.sddraft', 'output/foo.sd'))
+    def test_get_sddraft_output(self):
+        self.assertEqual(self.m.get_sddraft_output('foo', 'output/'), 'output/foo.sddraft')
+
+    def test_get_sd_output(self):
+        self.assertEqual(self.m.get_sd_output('foo', 'output/'), 'output/foo.sd')
 
     def test_get_method_by_type(self):
         self.assertEqual(self.m.publish_mxd, self.m._get_method_by_type('mapServices'))

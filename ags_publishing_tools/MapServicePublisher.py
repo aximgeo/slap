@@ -21,9 +21,7 @@ class MapServicePublisher:
     def load_config(self, path_to_config):
         self.config = self.config_parser.load_config(path_to_config)
 
-    def publish_gp(self, config_entry):
-        filename = os.path.splitext(os.path.split(self.currentDirectory + config_entry["input"])[1])[0]
-        sddraft, sd = self.get_filenames(filename, self.get_output_directory(config_entry))
+    def publish_gp(self, config_entry, filename, sddraft):
 
         if "result" in config_entry:
             result = os.path.join(self.currentDirectory, config_entry["result"])
@@ -34,7 +32,7 @@ class MapServicePublisher:
         arcpy.CreateGPSDDraft(
             result=result,
             out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else os.path.splitext(filename)[0],
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             connection_file_path=config_entry["connectionFilePath"],
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -53,9 +51,7 @@ class MapServicePublisher:
 
         return arcpy.mapping.AnalyzeForSD(sddraft)
 
-    def publish_mxd(self, config_entry):
-        filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
-        sddraft, sd = self.get_filenames(filename, self.get_output_directory(config_entry))
+    def publish_mxd(self, config_entry, filename, sddraft):
         mxd = arcpy.mapping.MapDocument(os.path.join(self.currentDirectory, config_entry["input"]))
 
         if "workspaces" in config_entry:
@@ -76,15 +72,12 @@ class MapServicePublisher:
 
         return arcpy.mapping.AnalyzeForSD(sddraft)
 
-    def publish_image_service(self, config_entry):
-        filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
-        sddraft, sd = self.get_filenames(filename, self.get_output_directory(config_entry))
-
+    def publish_image_service(self, config_entry, filename, sddraft):
         self.message("Generating service definition draft for image service...")
         arcpy.CreateImageSDDraft(
             raster_or_mosaic_layer=config_entry["input"],
             out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else os.path.splitext(filename)[0],
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             connection_file_path=config_entry["connectionFilePath"],
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -110,10 +103,14 @@ class MapServicePublisher:
         else:
             raise RuntimeError('Analysis contained errors: ', analysis_errors)
 
-    def get_filenames(self, original_name, output_path):
-        sddraft = os.path.join(output_path, '{}.' + 'sddraft').format(original_name)
-        sd = os.path.join(output_path, '{}.' + 'sd').format(original_name)
-        return sddraft, sd
+    def get_sddraft_output(self, original_name, output_path):
+        return self._get_output_filename(original_name, output_path, 'sddraft')
+
+    def get_sd_output(self, original_name, output_path):
+        return self._get_output_filename(original_name, output_path, 'sd')
+
+    def _get_output_filename(self, original_name, output_path, extension):
+        return os.path.join(output_path, '{}.' + extension).format(original_name)
 
     def publish_input(self, input_value):
         input_was_published = self.check_service_type('mapServices', input_value)
@@ -149,21 +146,28 @@ class MapServicePublisher:
             self.publish_service(type, config_entry)
 
     def publish_service(self, type, config_entry):
+        filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
+        sddraft = self.get_sddraft_output(filename, self.get_output_directory(config_entry))
         self.message("Publishing " + config_entry["input"])
-        analysis = self._get_method_by_type(type)(config_entry)
+        analysis = self._get_method_by_type(type)(config_entry, filename, sddraft)
         if self.analysis_successful(analysis['errors']):
-            self.publish_draft(sddraft, sd, config_entry["connectionFilePath"])
+            self.publish_draft(sddraft, config_entry["connectionFilePath"])
             self.message(config_entry["input"] + " published successfully")
         else:
             self.message("Error publishing " + config_entry['input'] + analysis)
 
-    def publish_draft(self, sddraft, sd, server):
+    def publish_draft(self, sddraft, server):
+        sd = self.swap_extension(sddraft, 'sd')
         self.message("Setting service configuration...")
         self.set_draft_configuration(sddraft)
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, server)
+
+    def swap_extension(self, input, extension):
+        file, ext = os.path.splitext(input)
+        return file + extension
 
     def set_draft_configuration(self, sddraft):
         self.draft_parser.parse_sd_draft(sddraft)
