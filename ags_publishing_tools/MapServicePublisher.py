@@ -21,7 +21,7 @@ class MapServicePublisher:
     def load_config(self, path_to_config):
         self.config = self.config_parser.load_config(path_to_config)
 
-    def publish_gp(self, config_entry, connection_file_path):
+    def publish_gp(self, config_entry):
         filename = os.path.splitext(os.path.split(self.currentDirectory + config_entry["input"])[1])[0]
         sddraft, sd = self.get_filenames(filename, self.get_output_directory(config_entry))
 
@@ -36,7 +36,7 @@ class MapServicePublisher:
             out_sddraft=sddraft,
             service_name=config_entry["serviceName"] if "serviceName" in config_entry else os.path.splitext(filename)[0],
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
-            connection_file_path=connection_file_path,
+            connection_file_path=config_entry["connectionFilePath"],
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else '',
             summary=config_entry["summary"] if "summary" in config_entry else '',
@@ -51,12 +51,9 @@ class MapServicePublisher:
             maxIdleTime=180
         )
 
-        analysis = arcpy.mapping.AnalyzeForSD(sddraft)
+        return arcpy.mapping.AnalyzeForSD(sddraft)
 
-        if self.analysis_successful(analysis['errors']):
-            self.publish_service(sddraft, sd, connection_file_path)
-
-    def publish_mxd(self, config_entry, connection_file_path):
+    def publish_mxd(self, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
         sddraft, sd = self.get_filenames(filename, self.get_output_directory(config_entry))
         mxd = arcpy.mapping.MapDocument(os.path.join(self.currentDirectory, config_entry["input"]))
@@ -70,19 +67,16 @@ class MapServicePublisher:
             out_sddraft=sddraft,
             service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
-            connection_file_path=connection_file_path,
+            connection_file_path=config_entry["connectionFilePath"],
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else None,
             summary=config_entry["summary"] if "summary" in config_entry else None,
             tags=config_entry["tags"] if "tags" in config_entry else None
         )
 
-        analysis = arcpy.mapping.AnalyzeForSD(sddraft)
+        return arcpy.mapping.AnalyzeForSD(sddraft)
 
-        if self.analysis_successful(analysis['errors']):
-            self.publish_service(sddraft, sd, connection_file_path)
-
-    def publish_image_service(self, config_entry, connection_file_path):
+    def publish_image_service(self, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
         sddraft, sd = self.get_filenames(filename, self.get_output_directory(config_entry))
 
@@ -91,7 +85,7 @@ class MapServicePublisher:
             raster_or_mosaic_layer=config_entry["input"],
             out_sddraft=sddraft,
             service_name=config_entry["serviceName"] if "serviceName" in config_entry else os.path.splitext(filename)[0],
-            connection_file_path=connection_file_path,
+            connection_file_path=config_entry["connectionFilePath"],
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else '',
@@ -99,10 +93,7 @@ class MapServicePublisher:
             tags=''
         )
 
-        analysis = arcpy.mapping.AnalyzeForSD(sddraft)
-
-        if self.analysis_successful(analysis['errors']):
-            self.publish_service(sddraft, sd, connection_file_path)
+        return arcpy.mapping.AnalyzeForSD(sddraft)
 
     def get_output_directory(self, config_entry):
         return os.path.join(self.currentDirectory, (config_entry["output"] if "output" in config_entry else 'output/'))
@@ -138,12 +129,35 @@ class MapServicePublisher:
         if type in self.config:
             for config in self.config[type]['services']:
                 if config["input"] == value:
-                    self._publish_service(type, config)
+                    self.publish_service(type, config)
                     ret = True
                     break
         return ret
 
-    def publish_service(self, sddraft, sd, server):
+    def publish_all(self):
+        for type in self.config_parser.types:
+            self.publish_services(type)
+
+    def _get_method_by_type(self, type):
+        if type == 'mapServices': return self.publish_mxd
+        if type == 'imageServices': return self.publish_image_service
+        if type == 'gpServices': return self.publish_gp
+        raise ValueError('Invalid type: ' + type)
+
+    def publish_services(self, type):
+        for config_entry in self.config[type]['services']:
+            self.publish_service(type, config_entry)
+
+    def publish_service(self, type, config_entry):
+        self.message("Publishing " + config_entry["input"])
+        analysis = self._get_method_by_type(type)(config_entry)
+        if self.analysis_successful(analysis['errors']):
+            self.publish_draft(sddraft, sd, config_entry["connectionFilePath"])
+            self.message(config_entry["input"] + " published successfully")
+        else:
+            self.message("Error publishing " + config_entry['input'] + analysis)
+
+    def publish_draft(self, sddraft, sd, server):
         self.message("Setting service configuration...")
         self.set_draft_configuration(sddraft)
         self.message("Staging service definition...")
@@ -156,25 +170,6 @@ class MapServicePublisher:
         self.draft_parser.set_as_replacement_service()
         self.draft_parser.disable_schema_locking()
         self.draft_parser.save_sd_draft()
-
-    def publish_all(self):
-        for type in self.config_parser.types:
-            self._publish_services(type)
-
-    def _get_method_by_type(self, type):
-        if type == 'mapServices': return self.publish_mxd
-        if type == 'imageServices': return self.publish_image_service
-        if type == 'gpServices': return self.publish_gp
-        raise ValueError('Invalid type: ' + type)
-
-    def _publish_services(self, type):
-        for config_entry in self.config[type]['services']:
-            self._publish_service(type, config_entry)
-
-    def _publish_service(self, type, config_entry):
-        self.message("Publishing " + config_entry["input"])
-        self._get_method_by_type(type)(config_entry)
-        self.message(config_entry["input"] + " published successfully")
 
     def message(self, message):
         print message

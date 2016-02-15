@@ -31,7 +31,7 @@ class TestMapServicePublisher(TestCase):
         def fake_publish(type, config):
             return True
 
-        self.m._publish_service = fake_publish
+        self.m.publish_service = fake_publish
         self.m.config = json.loads('{"imageServices": {"services": [{"input": "\\\\foo\\bar\\baz","connectionFilePath": "my/service/connection"}]}}')
         self.assertTrue(self.m.check_service_type('imageServices', '\\foo\bar\baz'))
 
