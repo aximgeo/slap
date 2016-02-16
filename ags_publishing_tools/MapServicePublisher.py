@@ -153,7 +153,6 @@ class MapServicePublisher:
     def publish_draft(self, sddraft, config):
         sd = self.swap_extension(sddraft, 'sd')
         self.message("Setting service configuration...")
-        print config
         self.set_draft_configuration(sddraft, config["properties"] if "properties" in config else {})
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
