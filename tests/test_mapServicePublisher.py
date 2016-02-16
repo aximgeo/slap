@@ -1,3 +1,4 @@
+import os
 import json
 import unittest
 from unittest import TestCase
@@ -45,7 +46,7 @@ class TestMapServicePublisher(TestCase):
             out_sddraft='file.sddraft',
             service_name='file',
             server_type='ARCGIS_SERVER',
-            connection_file_path='some/path',
+            connection_file_path=os.path.join(self.m.config_parser.cwd, 'some/path'),
             copy_data_to_server=False,
             folder_name=None,
             summary=None,
@@ -56,7 +57,7 @@ class TestMapServicePublisher(TestCase):
         mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
         mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
         self.m.publish_mxd({
-           'input': 'myFile.mxd',
+            'input': 'myFile.mxd',
             'connectionFilePath': 'some/path',
             'serviceName': 'myService',
             'serverType': 'MY_SERVER_TYPE',
@@ -70,7 +71,7 @@ class TestMapServicePublisher(TestCase):
             out_sddraft='file.sddraft',
             service_name='myService',
             server_type='MY_SERVER_TYPE',
-            connection_file_path='some/path',
+            connection_file_path=os.path.join(self.m.config_parser.cwd, 'some/path'),
             copy_data_to_server=True,
             folder_name='myFolder',
             summary='My Summary',

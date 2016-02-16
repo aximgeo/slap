@@ -24,7 +24,6 @@ class MapServicePublisher:
             result = self.config_parser.get_full_path(config_entry["result"])
         else:
             raise Exception("Result must be included in config for publishing a GP tool")
-        connection_file_path = self.config_parser.get_full_path(config_entry["connectionFilePath"])
 
         self.message("Generating service definition draft for gp tool...")
         arcpy.CreateGPSDDraft(
@@ -32,7 +31,7 @@ class MapServicePublisher:
             out_sddraft=sddraft,
             service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
-            connection_file_path=connection_file_path,
+            connection_file_path=self.config_parser.get_full_path(config_entry["connectionFilePath"]),
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else '',
             summary=config_entry["summary"] if "summary" in config_entry else '',
@@ -50,7 +49,7 @@ class MapServicePublisher:
 
     def publish_mxd(self, config_entry, filename, sddraft):
         mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(config_entry["input"]))
-        connection_file_path = self.config_parser.get_full_path(config_entry["connectionFilePath"])
+
         if "workspaces" in config_entry:
             self.set_workspaces(mxd, config_entry["workspaces"])
 
@@ -60,7 +59,7 @@ class MapServicePublisher:
             out_sddraft=sddraft,
             service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
-            connection_file_path=connection_file_path,
+            connection_file_path=self.config_parser.get_full_path(config_entry["connectionFilePath"]),
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else None,
             summary=config_entry["summary"] if "summary" in config_entry else None,
@@ -69,13 +68,12 @@ class MapServicePublisher:
         return arcpy.mapping.AnalyzeForSD(sddraft)
 
     def publish_image_service(self, config_entry, filename, sddraft):
-        connection_file_path = self.config_parser.get_full_path(config_entry["connectionFilePath"])
         self.message("Generating service definition draft for image service...")
         arcpy.CreateImageSDDraft(
             raster_or_mosaic_layer=config_entry["input"],
             out_sddraft=sddraft,
             service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
-            connection_file_path=connection_file_path,
+            connection_file_path=self.config_parser.get_full_path(config_entry["connectionFilePath"]),
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else '',
