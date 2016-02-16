@@ -1,7 +1,5 @@
 import os
-import sys
 import argparse
-import traceback
 from ags_publishing_tools.SdDraftParser import SdDraftParser
 from ags_publishing_tools.ConfigParser import ConfigParser
 import arcpy
@@ -26,7 +24,7 @@ class MapServicePublisher:
             if os.path.isabs(config_entry["result"]):
                 result = config_entry["result"]
             else:
-                result = os.path.join(os.getcwd(), os.path.sep, config_entry["result"])
+                result = os.path.join(os.getcwd(), config_entry["result"])
         else:
             raise Exception("Result must be included in config for publishing a GP tool")
 
@@ -54,7 +52,7 @@ class MapServicePublisher:
         return arcpy.mapping.AnalyzeForSD(sddraft)
 
     def publish_mxd(self, config_entry, filename, sddraft):
-        mxd = arcpy.mapping.MapDocument(os.path.join(os.getcwd(), os.path.sep, config_entry["input"]))
+        mxd = arcpy.mapping.MapDocument(os.path.join(os.getcwd(), config_entry["input"]))
 
         if "workspaces" in config_entry:
             self.set_workspaces(mxd, config_entry["workspaces"])
@@ -91,7 +89,7 @@ class MapServicePublisher:
         return arcpy.mapping.AnalyzeForSD(sddraft)
 
     def get_output_directory(self, config_entry):
-        return os.path.join(os.getcwd(), os.path.sep, (config_entry["output"] if "output" in config_entry else 'output/'))
+        return os.path.join(os.getcwd(), (config_entry["output"] if "output" in config_entry else 'output/'))
 
     def set_workspaces(self, mxd, workspaces):
         mxd.relativePaths = True
@@ -180,6 +178,7 @@ class MapServicePublisher:
 
     def message(self, message):
         print message
+
 
 def main():
     parser = argparse.ArgumentParser()
