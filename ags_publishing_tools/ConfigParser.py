@@ -1,6 +1,7 @@
 import os
 import json
 
+
 class ConfigParser:
 
     config = None
@@ -59,11 +60,8 @@ class ConfigParser:
                 a[key] = b[key]
         return a
 
-    def get_connection_file_path(self, config_entry):
-        connection_file_path = config_entry['connectionFilePath']
-        if not os.path.isabs(config_entry['connectionFilePath']):
-            connection_file_path = os.path.join(os.getcwd(), config_entry['connectionFilePath'])
-        return connection_file_path
+    def get_full_path(self, config_path):
+        return config_path if os.path.isabs(config_path) else os.path.join(os.getcwd(), config_path)
 
     def check_required_keys(self):
         for key in self.required_keys:

@@ -10,6 +10,9 @@ class TestConfigParser(TestCase):
     def setUp(self):
         self.m = ConfigParser()
 
+    def test_get_full_path(self):
+        self.assertEqual(os.path.join(os.getcwd(), 'foo'), self.m.get_full_path('foo'))
+
     def test_empty_config(self):
         self.assertEqual(self.m.parse_config({}), {
             'mapServices': {

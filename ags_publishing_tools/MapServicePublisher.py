@@ -24,7 +24,7 @@ class MapServicePublisher:
             if os.path.isabs(config_entry["result"]):
                 result = config_entry["result"]
             else:
-                result = os.path.join(os.getcwd(), config_entry["result"])
+                result = self.config_parser.get_full_path(config_entry["result"])
         else:
             raise Exception("Result must be included in config for publishing a GP tool")
 
@@ -52,7 +52,7 @@ class MapServicePublisher:
         return arcpy.mapping.AnalyzeForSD(sddraft)
 
     def publish_mxd(self, config_entry, filename, sddraft):
-        mxd = arcpy.mapping.MapDocument(os.path.join(os.getcwd(), config_entry["input"]))
+        mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(config_entry["input"]))
 
         if "workspaces" in config_entry:
             self.set_workspaces(mxd, config_entry["workspaces"])
@@ -89,7 +89,7 @@ class MapServicePublisher:
         return arcpy.mapping.AnalyzeForSD(sddraft)
 
     def get_output_directory(self, config_entry):
-        return os.path.join(os.getcwd(), (config_entry["output"] if "output" in config_entry else 'output/'))
+        return self.config_parser.get_full_path(config_entry["output"]) if "output" in config_entry else 'output/'
 
     def set_workspaces(self, mxd, workspaces):
         mxd.relativePaths = True
