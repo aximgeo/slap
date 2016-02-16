@@ -142,26 +142,22 @@ class MapServicePublisher:
     def publish_service(self, type, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
         sddraft = self.get_sddraft_output(filename, self.get_output_directory(config_entry))
+        sd= self.get_sddraft_output(filename, self.get_output_directory(config_entry))
         self.message("Publishing " + config_entry["input"])
         analysis = self._get_method_by_type(type)(config_entry, filename, sddraft)
         if self.analysis_successful(analysis['errors']):
-            self.publish_draft(sddraft, config_entry)
+            self.publish_draft(sddraft, sd, config_entry)
             self.message(config_entry["input"] + " published successfully")
         else:
             self.message("Error publishing " + config_entry['input'] + analysis)
 
-    def publish_draft(self, sddraft, config):
-        sd = self.swap_extension(sddraft, 'sd')
+    def publish_draft(self, sddraft, sd, config):
         self.message("Setting service configuration...")
         self.set_draft_configuration(sddraft, config["properties"] if "properties" in config else {})
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, config["connectionFilePath"])
-
-    def swap_extension(self, input, extension):
-        file, ext = os.path.splitext(input)
-        return file + extension
 
     def set_draft_configuration(self, sddraft, properties):
         self.draft_parser.parse_sd_draft(sddraft)
