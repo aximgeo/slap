@@ -23,15 +23,66 @@ class TestMapServicePublisher(TestCase):
             }
         }
 
+    def test_set_workspaces(self):
+        mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
+        mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
+        self.m.set_workspaces = MagicMock()
+        self.m.publish_mxd({'input': 'someFile',
+                            'connectionFilePath': 'some/path',
+                            'workspaces': {'old': 'foo', 'new': 'bar'}
+                            }, 'file', 'file.sddraft')
+        self.m.set_workspaces.assert_called_once_with({'mxd': 'myMap'}, {'new': 'bar', 'old': 'foo'})
+
+    def test_publish_mxd_with_defaults(self):
+        mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
+        mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
+        self.m.publish_mxd({
+           'input': 'myFile.mxd',
+            'connectionFilePath': 'some/path'
+        }, 'file', 'file.sddraft')
+        mock_arcpy.mapping.CreateMapSDDraft.assert_called_once_with(
+            map_document={'mxd': 'myMap'},
+            out_sddraft='file.sddraft',
+            service_name='file',
+            server_type='ARCGIS_SERVER',
+            connection_file_path='some/path',
+            copy_data_to_server=False,
+            folder_name=None,
+            summary=None,
+            tags=None
+        )
+
+    def test_publish_mxd_with_config_values(self):
+        mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
+        mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
+        self.m.publish_mxd({
+           'input': 'myFile.mxd',
+            'connectionFilePath': 'some/path',
+            'serviceName': 'myService',
+            'serverType': 'MY_SERVER_TYPE',
+            'copyDataToServer': True,
+            'folderName': 'myFolder',
+            'summary': 'My Summary',
+            'tags': 'Tags tags'
+        }, 'file', 'file.sddraft')
+        mock_arcpy.mapping.CreateMapSDDraft.assert_called_once_with(
+            map_document={'mxd': 'myMap'},
+            out_sddraft='file.sddraft',
+            service_name='myService',
+            server_type='MY_SERVER_TYPE',
+            connection_file_path='some/path',
+            copy_data_to_server=True,
+            folder_name='myFolder',
+            summary='My Summary',
+            tags='Tags tags'
+        )
+
     def test_raise_exception_when_input_not_found(self):
         with self.assertRaises(ValueError):
             self.m.publish_input('bar')
 
     def test_check_service_type_with_backslashes_in_input(self):
-        def fake_publish(type, config):
-            return True
-
-        self.m.publish_service = fake_publish
+        self.m.publish_service = MagicMock(return_value=True)
         self.m.config = json.loads('{"imageServices": {"services": [{"input": "\\\\foo\\bar\\baz","connectionFilePath": "my/service/connection"}]}}')
         self.assertTrue(self.m.check_service_type('imageServices', '\\foo\bar\baz'))
 

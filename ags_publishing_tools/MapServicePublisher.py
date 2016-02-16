@@ -8,7 +8,6 @@ import arcpy
 
 arcpy.env.overwriteOutput = True
 
-
 class MapServicePublisher:
 
     config = None
@@ -25,7 +24,10 @@ class MapServicePublisher:
     def publish_gp(self, config_entry, filename, sddraft):
 
         if "result" in config_entry:
-            result = os.path.join(self.currentDirectory, config_entry["result"])
+            if os.path.isabs(config_entry["result"]):
+                result = config_entry["result"]
+            else:
+                result = os.path.join(os.getcwd(), config_entry["result"])
         else:
             raise Exception("Result must be included in config for publishing a GP tool")
 
