@@ -182,7 +182,7 @@ class MapServicePublisher:
     def message(self, message):
         print message
 
-def main(argv):
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config",
                         help="full path to config file (ex: --config c:/configs/int_config.json)")
@@ -203,4 +203,4 @@ def main(argv):
         publisher.publish_all()
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
