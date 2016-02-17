@@ -14,6 +14,12 @@ class TestSdDraftParser(TestCase):
     def strip_whitespace(self, string):
         return "".join(string.split())
 
+    def test_convert_boolean(self):
+        self.assertEqual(self.m.convert_if_boolean(True), 'true')
+        self.assertEqual(self.m.convert_if_boolean(False), 'false')
+        self.assertEqual(self.m.convert_if_boolean('fooBarBaz'), 'fooBarBaz')
+        self.assertEqual(self.m.convert_if_boolean(1), 1)
+
     def test_raise_exception_when_no_nodes_found(self):
         xml = """
         <SVCManifest>

@@ -33,9 +33,12 @@ class SdDraftParser:
             node.text = 'esriServiceDefinitionType_Replacement'
 
     def disable_schema_locking(self):
-        self.set_configuration_property('schemaLockingEnabled', 'false')
+        self.set_configuration_property('schemaLockingEnabled', False)
 
     def set_configuration_property(self, key, value):
         for node in self._get_nodes(str.format("./Configurations/SVCConfiguration/Definition/ConfigurationProperties/"
                                        "PropertyArray/PropertySetProperty[Key='{}']/Value", key)):
-            node.text = value
+            node.text = self.convert_if_boolean(value)
+
+    def convert_if_boolean(self, value):
+        return str(value).lower() if isinstance(value, bool) else value
