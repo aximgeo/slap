@@ -1,7 +1,5 @@
 import os
-import sys
 import argparse
-import traceback
 from ags_publishing_tools.SdDraftParser import SdDraftParser
 from ags_publishing_tools.ConfigParser import ConfigParser
 import arcpy
@@ -11,7 +9,6 @@ arcpy.env.overwriteOutput = True
 class MapServicePublisher:
 
     config = None
-    currentDirectory = str(os.path.dirname(os.path.abspath(__file__)) + os.path.sep).replace("\\", "/")
     draft_parser = SdDraftParser()
     config_parser = ConfigParser()
 
@@ -24,10 +21,7 @@ class MapServicePublisher:
     def publish_gp(self, config_entry, filename, sddraft):
 
         if "result" in config_entry:
-            if os.path.isabs(config_entry["result"]):
-                result = config_entry["result"]
-            else:
-                result = os.path.join(os.getcwd(), config_entry["result"])
+            result = self.config_parser.get_full_path(config_entry["result"])
         else:
             raise Exception("Result must be included in config for publishing a GP tool")
 
@@ -37,7 +31,7 @@ class MapServicePublisher:
             out_sddraft=sddraft,
             service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
-            connection_file_path=config_entry["connectionFilePath"],
+            connection_file_path=self.config_parser.get_full_path(config_entry["connectionFilePath"]),
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else None,
             summary=config_entry["summary"] if "summary" in config_entry else None,
@@ -52,11 +46,10 @@ class MapServicePublisher:
             maxWaitTime=10,
             maxIdleTime=180
         )
-
         return arcpy.mapping.AnalyzeForSD(sddraft)
 
     def publish_mxd(self, config_entry, filename, sddraft):
-        mxd = arcpy.mapping.MapDocument(os.path.join(self.currentDirectory, config_entry["input"]))
+        mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(config_entry["input"]))
 
         if "workspaces" in config_entry:
             self.set_workspaces(mxd, config_entry["workspaces"])
@@ -67,13 +60,12 @@ class MapServicePublisher:
             out_sddraft=sddraft,
             service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
-            connection_file_path=config_entry["connectionFilePath"],
+            connection_file_path=self.config_parser.get_full_path(config_entry["connectionFilePath"]),
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else None,
             summary=config_entry["summary"] if "summary" in config_entry else None,
             tags=config_entry["tags"] if "tags" in config_entry else None
         )
-
         return arcpy.mapping.AnalyzeForSD(sddraft)
 
     def publish_image_service(self, config_entry, filename, sddraft):
@@ -82,18 +74,17 @@ class MapServicePublisher:
             raster_or_mosaic_layer=config_entry["input"],
             out_sddraft=sddraft,
             service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
-            connection_file_path=config_entry["connectionFilePath"],
+            connection_file_path=self.config_parser.get_full_path(config_entry["connectionFilePath"]),
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else None,
             summary=config_entry["summary"] if "summary" in config_entry else None,
             tags=config_entry["tags"] if "tags" in config_entry else None
         )
-
         return arcpy.mapping.AnalyzeForSD(sddraft)
 
     def get_output_directory(self, config_entry):
-        return os.path.join(self.currentDirectory, (config_entry["output"] if "output" in config_entry else 'output/'))
+        return self.config_parser.get_full_path(config_entry["output"]) if "output" in config_entry else self.config_parser.get_full_path('output')
 
     def set_workspaces(self, mxd, workspaces):
         mxd.relativePaths = True
@@ -152,16 +143,16 @@ class MapServicePublisher:
     def publish_service(self, type, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
         sddraft = self.get_sddraft_output(filename, self.get_output_directory(config_entry))
+        sd = self.get_sd_output(filename, self.get_output_directory(config_entry))
         self.message("Publishing " + config_entry["input"])
         analysis = self._get_method_by_type(type)(config_entry, filename, sddraft)
         if self.analysis_successful(analysis['errors']):
-            self.publish_draft(sddraft, config_entry)
+            self.publish_draft(sddraft, sd, config_entry)
             self.message(config_entry["input"] + " published successfully")
         else:
             self.message("Error publishing " + config_entry['input'] + analysis)
 
-    def publish_draft(self, sddraft, config):
-        sd = self.swap_extension(sddraft, 'sd')
+    def publish_draft(self, sddraft, sd, config):
         self.message("Setting service configuration...")
         self.set_draft_configuration(sddraft, config["properties"] if "properties" in config else {})
         self.message("Staging service definition...")
@@ -169,21 +160,18 @@ class MapServicePublisher:
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, config["connectionFilePath"])
 
-    def swap_extension(self, input, extension):
-        file, ext = os.path.splitext(input)
-        return file + extension
-
     def set_draft_configuration(self, sddraft, properties):
         self.draft_parser.parse_sd_draft(sddraft)
         self.draft_parser.set_as_replacement_service()
-        for key, value in properties:
+        for key, value in properties.iteritems():
             self.draft_parser.set_configuration_property(key, value)
         self.draft_parser.save_sd_draft()
 
     def message(self, message):
         print message
 
-def main(argv):
+
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config",
                         help="full path to config file (ex: --config c:/configs/int_config.json)")
@@ -204,4 +192,4 @@ def main(argv):
         publisher.publish_all()
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()

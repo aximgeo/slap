@@ -109,7 +109,7 @@ class TestMapServicePublisher(TestCase):
             out_sddraft='file.sddraft',
             service_name='file',
             server_type='ARCGIS_SERVER',
-            connection_file_path='some/path',
+            connection_file_path=os.path.join(self.m.config_parser.cwd, 'some/path'),
             copy_data_to_server=False,
             folder_name=None,
             summary=None,
@@ -120,7 +120,7 @@ class TestMapServicePublisher(TestCase):
         mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
         mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
         self.m.publish_mxd({
-           'input': 'myFile.mxd',
+            'input': 'myFile.mxd',
             'connectionFilePath': 'some/path',
             'serviceName': 'myService',
             'serverType': 'MY_SERVER_TYPE',
@@ -134,7 +134,7 @@ class TestMapServicePublisher(TestCase):
             out_sddraft='file.sddraft',
             service_name='myService',
             server_type='MY_SERVER_TYPE',
-            connection_file_path='some/path',
+            connection_file_path=os.path.join(self.m.config_parser.cwd, 'some/path'),
             copy_data_to_server=True,
             folder_name='myFolder',
             summary='My Summary',
@@ -211,6 +211,17 @@ class TestMapServicePublisher(TestCase):
         self.assertEqual(self.m.publish_image_service, self.m._get_method_by_type('imageServices'))
         with self.assertRaises(ValueError):
             self.m._get_method_by_type('foo')
+
+    def test_set_draft_configuration(self):
+        self.m.draft_parser.parse_sd_draft = MagicMock()
+        self.m.draft_parser.set_as_replacement_service = MagicMock()
+        self.m.draft_parser.save_sd_draft = MagicMock()
+        self.m.draft_parser.set_configuration_property = MagicMock()
+        self.m.set_draft_configuration('file.sddraft', {'myKey': 'myValue'})
+        self.m.draft_parser.parse_sd_draft.assert_called_once_with('file.sddraft')
+        self.m.draft_parser.set_as_replacement_service.assert_called_once_with()
+        self.m.draft_parser.set_configuration_property.assert_called_once_with('myKey', 'myValue')
+        self.m.draft_parser.save_sd_draft.assert_called_once_with()
 
 if __name__ == '__main__':
 
