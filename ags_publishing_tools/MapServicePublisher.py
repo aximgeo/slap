@@ -39,8 +39,9 @@ class MapServicePublisher:
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             connection_file_path=config_entry["connectionFilePath"],
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
-            folder_name=config_entry["folderName"] if "folderName" in config_entry else '',
-            summary=config_entry["summary"] if "summary" in config_entry else '',
+            folder_name=config_entry["folderName"] if "folderName" in config_entry else None,
+            summary=config_entry["summary"] if "summary" in config_entry else None,
+            tags=config_entry["tags"] if "tags" in config_entry else None,
             executionType=config_entry["executionType"] if "executionType" in config_entry else 'Asynchronous',
             resultMapServer=False,
             showMessages="INFO",
@@ -86,7 +87,7 @@ class MapServicePublisher:
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else '',
             summary=config_entry["summary"] if "summary" in config_entry else '',
-            tags=''
+            tags=config_entry["tags"] if "tags" in config_entry else None
         )
 
         return arcpy.mapping.AnalyzeForSD(sddraft)

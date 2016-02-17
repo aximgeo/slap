@@ -1,3 +1,4 @@
+import os
 import json
 import unittest
 from unittest import TestCase
@@ -75,6 +76,69 @@ class TestMapServicePublisher(TestCase):
             folder_name='myFolder',
             summary='My Summary',
             tags='Tags tags'
+        )
+
+    def test_publish_gp_with_defaults(self):
+        mock_arcpy.CreateGPSDDraft = MagicMock()
+        self.m.publish_gp({
+            'input': 'gp/myFile.tbx',
+            'result': 'my/result',
+            'connectionFilePath': 'some/path'
+        }, 'file', 'file.sddraft')
+        mock_arcpy.CreateGPSDDraft.assert_called_once_with(
+            result=os.path.join(os.getcwd(), 'my/result'),
+            out_sddraft='file.sddraft',
+            service_name='file',
+            server_type='ARCGIS_SERVER',
+            connection_file_path='some/path',
+            copy_data_to_server=False,
+            folder_name=None,
+            summary=None,
+            executionType="Asynchronous",
+            resultMapServer=False,
+            showMessages="INFO",
+            maximumRecords=5000,
+            minInstances=2,
+            maxInstances=3,
+            maxUsageTime=100,
+            maxWaitTime=10,
+            maxIdleTime=180,
+            tags=None
+        )
+
+    def test_publish_gp_with_config_values(self):
+        mock_arcpy.CreateGPSDDraft = MagicMock()
+        self.m.publish_gp({
+            'input': 'gp/myFile.tbx',
+            'result': 'my/result',
+            'connectionFilePath': 'some/path',
+            'serviceName': 'myService',
+            'serverType': 'MY_SERVER_TYPE',
+            'copyDataToServer': True,
+            'folderName': 'myFolder',
+            'summary': 'My Summary',
+            'executionType': 'Synchronous',
+            'tags': 'Tags tags'
+        }, 'file', 'file.sddraft')
+        mock_arcpy.CreateGPSDDraft.assert_called_once_with(
+            result=os.path.join(os.getcwd(), 'my/result'),
+            out_sddraft='file.sddraft',
+            service_name='myService',
+            server_type='MY_SERVER_TYPE',
+            connection_file_path='some/path',
+            copy_data_to_server=True,
+            folder_name='myFolder',
+            summary='My Summary',
+            tags='Tags tags',
+            executionType="Synchronous",
+            resultMapServer=False,
+            showMessages="INFO",
+            maximumRecords=5000,
+            minInstances=2,
+            maxInstances=3,
+            maxUsageTime=100,
+            maxWaitTime=10,
+            maxIdleTime=180
         )
 
     def test_raise_exception_when_input_not_found(self):
