@@ -3,6 +3,7 @@ import os
 import argparse
 from ags_publishing_tools.SdDraftParser import SdDraftParser
 from ags_publishing_tools.ConfigParser import ConfigParser
+from ags_publishing_tools import GitFileManager
 import arcpy
 
 arcpy.env.overwriteOutput = True
@@ -131,9 +132,12 @@ class MapServicePublisher:
             self.publish_services(type)
 
     def _get_method_by_type(self, type):
-        if type == 'mapServices': return self.publish_mxd
-        if type == 'imageServices': return self.publish_image_service
-        if type == 'gpServices': return self.publish_gp
+        if type == 'mapServices':
+            return self.publish_mxd
+        if type == 'imageServices':
+            return self.publish_image_service
+        if type == 'gpServices':
+            return self.publish_gp
         raise ValueError('Invalid type: ' + type)
 
     def publish_services(self, type):
@@ -170,30 +174,40 @@ class MapServicePublisher:
     def message(self, message):
         print message
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config",
-                        required=True, help="full path to config file (ex: --config c:/configs/int_config.json)")
-    parser.add_argument("-i", "--inputs", action="append",
+                        required=True,
+                        help="full path to config file (ex: --config c:/configs/int_config.json)")
+    parser.add_argument("-i", "--inputs",
+                        action="append",
                         help="one or more inputs to publish (ex: -i mxd/bar -i gp/PrintService.tbx, -i \\\\my\\network\\share)")
-    parser.add_argument("-a", "--all", action="store_true")
+    parser.add_argument("-a", "--all",
+                        action="store_true",
+                        help="publish all entries in config")
+    parser.add_argument("-g", "--git",
+                        action="store_true",
+                        help="publish all mxd files that have changed since the last commit")
     args = parser.parse_args()
 
     if not args.config:
         parser.error("Full path to config file is required")
 
-    if args.all and args.inputs:
-        parser.error("Specify --all or --inputs, not both")
+    if sum(args.all, args.inputs, args.git) != 1:
+        parser.error("Specify only one of --git, --all, or --inputs")
 
-    if not args.all and not args.inputs:
-        print "No inputs found"
-        sys.exit()
+    if not args.all and not args.inputs and not args.git:
+        parser.error("Specify one of --git, --all, or --inputs")
 
     publisher = MapServicePublisher()
     print "Loading config..."
     publisher.load_config(args.config)
     if args.inputs:
         for i in args.inputs:
+            publisher.publish_input(i)
+    elif args.git:
+        for i in GitFileManager.get_changed_mxds():
             publisher.publish_input(i)
     elif args.all:
         publisher.publish_all()
