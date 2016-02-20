@@ -13,4 +13,4 @@ class TestGitFileManager(TestCase):
 
     def test_get_args(self):
         GitFileManager.get_changed_files = MagicMock(return_value=['foo.mxd', 'bar.txt', 'baz.MXD'])
-        self.assertEqual(GitFileManager.get_args(), '-i foo.mxd -i baz.MXD')
+        self.assertEqual(GitFileManager.build_args(), '-i foo.mxd -i baz.MXD')
