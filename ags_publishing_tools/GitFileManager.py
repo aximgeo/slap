@@ -1,10 +1,10 @@
-from subprocess import call
+from subprocess import check_output
 
 __author__ = 'ifirkin'
 
 
 def get_changed_files():
-    return call(['git',  'diff', '--name-only',  'HEAD~1'])
+    return check_output(['git',  'diff', '--name-only',  'HEAD~1']).splitlines()
 
 
 def get_changed_mxds(changed_files):
