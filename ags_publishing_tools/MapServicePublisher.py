@@ -1,3 +1,4 @@
+import sys
 import os
 import argparse
 from ags_publishing_tools.SdDraftParser import SdDraftParser
@@ -186,7 +187,7 @@ def main():
 
     if not args.all and not args.inputs:
         print "No inputs found"
-        return
+        sys.exit()
 
     publisher = MapServicePublisher()
     print "Loading config..."
