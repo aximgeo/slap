@@ -1,32 +1,27 @@
 import os
-import sys
 import argparse
-import json
-from SdDraftParser import SdDraftParser
+from ags_publishing_tools.SdDraftParser import SdDraftParser
+from ags_publishing_tools.ConfigParser import ConfigParser
 import arcpy
 
 arcpy.env.overwriteOutput = True
 
-
 class MapServicePublisher:
 
     config = None
-    currentDirectory = str(os.path.dirname(os.path.abspath(__file__)) + os.path.sep).replace("\\", "/")
     draft_parser = SdDraftParser()
+    config_parser = ConfigParser()
 
     def __init__(self):
         pass
 
     def load_config(self, path_to_config):
-        with open(path_to_config) as config_file:
-            self.config = json.load(config_file)
+        self.config = self.config_parser.load_config(path_to_config)
 
-    def publish_gp(self, config_entry, connection_file_path):
-        filename = os.path.splitext(os.path.split(self.currentDirectory + config_entry["input"])[1])[0]
-        sddraft, sd = self.get_filenames(filename, self.get_output_directory(config_entry))
+    def publish_gp(self, config_entry, filename, sddraft):
 
         if "result" in config_entry:
-            result = os.path.join(self.currentDirectory, config_entry["result"])
+            result = self.config_parser.get_full_path(config_entry["result"])
         else:
             raise Exception("Result must be included in config for publishing a GP tool")
 
@@ -34,9 +29,9 @@ class MapServicePublisher:
         arcpy.CreateGPSDDraft(
             result=result,
             out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else os.path.splitext(filename)[0],
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
-            connection_file_path=connection_file_path,
+            connection_file_path=self.config_parser.get_full_path(config_entry["connectionFilePath"]),
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else '',
             summary=config_entry["summary"] if "summary" in config_entry else '',
@@ -50,16 +45,10 @@ class MapServicePublisher:
             maxWaitTime=10,
             maxIdleTime=180
         )
+        return arcpy.mapping.AnalyzeForSD(sddraft)
 
-        analysis = arcpy.mapping.AnalyzeForSD(sddraft)
-
-        if self.analysis_successful(analysis['errors']):
-            self.publish_service(sddraft, sd, connection_file_path)
-
-    def publish_mxd(self, config_entry, connection_file_path):
-        filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
-        sddraft, sd = self.get_filenames(filename, self.get_output_directory(config_entry))
-        mxd = arcpy.mapping.MapDocument(os.path.join(self.currentDirectory, config_entry["input"]))
+    def publish_mxd(self, config_entry, filename, sddraft):
+        mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(config_entry["input"]))
 
         if "workspaces" in config_entry:
             self.set_workspaces(mxd, config_entry["workspaces"])
@@ -70,42 +59,31 @@ class MapServicePublisher:
             out_sddraft=sddraft,
             service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
-            connection_file_path=connection_file_path,
+            connection_file_path=self.config_parser.get_full_path(config_entry["connectionFilePath"]),
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else None,
             summary=config_entry["summary"] if "summary" in config_entry else None,
             tags=config_entry["tags"] if "tags" in config_entry else None
         )
+        return arcpy.mapping.AnalyzeForSD(sddraft)
 
-        analysis = arcpy.mapping.AnalyzeForSD(sddraft)
-
-        if self.analysis_successful(analysis['errors']):
-            self.publish_service(sddraft, sd, connection_file_path)
-
-    def publish_image_service(self, config_entry, connection_file_path):
-        filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
-        sddraft, sd = self.get_filenames(filename, self.get_output_directory(config_entry))
-
+    def publish_image_service(self, config_entry, filename, sddraft):
         self.message("Generating service definition draft for image service...")
         arcpy.CreateImageSDDraft(
             raster_or_mosaic_layer=config_entry["input"],
             out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else os.path.splitext(filename)[0],
-            connection_file_path=connection_file_path,
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
+            connection_file_path=self.config_parser.get_full_path(config_entry["connectionFilePath"]),
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
             folder_name=config_entry["folderName"] if "folderName" in config_entry else '',
             summary=config_entry["summary"] if "summary" in config_entry else '',
             tags=''
         )
-
-        analysis = arcpy.mapping.AnalyzeForSD(sddraft)
-
-        if self.analysis_successful(analysis['errors']):
-            self.publish_service(sddraft, sd, connection_file_path)
+        return arcpy.mapping.AnalyzeForSD(sddraft)
 
     def get_output_directory(self, config_entry):
-        return os.path.join(self.currentDirectory, (config_entry["output"] if "output" in config_entry else 'output/'))
+        return self.config_parser.get_full_path(config_entry["output"]) if "output" in config_entry else self.config_parser.get_full_path('output')
 
     def set_workspaces(self, mxd, workspaces):
         mxd.relativePaths = True
@@ -119,84 +97,80 @@ class MapServicePublisher:
         else:
             raise RuntimeError('Analysis contained errors: ', analysis_errors)
 
-    def get_filenames(self, original_name, output_path):
-        sddraft = self.swap_extension(original_name, output_path, 'sddraft')
-        sd = self.swap_extension(original_name, output_path, 'sd')
-        return sddraft, sd
+    def get_sddraft_output(self, original_name, output_path):
+        return self._get_output_filename(original_name, output_path, 'sddraft')
 
-    def swap_extension(self, mxd_name, output_path, extension):
-        new_name = os.path.join(output_path, '{}.' + extension).format(mxd_name)
-        return new_name
+    def get_sd_output(self, original_name, output_path):
+        return self._get_output_filename(original_name, output_path, 'sd')
 
-    def get_connection_file_path(self, type_key, config_entry):
-        connection_key = "connectionFilePath"
-        if connection_key in config_entry:
-            connection_file_path = config_entry["connectionFilePath"]
-        elif connection_key in self.config[type_key]:
-            connection_file_path = self.config[type_key]["connectionFilePath"]
-        elif connection_key in self.config:
-            connection_file_path = self.config["connectionFilePath"]
-        else:
-            raise ValueError('connectionFilePath not specified for ' + config_entry)
-        if not os.path.isabs(connection_file_path):
-            connection_file_path = os.path.join(self.currentDirectory, connection_file_path)
-        return connection_file_path
+    def _get_output_filename(self, original_name, output_path, extension):
+        return os.path.join(output_path, '{}.' + extension).format(original_name)
 
     def publish_input(self, input_value):
-        input_was_published = self.check_service_type('mapServices', input_value, self.publish_mxd)
+        input_was_published = self.check_service_type('mapServices', input_value)
         if not input_was_published:
-            input_was_published = self.check_service_type('gpServices', input_value, self.publish_gp)
+            input_was_published = self.check_service_type('gpServices', input_value)
         if not input_was_published:
-            input_was_published = self.check_service_type('imageServices', input_value, self.publish_image_service)
+            input_was_published = self.check_service_type('imageServices', input_value)
         if not input_was_published:
             raise ValueError('Input ' + input_value + ' was not found in config.')
 
-    def check_service_type(self, type, value, method):
+    def check_service_type(self, type, value):
         ret = False
         if type in self.config:
             for config in self.config[type]['services']:
                 if config["input"] == value:
-                    self._publish_service('mapServices', method, config)
+                    self.publish_service(type, config)
                     ret = True
                     break
         return ret
 
-    def publish_service(self, sddraft, sd, server):
+    def publish_all(self):
+        for type in self.config_parser.types:
+            self.publish_services(type)
+
+    def _get_method_by_type(self, type):
+        if type == 'mapServices': return self.publish_mxd
+        if type == 'imageServices': return self.publish_image_service
+        if type == 'gpServices': return self.publish_gp
+        raise ValueError('Invalid type: ' + type)
+
+    def publish_services(self, type):
+        for config_entry in self.config[type]['services']:
+            self.publish_service(type, config_entry)
+
+    def publish_service(self, type, config_entry):
+        filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
+        sddraft = self.get_sddraft_output(filename, self.get_output_directory(config_entry))
+        sd = self.get_sd_output(filename, self.get_output_directory(config_entry))
+        self.message("Publishing " + config_entry["input"])
+        analysis = self._get_method_by_type(type)(config_entry, filename, sddraft)
+        if self.analysis_successful(analysis['errors']):
+            self.publish_draft(sddraft, sd, config_entry)
+            self.message(config_entry["input"] + " published successfully")
+        else:
+            self.message("Error publishing " + config_entry['input'] + analysis)
+
+    def publish_draft(self, sddraft, sd, config):
         self.message("Setting service configuration...")
-        self.set_draft_configuration(sddraft)
+        self.set_draft_configuration(sddraft, config["properties"] if "properties" in config else {})
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
         self.message("Uploading service definition...")
-        arcpy.UploadServiceDefinition_server(sd, server)
+        arcpy.UploadServiceDefinition_server(sd, config["connectionFilePath"])
 
-    def set_draft_configuration(self, sddraft):
+    def set_draft_configuration(self, sddraft, properties):
         self.draft_parser.parse_sd_draft(sddraft)
         self.draft_parser.set_as_replacement_service()
-        self.draft_parser.disable_schema_locking()
+        for key, value in properties.iteritems():
+            self.draft_parser.set_configuration_property(key, value)
         self.draft_parser.save_sd_draft()
-
-    def publish_all(self):
-        self._publish_services('mapServices', self.publish_mxd)
-        self._publish_services('imageServices', self.publish_image_service)
-        self._publish_services('gpServices', self.publish_gp)
-
-    def _publish_services(self, type_key, method):
-        for config_entry in self.config[type_key]['services']:
-            self._publish_service(type_key, method, config_entry)
-
-    def _publish_service(self, type_key, method, config_entry):
-        self.message("Publishing " + config_entry["input"])
-        method(config_entry, self.get_connection_file_path(type_key, config_entry))
-        print config_entry["input"] + " published successfully"
-
-    def slashes_to_dots(self, path):
-        return path.replace('/', '.').replace('\\', '.')
 
     def message(self, message):
         print message
 
 
-def main(argv):
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config",
                         help="full path to config file (ex: --config c:/configs/int_config.json)")
@@ -217,4 +191,4 @@ def main(argv):
         publisher.publish_all()
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
