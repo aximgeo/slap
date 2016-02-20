@@ -17,4 +17,4 @@ def build_args():
 
 
 def get_args():
-    sys.stdout.write(build_args)
+    sys.stdout.write(build_args())
