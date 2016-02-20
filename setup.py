@@ -101,6 +101,7 @@ setup(
     entry_points={
         'console_scripts': [
             'MapServicePublisher=ags_publishing_tools.MapServicePublisher:main',
+            'git_mxd_inputs=ags_publishing_tools.GitFileManager:get_args'
         ],
     },
 )
