@@ -1,4 +1,3 @@
-import sys
 import os
 import argparse
 from ags_publishing_tools.SdDraftParser import SdDraftParser
@@ -7,6 +6,7 @@ from ags_publishing_tools import GitFileManager
 import arcpy
 
 arcpy.env.overwriteOutput = True
+
 
 class MapServicePublisher:
 
@@ -175,6 +175,11 @@ class MapServicePublisher:
         print message
 
 
+def only_one(iterable):
+    it = iter(iterable)
+    return any(it) and not any(it)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config",
@@ -194,7 +199,7 @@ def main():
     if not args.config:
         parser.error("Full path to config file is required")
 
-    if sum(args.all, args.inputs, args.git) != 1:
+    if not only_one([args.git, args.inputs, args.all]):
         parser.error("Specify only one of --git, --all, or --inputs")
 
     if not args.all and not args.inputs and not args.git:

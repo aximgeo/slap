@@ -6,6 +6,7 @@ from mock import MagicMock, patch
 mock_arcpy = MagicMock()
 patch.dict("sys.modules", arcpy=mock_arcpy).start()
 
+from ags_publishing_tools.MapServicePublisher import only_one
 from ags_publishing_tools.MapServicePublisher import MapServicePublisher
 
 class TestMapServicePublisher(TestCase):
@@ -23,6 +24,13 @@ class TestMapServicePublisher(TestCase):
                 ]
             }
         }
+
+    def test_only_one(self):
+        self.assertTrue(only_one([True, False, False]))
+        self.assertTrue(only_one([False, ['foo', 'bar'], False]))
+        self.assertTrue(only_one([True, [], False]))
+        self.assertFalse(only_one([True, True]))
+        self.assertFalse(only_one([True, ['foo'], False]))
 
     def test_set_workspaces(self):
         mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
