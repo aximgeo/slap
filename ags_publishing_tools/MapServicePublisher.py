@@ -169,17 +169,24 @@ class MapServicePublisher:
     def message(self, message):
         print message
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config",
-                        help="full path to config file (ex: --config c:/configs/int_config.json)")
+                        required=True, help="full path to config file (ex: --config c:/configs/int_config.json)")
     parser.add_argument("-i", "--inputs", action="append",
                         help="one or more inputs to publish (ex: -i mxd/bar -i gp/PrintService.tbx, -i \\\\my\\network\\share)")
+    parser.add_argument("-a", "--all", action="store_true")
     args = parser.parse_args()
 
     if not args.config:
         parser.error("Full path to config file is required")
+
+    if args.all and args.inputs:
+        parser.error("Specify --all or --inputs, not both")
+
+    if not args.all and not args.inputs:
+        print "No inputs found"
+        return
 
     publisher = MapServicePublisher()
     print "Loading config..."
@@ -187,7 +194,7 @@ def main():
     if args.inputs:
         for i in args.inputs:
             publisher.publish_input(i)
-    else:
+    elif args.all:
         publisher.publish_all()
 
 if __name__ == "__main__":
