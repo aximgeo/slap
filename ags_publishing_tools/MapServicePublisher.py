@@ -212,7 +212,10 @@ def main():
         for i in args.inputs:
             publisher.publish_input(i)
     elif args.git:
-        for i in GitFileManager.get_changed_mxds():
+        print "Getting changes from git..."
+        changed_files = GitFileManager.get_changed_mxds()
+        print changed_files
+        for i in changed_files:
             publisher.publish_input(i)
     elif args.all:
         publisher.publish_all()
