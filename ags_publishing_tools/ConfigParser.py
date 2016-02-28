@@ -6,8 +6,8 @@ class ConfigParser:
 
     config = None
     cwd = None
-    types = ['mapServices', 'gpServices', 'imageServices']
-    required_keys = ['input', 'connectionFilePath']
+    service_types = ['mapServices', 'gpServices', 'imageServices']
+    required_keys = ['input', 'serverUrl']
 
     def __init__(self):
         # ESRI's tools will change the cwd, so set it at the beginning
@@ -19,30 +19,30 @@ class ConfigParser:
         return self.parse_config(config)
 
     def parse_config(self, config):
-        parsed = {}
-        for type in self.types:
-            parsed[type] = self.update_keys(config, type)
+        parsed = self.get_root_keys(config)
+        for service_type in self.service_types:
+            parsed[service_type] = self.update_keys(config, service_type)
         return parsed
 
-    def update_keys(self, config, type):
+    def update_keys(self, config, service_type):
         copy = {'services': []}
-        if type in config:
-            copy = config[type].copy()
+        if service_type in config:
+            copy = config[service_type].copy()
             for service in copy['services']:
-                service = reduce(self.merge, [service, self.get_root_keys(config), self.get_type_keys(config, type)])
+                service = reduce(self.merge, [service, self.get_root_keys(config), self.get_type_keys(config, service_type)])
         return copy
 
     def get_root_keys(self, config):
         root_keys = {}
         for key in config:
-            if key not in self.types:
+            if key not in self.service_types:
                 root_keys[key] = config[key]
         return root_keys
 
-    def get_type_keys(self, config, type):
+    def get_type_keys(self, config, service_type):
         type_keys = {}
         for key in config:
-            if key == type:
+            if key == service_type:
                 for type_key in config[key]:
                     if type_key not in ['services']:
                         type_keys[type_key] = config[key][type_key]
