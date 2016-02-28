@@ -13,6 +13,7 @@ arcpy.env.overwriteOutput = True
 class MapServicePublisher:
 
     config = None
+    connection_file_path = None
     draft_parser = SdDraftParser()
     config_parser = ConfigParser()
     security_handler = None
@@ -40,21 +41,20 @@ class MapServicePublisher:
             password=password,
             save_username_password=True
         )
-		
-	def init_arcrest(self, url, username, password):
+
+    def init_arcrest(self, url, username, password):
         self.security_handler = arcrest.AGSTokenSecurityHandler(
             username=username,
             password=password,
             save_username_password=True
         )
-		
+
         self.ags_admin = arcrest.manageags.AGSService(
             url=url,
-            securityHandler=security_handler
+            securityHandler=self.security_handler
         )
-		
-    def publish_gp(self, config_entry, filename, sddraft):
 
+    def publish_gp(self, config_entry, filename, sddraft):
         if "result" in config_entry:
             result = self.config_parser.get_full_path(config_entry["result"])
         else:
