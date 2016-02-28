@@ -28,6 +28,7 @@ class TestConfigParser(TestCase):
 
     def test_no_map_services(self):
         config = {
+            'serverUrl': 'https://my/server',
             'gpServices': {
                 'services': [{'input': 'gp'}]
             },
@@ -40,15 +41,16 @@ class TestConfigParser(TestCase):
                 'services': []
             },
             'gpServices': {
-                'services': [{'input': 'gp'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'gp'}]
             },
             'imageServices': {
-                'services': [{'input': 'image'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'image'}]
             }
         })
 
     def test_no_gp_services(self):
         config = {
+            'serverUrl': 'https://my/server',
             'mapServices': {
                 'services': [{'input': 'map'}]
             },
@@ -58,18 +60,19 @@ class TestConfigParser(TestCase):
         }
         self.assertEqual(self.m.parse_config(config), {
             'mapServices': {
-                'services': [{'input': 'map'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'map'}]
             },
             'gpServices': {
                 'services': []
             },
             'imageServices': {
-                'services': [{'input': 'image'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'image'}]
             }
         })
 
     def test_no_image_services(self):
         config = {
+            'serverUrl': 'https://my/server',
             'gpServices': {
                 'services': [{'input': 'gp'}]
             },
@@ -79,10 +82,10 @@ class TestConfigParser(TestCase):
         }
         self.assertEqual(self.m.parse_config(config), {
             'mapServices': {
-                'services': [{'input': 'map'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'map'}]
             },
             'gpServices': {
-                'services': [{'input': 'gp'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'gp'}]
             },
             'imageServices': {
                 'services': []

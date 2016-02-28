@@ -19,7 +19,7 @@ class ConfigParser:
         return self.parse_config(config)
 
     def parse_config(self, config):
-        parsed = {}
+        parsed = {} #self.get_root_keys(config)
         for service_type in self.service_types:
             parsed[service_type] = self.update_keys(config, service_type)
         return parsed
