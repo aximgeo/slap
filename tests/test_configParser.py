@@ -26,6 +26,20 @@ class TestConfigParser(TestCase):
             }
         })
 
+    def test_root_only_config(self):
+        self.assertEqual(self.m.parse_config({'serverUrl': 'https://my/server'}), {
+            'serverUrl': 'https://my/server',
+            'mapServices': {
+                'services': []
+            },
+            'gpServices': {
+                'services': []
+            },
+            'imageServices': {
+                'services': []
+            }
+        })
+
     def test_no_map_services(self):
         config = {
             'serverUrl': 'https://my/server',
@@ -37,6 +51,7 @@ class TestConfigParser(TestCase):
             }
         }
         self.assertEqual(self.m.parse_config(config), {
+            'serverUrl': 'https://my/server',
             'mapServices': {
                 'services': []
             },
@@ -59,6 +74,7 @@ class TestConfigParser(TestCase):
             }
         }
         self.assertEqual(self.m.parse_config(config), {
+            'serverUrl': 'https://my/server',
             'mapServices': {
                 'services': [{'serverUrl': 'https://my/server', 'input': 'map'}]
             },
@@ -81,6 +97,7 @@ class TestConfigParser(TestCase):
             }
         }
         self.assertEqual(self.m.parse_config(config), {
+            'serverUrl': 'https://my/server',
             'mapServices': {
                 'services': [{'serverUrl': 'https://my/server', 'input': 'map'}]
             },
