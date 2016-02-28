@@ -1,5 +1,7 @@
 import os
 import argparse
+import arcrest
+# from arcrest.manageags import AGSService
 from ags_publishing_tools.SdDraftParser import SdDraftParser
 from ags_publishing_tools.ConfigParser import ConfigParser
 from ags_publishing_tools import GitFileManager
@@ -13,12 +15,25 @@ class MapServicePublisher:
     config = None
     draft_parser = SdDraftParser()
     config_parser = ConfigParser()
+    security_handler = None
+    ags_admin = None
 
     def __init__(self):
         pass
 
     def load_config(self, path_to_config):
         self.config = self.config_parser.load_config(path_to_config)
+
+    def init_arcrest(self, url, username, password):
+        self.security_handler = arcrest.AGSTokenSecurityHandler(
+            username=username,
+            password=password,
+            org_url=url
+        )
+        self.ags_admin = arcrest.manageags.AGSService(
+            url=url,
+            securityHandler=security_handler
+        )
 
     def publish_gp(self, config_entry, filename, sddraft):
 

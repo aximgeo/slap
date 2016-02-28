@@ -190,3 +190,33 @@ class TestConfigParser(TestCase):
                 'services': []
             }
         })
+
+    def test_get_map_service_json(self):
+        self.m.map_service_default_json = {
+            "type": "MapServer",
+            "capabilities": "Map,Query,Data",
+            "properties": {
+                "outputDir": "c:\\arcgis\\arcgisoutput",
+                "virtualOutputDir": "/rest/directories/arcgisoutput"
+            },
+        }
+        config = {
+            "json": {
+                "capabilities": "Map,Query",
+                "properties": {
+                    "schemaLockingEnabled": False
+                }
+            }
+        }
+        expected = {
+            "serviceName": "foo",
+            "type": "MapServer",
+            "capabilities": "Map,Query",
+            "properties": {
+                "schemaLockingEnabled": False,
+                "filePath": "c:\\arcgis\\foo.MapServer\\extracted\\v101\\foo.msd",
+                "outputDir": "c:\\arcgis\\arcgisoutput",
+                "virtualOutputDir": "/rest/directories/arcgisoutput"
+            }
+        }
+        self.assertEqual(expected, self.m.get_map_service_json(config, "c:\\arcgis", "foo"))

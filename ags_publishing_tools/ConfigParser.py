@@ -8,6 +8,34 @@ class ConfigParser:
     cwd = None
     types = ['mapServices', 'gpServices', 'imageServices']
     required_keys = ['input', 'connectionFilePath']
+    map_service_default_json = {
+        # "serviceName": "name",
+        # "description": "description",
+        "type": "MapServer",
+        "capabilities": "Map,Query,Data",
+        "properties": {
+            # "filePath": "c:\\data\\Beirut\\Beirut_Parcels.msd",
+            "outputDir": "c:\\arcgisserver\\directories\\arcgisoutput",
+            "virtualOutputDir": "/rest/directories/arcgisoutput"
+        },
+        "extensions": [
+            {
+                "typeName": "KmlServer",
+                "enabled": True,
+                "capabilities": "SingleImage,SeparateImages,Vectors",
+                "properties": {
+                  "minRefreshPeriod": "30",
+                  "compatibilityMode": "GoogleEarth",
+                  "imageSize": "1024",
+                  "dpi": "96",
+                  "endPointURL": "",
+                  "featureLimit": "1000000",
+                  "useDefaultSnippets": "false"
+                }
+            }
+        ],
+        "datasets": []
+    }
 
     def __init__(self):
         # ESRI's tools will change the cwd, so set it at the beginning
@@ -39,7 +67,8 @@ class ConfigParser:
                 root_keys[key] = config[key]
         return root_keys
 
-    def get_type_keys(self, config, type):
+    @staticmethod
+    def get_type_keys(config, type):
         type_keys = {}
         for key in config:
             if key == type:
@@ -57,7 +86,7 @@ class ConfigParser:
                 elif a[key] == b[key]:
                     pass # same leaf value
                 else:
-                    raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+                    a[key] = b[key]  # Always overwrite
             else:
                 a[key] = b[key]
         return a
@@ -68,3 +97,16 @@ class ConfigParser:
     def check_required_keys(self):
         for key in self.required_keys:
             test = self.config[key]
+
+    def get_map_service_json(self, config, server_input_path, filename):
+        default_json = self.map_service_default_json.copy()
+        msd_path = ConfigParser.get_msd_path(server_input_path, filename)
+        default_json['properties']['filePath'] = msd_path
+        json = config['json'].copy() if 'json' in config else {}
+        if 'serviceName' not in config:
+            json['serviceName'] = filename
+        return self.merge(default_json, json)
+
+    @staticmethod
+    def get_msd_path(server_input_path, filename):
+        return os.path.join(server_input_path, filename + '.MapServer', 'extracted', 'v101', filename + '.msd')
