@@ -165,7 +165,7 @@ class TestConfigParser(TestCase):
         with self.assertRaises(KeyError):
             self.m.check_required_keys()
 
-    def test_raises_for_missing_connection_file_path(self):
+    def test_raises_for_missing_server_url(self):
         self.check_missing_key( {
             'mapServices': {
                 'services': [{'input': 'foo'}]
@@ -181,7 +181,7 @@ class TestConfigParser(TestCase):
     def test_raises_for_missing_input(self):
         self.check_missing_key( {
             'mapServices': {
-                'services': [{'connectionFilePath': 'foo'}]
+                'services': [{'serverUrl': 'foo'}]
             },
             'gpServices': {
                 'services': []
