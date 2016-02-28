@@ -26,8 +26,23 @@ class TestConfigParser(TestCase):
             }
         })
 
+    def test_root_only_config(self):
+        self.assertEqual(self.m.parse_config({'serverUrl': 'https://my/server'}), {
+            'serverUrl': 'https://my/server',
+            'mapServices': {
+                'services': []
+            },
+            'gpServices': {
+                'services': []
+            },
+            'imageServices': {
+                'services': []
+            }
+        })
+
     def test_no_map_services(self):
         config = {
+            'serverUrl': 'https://my/server',
             'gpServices': {
                 'services': [{'input': 'gp'}]
             },
@@ -36,19 +51,21 @@ class TestConfigParser(TestCase):
             }
         }
         self.assertEqual(self.m.parse_config(config), {
+            'serverUrl': 'https://my/server',
             'mapServices': {
                 'services': []
             },
             'gpServices': {
-                'services': [{'input': 'gp'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'gp'}]
             },
             'imageServices': {
-                'services': [{'input': 'image'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'image'}]
             }
         })
 
     def test_no_gp_services(self):
         config = {
+            'serverUrl': 'https://my/server',
             'mapServices': {
                 'services': [{'input': 'map'}]
             },
@@ -57,19 +74,21 @@ class TestConfigParser(TestCase):
             }
         }
         self.assertEqual(self.m.parse_config(config), {
+            'serverUrl': 'https://my/server',
             'mapServices': {
-                'services': [{'input': 'map'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'map'}]
             },
             'gpServices': {
                 'services': []
             },
             'imageServices': {
-                'services': [{'input': 'image'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'image'}]
             }
         })
 
     def test_no_image_services(self):
         config = {
+            'serverUrl': 'https://my/server',
             'gpServices': {
                 'services': [{'input': 'gp'}]
             },
@@ -78,11 +97,12 @@ class TestConfigParser(TestCase):
             }
         }
         self.assertEqual(self.m.parse_config(config), {
+            'serverUrl': 'https://my/server',
             'mapServices': {
-                'services': [{'input': 'map'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'map'}]
             },
             'gpServices': {
-                'services': [{'input': 'gp'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'gp'}]
             },
             'imageServices': {
                 'services': []
@@ -165,7 +185,7 @@ class TestConfigParser(TestCase):
         with self.assertRaises(KeyError):
             self.m.check_required_keys()
 
-    def test_raises_for_missing_connection_file_path(self):
+    def test_raises_for_missing_server_url(self):
         self.check_missing_key( {
             'mapServices': {
                 'services': [{'input': 'foo'}]
@@ -181,7 +201,7 @@ class TestConfigParser(TestCase):
     def test_raises_for_missing_input(self):
         self.check_missing_key( {
             'mapServices': {
-                'services': [{'connectionFilePath': 'foo'}]
+                'services': [{'serverUrl': 'foo'}]
             },
             'gpServices': {
                 'services': []
