@@ -221,7 +221,7 @@ def get_args():
     parser.add_argument("-c", "--config",
                         required=True,
                         help="full path to config file (ex: --config c:/configs/int_config.json)")
-    parser.add_argument("-i", "--input",
+    parser.add_argument("-i", "--inputs",
                         action="append",
                         help="one or more inputs to publish (ex: -i mxd/bar.mxd -i mxd/foo.mxd")
     parser.add_argument("-a", "--all",
@@ -242,10 +242,10 @@ def get_args():
         parser.error("Full path to config file is required")
 
     if not only_one([args.git, args.inputs, args.all]):
-        parser.error("Specify either --git, --all, or --input")
+        parser.error("Specify only one of --git, --all, or --inputs")
 
     if not args.all and not args.inputs and not args.git:
-        parser.error("Specify either --git, --all, or --input")
+        parser.error("Specify one of --git, --all, or --inputs")
 
     return args
 
