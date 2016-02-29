@@ -43,7 +43,7 @@ class MapServicePublisher:
         )
 
     def init_arcrest(self, url, username, password):
-        self.security_handler = security.PortalTokenSecurityHandler(
+        self.security_handler = security.ArcGISTokenSecurityHandler(
             username=username,
             password=password,
             org_url=url
