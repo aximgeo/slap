@@ -45,7 +45,8 @@ class MapServicePublisher:
     def init_arcrest(self, url, username, password):
         self.security_handler = security.AGSTokenSecurityHandler(
             username=username,
-            password=password
+            password=password,
+            org_url=url
         )
 
         self.ags_admin = AGSAdministration(
