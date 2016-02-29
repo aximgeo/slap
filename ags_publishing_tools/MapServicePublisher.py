@@ -181,12 +181,12 @@ class MapServicePublisher:
         for config_entry in self.config[type]['services']:
             self.publish_service(type, config_entry)
 
-    def publish_service(self, type, config_entry):
+    def publish_service(self, service_type, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
         sddraft = self.get_sddraft_output(filename, self.get_output_directory(config_entry))
         sd = self.get_sd_output(filename, self.get_output_directory(config_entry))
         self.message("Publishing " + config_entry["input"])
-        analysis = self._get_method_by_type(type)(config_entry, filename, sddraft)
+        analysis = self._get_method_by_type(service_type)(config_entry, filename, sddraft)
         if self.analysis_successful(analysis['errors']):
             self.publish_draft(sddraft, sd, config_entry)
             self.message(config_entry["input"] + " published successfully")
