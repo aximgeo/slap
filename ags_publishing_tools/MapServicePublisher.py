@@ -46,7 +46,8 @@ class MapServicePublisher:
         self.security_handler = security.AGSTokenSecurityHandler(
             username=username,
             password=password,
-            org_url=url
+            org_url=url,
+            token_url='https://***REMOVED***/portal'
         )
 
         self.ags_admin = AGSAdministration(
