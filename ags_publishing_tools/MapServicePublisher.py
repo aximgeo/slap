@@ -1,6 +1,8 @@
 import os
 import argparse
 import arcrest
+from arcrest.manageags import AGSAdministration
+from arcrest.security import security
 from ags_publishing_tools.ConfigParser import ConfigParser
 from ags_publishing_tools import GitFileManager
 import arcpy
@@ -41,21 +43,19 @@ class MapServicePublisher:
         )
 
     def init_arcrest(self, url, username, password):
-        self.security_handler = arcrest.security.AGSTokenSecurityHandler(
+        self.security_handler = security.AGSTokenSecurityHandler(
             username=username,
             password=password
         )
 
-        self.ags_admin = arcrest.manageags.AGSService(
+        self.ags_admin = AGSAdministration(
             url=url,
             securityHandler=self.security_handler
         )
 
-        ags_input_directory = arcrest.manageags.ServerDirectory(
-            url=url + '/arcgisinput',
-            securityHandler=self.security_handler
-        )
-        self.server_input_directory = ags_input_directory['physicalPath']
+        ags_system = self.ags_admin.system()
+        server_directories = ags_system.serverDirectories()
+        self.server_input_directory = [d for d in server_directories if d['name'] == 'arcgisinput']['physicalPath']
 
     def publish_gp(self, config_entry, filename, sddraft):
         if "result" in config_entry:
