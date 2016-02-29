@@ -1,8 +1,6 @@
 import os
 import argparse
 import arcrest
-# from arcrest.manageags import AGSService
-from ags_publishing_tools.SdDraftParser import SdDraftParser
 from ags_publishing_tools.ConfigParser import ConfigParser
 from ags_publishing_tools import GitFileManager
 import arcpy
@@ -14,10 +12,10 @@ class MapServicePublisher:
 
     config = None
     connection_file_path = None
-    draft_parser = SdDraftParser()
     config_parser = ConfigParser()
     security_handler = None
     ags_admin = None
+    server_input_directory = None
 
     def __init__(self):
         pass
@@ -45,14 +43,19 @@ class MapServicePublisher:
     def init_arcrest(self, url, username, password):
         self.security_handler = arcrest.AGSTokenSecurityHandler(
             username=username,
-            password=password,
-            save_username_password=True
+            password=password
         )
 
         self.ags_admin = arcrest.manageags.AGSService(
             url=url,
             securityHandler=self.security_handler
         )
+
+        ags_input_directory = arcrest.manageags.ServerDirectory(
+            url=url + '/arcgisinput',
+            securityHandler=self.security_handler
+        )
+        self.server_input_directory = ags_input_directory['physicalPath']
 
     def publish_gp(self, config_entry, filename, sddraft):
         if "result" in config_entry:
@@ -191,19 +194,12 @@ class MapServicePublisher:
             self.message("Error publishing " + config_entry['input'] + analysis)
 
     def publish_draft(self, sddraft, sd, config):
-        self.message("Setting service configuration...")
-        self.set_draft_configuration(sddraft, config["properties"] if "properties" in config else {})
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
+        self.message("Deleting old service...")
+        self.ags_admin.delete_service()
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, self.connection_file_path)
-
-    def set_draft_configuration(self, sddraft, properties):
-        self.draft_parser.parse_sd_draft(sddraft)
-        self.draft_parser.set_as_replacement_service()
-        for key, value in properties.iteritems():
-            self.draft_parser.set_configuration_property(key, value)
-        self.draft_parser.save_sd_draft()
 
     def message(self, message):
         print message
@@ -260,6 +256,7 @@ def main():
     print "Loading config..."
     publisher.load_config(args.config)
     publisher.create_server_connection_file(args.username, args.password)
+    publisher.init_arcrest(publisher.config['serverUrl'], args.username, args.password)
     if args.inputs:
         for i in args.inputs:
             publisher.publish_input(i)
