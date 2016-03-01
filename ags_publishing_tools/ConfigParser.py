@@ -7,7 +7,7 @@ class ConfigParser:
     config = None
     cwd = None
     service_types = ['mapServices', 'gpServices', 'imageServices']
-    required_keys = ['input', 'serverUrl']
+    required_keys = ['input', 'agsUrl']
     map_service_default_json = {
         # "serviceName": "name",
         # "description": "description",
