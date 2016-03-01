@@ -3,6 +3,7 @@ import argparse
 import arcrest
 from arcrest.manageags import AGSAdministration
 from arcrest.security import security
+from arcrest.manageorg import Administration
 from ags_publishing_tools.ConfigParser import ConfigParser
 from ags_publishing_tools import GitFileManager
 import arcpy
@@ -46,13 +47,19 @@ class MapServicePublisher:
         self.security_handler = security.PortalTokenSecurityHandler(
             username=username,
             password=password,
-            org_url=url
+            org_url=url,
+            token_url=url + '/generateToken'
         )
 
-        self.ags_admin = AGSAdministration(
+        portal_admin = Administration(
             url=url,
             securityHandler=self.security_handler
         )
+
+        servers = portal_admin.hostingServers()
+        for server in servers:
+            if isinstance(server, AGSAdministration):
+                self.ags_admin = AGSAdministration
 
         ags_system = self.ags_admin.system()
         server_directories = ags_system.serverDirectories()
