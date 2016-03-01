@@ -194,6 +194,7 @@ class MapServicePublisher:
 
     def publish_service(self, service_type, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
+        config_entry['json']['serviceName'] = filename
         sddraft = self.get_sddraft_output(filename, self.get_output_directory(config_entry))
         sd = self.get_sd_output(filename, self.get_output_directory(config_entry))
         self.message("Publishing " + config_entry["input"])
