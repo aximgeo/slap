@@ -51,7 +51,7 @@ class MapServicePublisher:
             securityHandler=self.security_handler
         )
 
-        server_directories = self.ags_admin.system.serverDirectories()
+        server_directories = self.ags_admin.system.serverDirectories
         self.server_input_directory = [d for d in server_directories if d['name'] == 'arcgisinput']['physicalPath']
 
     @staticmethod
