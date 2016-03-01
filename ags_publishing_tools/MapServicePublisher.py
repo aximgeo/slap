@@ -43,21 +43,33 @@ class MapServicePublisher:
             save_username_password=True
         )
 
-    def init_arcrest(self, url, token_url, username, password):
-        self.security_handler = security.AGSTokenSecurityHandler(
-            username=username,
-            password=password,
-            org_url=url,
-            token_url=token_url
-        )
+    def init_arcrest(self, ags_url, token_url, portal_url, username, password):
+        self.security_handler = self.get_security_handler(ags_url, token_url, portal_url, username, password)
 
         self.ags_admin = AGSAdministration(
-            url=url,
+            url=ags_url,
             securityHandler=self.security_handler
         )
 
         server_directories = self.ags_admin.system.serverDirectories()
         self.server_input_directory = [d for d in server_directories if d['name'] == 'arcgisinput']['physicalPath']
+
+    @staticmethod
+    def get_security_handler(ags_url, token_url, portal_url, username, password):
+        if token_url and portal_url:
+            security_handler = security.PortalTokenSecurityHandler(
+                username=username,
+                password=password,
+                org_url=portal_url,
+                token_url=token_url
+            )
+        else:
+            security_handler = security.AGSTokenSecurityHandler(
+                username=username,
+                password=password,
+                org_url=ags_url
+            )
+        return security_handler
 
     def publish_gp(self, config_entry, filename, sddraft):
         if "result" in config_entry:
@@ -258,7 +270,13 @@ def main():
     print "Loading config..."
     publisher.load_config(args.config)
     publisher.create_server_connection_file(args.username, args.password)
-    publisher.init_arcrest(publisher.config['serverUrl'], publisher.config['tokenUrl'], args.username, args.password)
+    publisher.init_arcrest(
+        ags_url=publisher.config['agsUrl'],
+        token_url=publisher.config['tokenUrl'],
+        portal_url=publisher.config['tokenUrl'] if 'tokenUrl' in publisher.config else None,
+        username=args.username,
+        password=args.password
+    )
     if args.inputs:
         for i in args.inputs:
             publisher.publish_input(i)
