@@ -36,6 +36,8 @@ class ConfigParser:
         ],
         "datasets": []
     }
+    image_service_default_json = {}
+    gp_service_default_json = {}
 
     def __init__(self):
         # ESRI's tools will change the cwd, so set it at the beginning
@@ -58,6 +60,7 @@ class ConfigParser:
             copy = config[service_type].copy()
             for service in copy['services']:
                 service = reduce(self.merge, [service, self.get_root_keys(config), self.get_type_keys(config, service_type)])
+                service['json'] = self.get_json_by_type(service_type, service)
         return copy
 
     def get_root_keys(self, config):
@@ -90,21 +93,29 @@ class ConfigParser:
                 a[key] = b[key]
         return a
 
+    def get_json_by_type(self, service_type, config):
+        if service_type == 'mapServices':
+            return self.merge_json(config, self.map_service_default_json.copy())
+        if service_type == 'imageServices':
+            return self.merge_json(config, self.image_service_default_json.copy())
+        if service_type == 'gpServices':
+            return self.merge_json(config, self.gp_service_default_json.copy())
+        raise ValueError('Invalid type: ' + service_type)
+
+    def merge_json(self, config, default_json):
+        # default_json = self.map_service_default_json.copy()
+        # msd_path = ConfigParser.get_msd_path(server_input_path, filename)
+        # default_json['properties']['filePath'] = msd_path
+        config_json = config['json'].copy() if 'json' in config else {}
+        # json['serviceName'] = filename
+        return self.merge(default_json, config_json)
+
     def get_full_path(self, config_path):
         return config_path if os.path.isabs(config_path) else os.path.join(self.cwd, config_path)
 
     def check_required_keys(self):
         for key in self.required_keys:
             test = self.config[key]
-
-    def get_map_service_json(self, config, server_input_path, filename):
-        default_json = self.map_service_default_json.copy()
-        msd_path = ConfigParser.get_msd_path(server_input_path, filename)
-        default_json['properties']['filePath'] = msd_path
-        json = config['json'].copy() if 'json' in config else {}
-        if 'serviceName' not in config:
-            json['serviceName'] = filename
-        return self.merge(default_json, json)
 
     @staticmethod
     def get_msd_path(server_input_path, filename):
