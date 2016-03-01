@@ -43,11 +43,10 @@ class MapServicePublisher:
         )
 
     def init_arcrest(self, url, username, password):
-        self.security_handler = security.AGSTokenSecurityHandler(
+        self.security_handler = security.PortalTokenSecurityHandler(
             username=username,
             password=password,
-            org_url=url,
-            token_url='https://***REMOVED***/portal'
+            org_url=url
         )
 
         self.ags_admin = AGSAdministration(
