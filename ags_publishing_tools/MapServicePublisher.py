@@ -211,7 +211,7 @@ class MapServicePublisher:
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
         self.message("Deleting old service...")
-        self.ags_admin.delete_service()
+        self.ags_admin.services.delete_service()
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, self.connection_file_path)
 
