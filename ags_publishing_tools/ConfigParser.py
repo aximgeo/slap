@@ -15,7 +15,7 @@ class ConfigParser:
         "capabilities": "Map,Query,Data",
         "properties": {
             # "filePath": "c:\\data\\Beirut\\Beirut_Parcels.msd",
-            "outputDir": "c:\\arcgisserver\\directories\\arcgisoutput",
+            # "outputDir": "c:\\arcgisserver\\directories\\arcgisoutput",
             "virtualOutputDir": "/rest/directories/arcgisoutput"
         },
         "extensions": [
@@ -103,12 +103,15 @@ class ConfigParser:
         raise ValueError('Invalid type: ' + service_type)
 
     def merge_json(self, config, default_json):
-        # default_json = self.map_service_default_json.copy()
-        # msd_path = ConfigParser.get_msd_path(server_input_path, filename)
-        # default_json['properties']['filePath'] = msd_path
+
         config_json = config['json'].copy() if 'json' in config else {}
-        # json['serviceName'] = filename
         return self.merge(default_json, config_json)
+
+    @staticmethod
+    def set_server_properties(config_json, server_input_path, filename):
+        msd_path = ConfigParser.get_msd_path(server_input_path, filename)
+        config_json['properties']['filePath'] = msd_path
+        config_json['serviceName'] = filename
 
     def get_full_path(self, config_path):
         return config_path if os.path.isabs(config_path) else os.path.join(self.cwd, config_path)
