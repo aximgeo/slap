@@ -43,26 +43,20 @@ class MapServicePublisher:
             save_username_password=True
         )
 
-    def init_arcrest(self, url, username, password):
-        self.security_handler = security.PortalTokenSecurityHandler(
+    def init_arcrest(self, url, token_url, username, password):
+        self.security_handler = security.AGSTokenSecurityHandler(
             username=username,
             password=password,
             org_url=url,
-            token_url=url + '/generateToken'
+            token_url=token_url
         )
 
-        portal_admin = Administration(
+        self.ags_admin = AGSAdministration(
             url=url,
             securityHandler=self.security_handler
         )
 
-        servers = portal_admin.hostingServers()
-        for server in servers:
-            if isinstance(server, AGSAdministration):
-                self.ags_admin = AGSAdministration
-
-        ags_system = self.ags_admin.system()
-        server_directories = ags_system.serverDirectories()
+        server_directories = self.ags_admin.system.serverDirectories()
         self.server_input_directory = [d for d in server_directories if d['name'] == 'arcgisinput']['physicalPath']
 
     def publish_gp(self, config_entry, filename, sddraft):
@@ -264,7 +258,7 @@ def main():
     print "Loading config..."
     publisher.load_config(args.config)
     publisher.create_server_connection_file(args.username, args.password)
-    publisher.init_arcrest(publisher.config['serverUrl'], args.username, args.password)
+    publisher.init_arcrest(publisher.config['serverUrl'], publisher.config['tokenUrl'], args.username, args.password)
     if args.inputs:
         for i in args.inputs:
             publisher.publish_input(i)
