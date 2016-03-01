@@ -52,7 +52,7 @@ class MapServicePublisher:
         )
 
         server_directories = self.ags_admin.system.serverDirectories
-        self.server_input_directory = [d for d in server_directories if d['name'] == 'arcgisinput']['physicalPath']
+        self.server_input_directory = [d for d in server_directories if d.name == 'arcgisinput'][0].physicalPath
 
     @staticmethod
     def get_security_handler(ags_url, token_url, portal_url, username, password):
