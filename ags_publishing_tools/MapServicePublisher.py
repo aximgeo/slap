@@ -81,7 +81,7 @@ class MapServicePublisher:
         arcpy.CreateGPSDDraft(
             result=result,
             out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
+            service_name=filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             connection_file_path=self.connection_file_path,
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -110,7 +110,7 @@ class MapServicePublisher:
         arcpy.mapping.CreateMapSDDraft(
             map_document=mxd,
             out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
+            service_name=filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             connection_file_path=self.connection_file_path,
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -125,7 +125,7 @@ class MapServicePublisher:
         arcpy.CreateImageSDDraft(
             raster_or_mosaic_layer=config_entry["input"],
             out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
+            service_name=filename,
             connection_file_path=self.connection_file_path,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -211,7 +211,7 @@ class MapServicePublisher:
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
         self.message("Deleting old service...")
-        self.ags_admin.services.delete_service()
+        self.ags_admin.services.deleteService()
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, self.connection_file_path)
 
