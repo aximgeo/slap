@@ -34,7 +34,7 @@ class MapServicePublisher:
             connection_type='PUBLISH_GIS_SERVICES',
             out_folder_path=output_path,
             out_name=connection_file_name,
-            server_url=self.config['serverUrl'],
+            server_url=self.config['agsUrl'],
             server_type='ARCGIS_SERVER',
             use_arcgis_desktop_staging_folder=False,
             staging_folder_path=output_path,
