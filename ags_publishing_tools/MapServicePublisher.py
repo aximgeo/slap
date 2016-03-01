@@ -1,9 +1,7 @@
 import os
 import argparse
-import arcrest
 from arcrest.manageags import AGSAdministration
 from arcrest.security import security
-from arcrest.manageorg import Administration
 from ags_publishing_tools.ConfigParser import ConfigParser
 from ags_publishing_tools import GitFileManager
 import arcpy
@@ -160,11 +158,10 @@ class MapServicePublisher:
         return os.path.join(output_path, '{}.' + extension).format(original_name)
 
     def publish_input(self, input_value):
-        input_was_published = self.check_service_type('mapServices', input_value)
-        if not input_was_published:
-            input_was_published = self.check_service_type('gpServices', input_value)
-        if not input_was_published:
-            input_was_published = self.check_service_type('imageServices', input_value)
+        input_was_published = False
+        for service_type in self.config_parser.service_types:
+            if not input_was_published:
+                input_was_published = self.check_service_type(service_type, input_value)
         if not input_was_published:
             raise ValueError('Input ' + input_value + ' was not found in config.')
 
