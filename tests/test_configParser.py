@@ -146,13 +146,12 @@ class TestConfigParser(TestCase):
                 }]
             }
         }
-        self.assertEqual(self.m.parse_config(config)['mapServices']['services'][0], {
-                                                             'input': 'map',
-                                                             'root_level': 'root',
-                                                             'type_level': 'type',
-                                                             'json': {}
-                                                         }
-                         )
+        expected = {
+            'input': 'map',
+            'root_level': 'root',
+            'type_level': 'type'
+         }
+        self.assertEqual(self.m.parse_config(config)['mapServices']['services'][0], expected)
 
     def test_flattening_nested_keys(self):
         config = {
@@ -177,7 +176,6 @@ class TestConfigParser(TestCase):
                                                              'input': 'map',
                                                              'root_level': 'root',
                                                              'type_level': 'type',
-                                                             'json': {},
                                                              'properties': {
                                                                  'myRootProp': 'someValue',
                                                                  'myTypeProp': 'someOtherValue',
@@ -216,8 +214,8 @@ class TestConfigParser(TestCase):
             }
         })
 
-    def test_get_map_service_json(self):
-        self.m.map_service_default_json = {
+    def test_merge_json_dict(self):
+        default_json = {
             "type": "MapServer",
             "capabilities": "Map,Query,Data",
             "properties": {
@@ -225,12 +223,10 @@ class TestConfigParser(TestCase):
                 "virtualOutputDir": "/rest/directories/arcgisoutput"
             },
         }
-        config = {
-            "json": {
-                "capabilities": "Map,Query",
-                "properties": {
-                    "schemaLockingEnabled": False
-                }
+        config_json = {
+            "capabilities": "Map,Query",
+            "properties": {
+                "schemaLockingEnabled": False
             }
         }
         expected = {
@@ -242,4 +238,26 @@ class TestConfigParser(TestCase):
                 "virtualOutputDir": "/rest/directories/arcgisoutput"
             }
         }
-        self.assertEqual(expected, self.m.get_json_by_type('mapServices', config))
+        self.assertEqual(expected, self.m.merge_json(default_json, config_json))
+
+    def test_merge_json_string(self):
+        default_json = {
+            "type": "MapServer",
+            "capabilities": "Map,Query,Data",
+            "properties": {
+                "outputDir": "c:\\arcgis\\arcgisoutput",
+                "virtualOutputDir": "/rest/directories/arcgisoutput"
+            },
+        }
+        config_json_string = '{"capabilities": "Map,Query","properties": {"schemaLockingEnabled": false}}'
+
+        expected = {
+            "type": "MapServer",
+            "capabilities": "Map,Query",
+            "properties": {
+                "schemaLockingEnabled": False,
+                "outputDir": "c:\\arcgis\\arcgisoutput",
+                "virtualOutputDir": "/rest/directories/arcgisoutput"
+            }
+        }
+        self.assertEqual(self.m.merge_json(default_json, config_json_string), expected)

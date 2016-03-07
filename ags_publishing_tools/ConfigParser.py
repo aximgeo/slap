@@ -8,36 +8,6 @@ class ConfigParser:
     cwd = None
     service_types = ['mapServices', 'gpServices', 'imageServices']
     required_keys = ['input', 'agsUrl']
-    map_service_default_json = {
-        # "serviceName": "name",
-        # "description": "description",
-        "type": "MapServer",
-        "capabilities": "Map,Query,Data",
-        "properties": {
-            # "filePath": "c:\\data\\Beirut\\Beirut_Parcels.msd",
-            # "outputDir": "c:\\arcgisserver\\directories\\arcgisoutput",
-            "virtualOutputDir": "/rest/directories/arcgisoutput"
-        },
-        "extensions": [
-            {
-                "typeName": "KmlServer",
-                "enabled": True,
-                "capabilities": "SingleImage,SeparateImages,Vectors",
-                "properties": {
-                  "minRefreshPeriod": "30",
-                  "compatibilityMode": "GoogleEarth",
-                  "imageSize": "1024",
-                  "dpi": "96",
-                  "endPointURL": "",
-                  "featureLimit": "1000000",
-                  "useDefaultSnippets": "false"
-                }
-            }
-        ],
-        "datasets": []
-    }
-    image_service_default_json = {}
-    gp_service_default_json = {}
 
     def __init__(self):
         # ESRI's tools will change the cwd, so set it at the beginning
@@ -60,7 +30,6 @@ class ConfigParser:
             copy = config[service_type].copy()
             for service in copy['services']:
                 service = reduce(self.merge, [service, self.get_root_keys(config), self.get_type_keys(config, service_type)])
-                service['json'] = self.get_json_by_type(service_type, service)
         return copy
 
     def get_root_keys(self, config):
@@ -92,15 +61,6 @@ class ConfigParser:
             else:
                 a[key] = b[key]
         return a
-
-    def get_json_by_type(self, service_type, config):
-        if service_type == 'mapServices':
-            return self.merge_json(config, self.map_service_default_json.copy())
-        if service_type == 'imageServices':
-            return self.merge_json(config, self.image_service_default_json.copy())
-        if service_type == 'gpServices':
-            return self.merge_json(config, self.gp_service_default_json.copy())
-        raise ValueError('Invalid type: ' + service_type)
 
     def merge_json(self, default_json, config_json):
         if isinstance(config_json, str):
