@@ -78,18 +78,17 @@ class TestMapServicePublisher(TestCase):
             'input': 'gp/myFile.tbx',
             'result': 'my/result',
             'serverUrl': 'some/path',
-            'serviceName': 'myService',
             'serverType': 'MY_SERVER_TYPE',
             'copyDataToServer': True,
             'folderName': 'myFolder',
             'summary': 'My Summary',
             'executionType': 'Synchronous',
             'tags': 'Tags tags'
-        }, 'file', 'file.sddraft')
+        }, 'myFile', 'myFile.sddraft')
         mock_arcpy.CreateGPSDDraft.assert_called_once_with(
             result=os.path.join(os.getcwd(), 'my/result'),
-            out_sddraft='file.sddraft',
-            service_name='myService',
+            out_sddraft='myFile.sddraft',
+            service_name='myFile',
             server_type='MY_SERVER_TYPE',
             connection_file_path=os.path.join(self.m.config_parser.cwd, 'some/path'),
             copy_data_to_server=True,
@@ -133,17 +132,16 @@ class TestMapServicePublisher(TestCase):
         self.m.connection_file_path = os.path.join(self.m.config_parser.cwd, 'some/path')
         self.m.publish_mxd({
             'input': 'myFile.mxd',
-            'serviceName': 'myService',
             'serverType': 'MY_SERVER_TYPE',
             'copyDataToServer': True,
             'folderName': 'myFolder',
             'summary': 'My Summary',
             'tags': 'Tags tags'
-        }, 'file', 'file.sddraft')
+        }, 'myFile', 'myFile.sddraft')
         mock_arcpy.mapping.CreateMapSDDraft.assert_called_once_with(
             map_document={'mxd': 'myMap'},
-            out_sddraft='file.sddraft',
-            service_name='myService',
+            out_sddraft='myFile.sddraft',
+            service_name='myFile',
             server_type='MY_SERVER_TYPE',
             connection_file_path=os.path.join(self.m.config_parser.cwd, 'some/path'),
             copy_data_to_server=True,
@@ -156,13 +154,13 @@ class TestMapServicePublisher(TestCase):
         mock_arcpy.CreateImageSDDraft = MagicMock()
         self.m.connection_file_path = os.path.join(self.m.config_parser.cwd, 'some/path')
         self.m.publish_image_service({
-            'input': '//share/dir/fgdb.gdb/Input',
+            'input': '//share/dir/fgdb.gdb/myFile',
             'serverUrl': 'some/path'
-        }, 'file', 'file.sddraft')
+        }, 'myFile', 'myFile.sddraft')
         mock_arcpy.CreateImageSDDraft.assert_called_once_with(
-            raster_or_mosaic_layer='//share/dir/fgdb.gdb/Input',
-            out_sddraft='file.sddraft',
-            service_name='file',
+            raster_or_mosaic_layer='//share/dir/fgdb.gdb/myFile',
+            out_sddraft='myFile.sddraft',
+            service_name='myFile',
             server_type='ARCGIS_SERVER',
             connection_file_path=os.path.join(self.m.config_parser.cwd, 'some/path'),
             copy_data_to_server=False,
@@ -175,19 +173,18 @@ class TestMapServicePublisher(TestCase):
         mock_arcpy.CreateImageSDDraft = MagicMock()
         self.m.connection_file_path = os.path.join(self.m.config_parser.cwd, 'some/path')
         self.m.publish_image_service({
-            'input': '//share/dir/fgdb.gdb/Input',
+            'input': '//share/dir/fgdb.gdb/myFile',
             'serverUrl': 'some/path',
-            'serviceName': 'myService',
             'serverType': 'MY_SERVER_TYPE',
             'copyDataToServer': True,
             'folderName': 'myFolder',
             'summary': 'My Summary',
             'tags': 'Tags tags'
-        }, 'file', 'file.sddraft')
+        }, 'myFile', 'myFile.sddraft')
         mock_arcpy.CreateImageSDDraft.assert_called_once_with(
-            raster_or_mosaic_layer='//share/dir/fgdb.gdb/Input',
-            out_sddraft='file.sddraft',
-            service_name='myService',
+            raster_or_mosaic_layer='//share/dir/fgdb.gdb/myFile',
+            out_sddraft='myFile.sddraft',
+            service_name='myFile',
             server_type='MY_SERVER_TYPE',
             connection_file_path=os.path.join(self.m.config_parser.cwd, 'some/path'),
             copy_data_to_server=True,
@@ -224,17 +221,6 @@ class TestMapServicePublisher(TestCase):
         self.assertEqual(self.m.publish_image_service, self.m._get_method_by_type('imageServices'))
         with self.assertRaises(ValueError):
             self.m._get_method_by_type('foo')
-
-    def test_set_draft_configuration(self):
-        self.m.draft_parser.parse_sd_draft = MagicMock()
-        self.m.draft_parser.set_as_replacement_service = MagicMock()
-        self.m.draft_parser.save_sd_draft = MagicMock()
-        self.m.draft_parser.set_configuration_property = MagicMock()
-        self.m.set_draft_configuration('file.sddraft', {'myKey': 'myValue'})
-        self.m.draft_parser.parse_sd_draft.assert_called_once_with('file.sddraft')
-        self.m.draft_parser.set_as_replacement_service.assert_called_once_with()
-        self.m.draft_parser.set_configuration_property.assert_called_once_with('myKey', 'myValue')
-        self.m.draft_parser.save_sd_draft.assert_called_once_with()
 
 if __name__ == '__main__':
 

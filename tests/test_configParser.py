@@ -9,6 +9,9 @@ class TestConfigParser(TestCase):
 
     def setUp(self):
         self.m = ConfigParser()
+        self.m.map_service_default_json = {}
+        self.m.image_service_default_json = {}
+        self.m.gp_service_default_json = {}
 
     def test_get_full_path(self):
         self.assertEqual(os.path.join(os.getcwd(), 'foo'), self.m.get_full_path('foo'))
@@ -44,10 +47,10 @@ class TestConfigParser(TestCase):
         config = {
             'serverUrl': 'https://my/server',
             'gpServices': {
-                'services': [{'input': 'gp'}]
+                'services': [{'input': 'gp', 'json': {}}]
             },
             'imageServices': {
-                'services': [{'input': 'image'}]
+                'services': [{'input': 'image', 'json': {}}]
             }
         }
         self.assertEqual(self.m.parse_config(config), {
@@ -56,10 +59,10 @@ class TestConfigParser(TestCase):
                 'services': []
             },
             'gpServices': {
-                'services': [{'serverUrl': 'https://my/server', 'input': 'gp'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'gp', 'json': {}}]
             },
             'imageServices': {
-                'services': [{'serverUrl': 'https://my/server', 'input': 'image'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'image', 'json': {}}]
             }
         })
 
@@ -67,22 +70,22 @@ class TestConfigParser(TestCase):
         config = {
             'serverUrl': 'https://my/server',
             'mapServices': {
-                'services': [{'input': 'map'}]
+                'services': [{'input': 'map', 'json': {}}]
             },
             'imageServices': {
-                'services': [{'input': 'image'}]
+                'services': [{'input': 'image', 'json': {}}]
             }
         }
         self.assertEqual(self.m.parse_config(config), {
             'serverUrl': 'https://my/server',
             'mapServices': {
-                'services': [{'serverUrl': 'https://my/server', 'input': 'map'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'map', 'json': {}}]
             },
             'gpServices': {
                 'services': []
             },
             'imageServices': {
-                'services': [{'serverUrl': 'https://my/server', 'input': 'image'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'image', 'json': {}}]
             }
         })
 
@@ -90,19 +93,19 @@ class TestConfigParser(TestCase):
         config = {
             'serverUrl': 'https://my/server',
             'gpServices': {
-                'services': [{'input': 'gp'}]
+                'services': [{'input': 'gp', 'json': {}}]
             },
             'mapServices': {
-                'services': [{'input': 'map'}]
+                'services': [{'input': 'map', 'json': {}}]
             }
         }
         self.assertEqual(self.m.parse_config(config), {
             'serverUrl': 'https://my/server',
             'mapServices': {
-                'services': [{'serverUrl': 'https://my/server', 'input': 'map'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'map', 'json': {}}]
             },
             'gpServices': {
-                'services': [{'serverUrl': 'https://my/server', 'input': 'gp'}]
+                'services': [{'serverUrl': 'https://my/server', 'input': 'gp', 'json': {}}]
             },
             'imageServices': {
                 'services': []
@@ -143,12 +146,12 @@ class TestConfigParser(TestCase):
                 }]
             }
         }
-        self.assertEqual(self.m.parse_config(config)['mapServices']['services'][0], {
-                                                             'input': 'map',
-                                                             'root_level': 'root',
-                                                             'type_level': 'type'
-                                                         }
-                         )
+        expected = {
+            'input': 'map',
+            'root_level': 'root',
+            'type_level': 'type'
+         }
+        self.assertEqual(self.m.parse_config(config)['mapServices']['services'][0], expected)
 
     def test_flattening_nested_keys(self):
         config = {
@@ -210,3 +213,50 @@ class TestConfigParser(TestCase):
                 'services': []
             }
         })
+
+    def test_merge_json_dict(self):
+        default_json = {
+            "type": "MapServer",
+            "capabilities": "Map,Query,Data",
+            "properties": {
+                "outputDir": "c:\\arcgis\\arcgisoutput",
+                "virtualOutputDir": "/rest/directories/arcgisoutput"
+            },
+        }
+        config_json = {
+            "capabilities": "Map,Query",
+            "properties": {
+                "schemaLockingEnabled": False
+            }
+        }
+        expected = {
+            "type": "MapServer",
+            "capabilities": "Map,Query",
+            "properties": {
+                "schemaLockingEnabled": False,
+                "outputDir": "c:\\arcgis\\arcgisoutput",
+                "virtualOutputDir": "/rest/directories/arcgisoutput"
+            }
+        }
+        self.assertEqual(expected, self.m.merge_json(default_json, config_json))
+
+    def test_merge_json_string(self):
+        default_json_string = '{"type": "MapServer","capabilities": "Map,Query,Data",' \
+                              '"properties": {"outputDir": "c:\\\\arcgis\\\\arcgisoutput","virtualOutputDir": ' \
+                              '"/rest/directories/arcgisoutput"}}'
+        config_json = {
+            "capabilities": "Map,Query",
+            "properties": {
+                "schemaLockingEnabled": False
+            }
+        }
+        expected = {
+            "type": "MapServer",
+            "capabilities": "Map,Query",
+            "properties": {
+                "schemaLockingEnabled": False,
+                "outputDir": "c:\\arcgis\\arcgisoutput",
+                "virtualOutputDir": "/rest/directories/arcgisoutput"
+            }
+        }
+        self.assertEqual(self.m.merge_json(default_json_string, config_json), expected)

@@ -7,7 +7,7 @@ class ConfigParser:
     config = None
     cwd = None
     service_types = ['mapServices', 'gpServices', 'imageServices']
-    required_keys = ['input', 'serverUrl']
+    required_keys = ['input', 'agsUrl']
 
     def __init__(self):
         # ESRI's tools will change the cwd, so set it at the beginning
@@ -57,10 +57,23 @@ class ConfigParser:
                 elif a[key] == b[key]:
                     pass # same leaf value
                 else:
-                    raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+                    a[key] = b[key]  # Always overwrite
             else:
                 a[key] = b[key]
         return a
+
+    def merge_json(self, default_json, config_json):
+        if isinstance(default_json, str):
+            default_json_copy = json.loads(default_json)
+        else:
+            default_json_copy = default_json.copy()
+        return self.merge(default_json_copy, config_json)
+
+    @staticmethod
+    def set_server_properties(config_json, server_input_path, filename):
+        msd_path = ConfigParser.get_msd_path(server_input_path, filename)
+        config_json['properties']['filePath'] = msd_path
+        config_json['serviceName'] = filename
 
     def get_full_path(self, config_path):
         return config_path if os.path.isabs(config_path) else os.path.join(self.cwd, config_path)
@@ -68,3 +81,7 @@ class ConfigParser:
     def check_required_keys(self):
         for key in self.required_keys:
             test = self.config[key]
+
+    @staticmethod
+    def get_msd_path(server_input_path, filename):
+        return os.path.join(server_input_path, filename + '.MapServer', 'extracted', 'v101', filename + '.msd')

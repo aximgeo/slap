@@ -1,6 +1,7 @@
 import os
 import argparse
-from ags_publishing_tools.SdDraftParser import SdDraftParser
+from arcrest.manageags import AGSAdministration
+from arcrest.security import security
 from ags_publishing_tools.ConfigParser import ConfigParser
 from ags_publishing_tools import GitFileManager
 import arcpy
@@ -12,8 +13,10 @@ class MapServicePublisher:
 
     config = None
     connection_file_path = None
-    draft_parser = SdDraftParser()
     config_parser = ConfigParser()
+    security_handler = None
+    ags_admin = None
+    server_input_directory = None
 
     def __init__(self):
         pass
@@ -29,7 +32,7 @@ class MapServicePublisher:
             connection_type='PUBLISH_GIS_SERVICES',
             out_folder_path=output_path,
             out_name=connection_file_name,
-            server_url=self.config['serverUrl'],
+            server_url=self.config['agsUrl'],
             server_type='ARCGIS_SERVER',
             use_arcgis_desktop_staging_folder=False,
             staging_folder_path=output_path,
@@ -38,8 +41,35 @@ class MapServicePublisher:
             save_username_password=True
         )
 
-    def publish_gp(self, config_entry, filename, sddraft):
+    def init_arcrest(self, ags_url, token_url, portal_url, username, password):
+        self.security_handler = self.get_security_handler(ags_url, token_url, portal_url, username, password)
 
+        self.ags_admin = AGSAdministration(
+            url=ags_url,
+            securityHandler=self.security_handler
+        )
+
+        server_directories = self.ags_admin.system.serverDirectories
+        self.server_input_directory = [d for d in server_directories if d.name == 'arcgisinput'][0].physicalPath
+
+    @staticmethod
+    def get_security_handler(ags_url, token_url, portal_url, username, password):
+        if token_url and portal_url:
+            security_handler = security.PortalTokenSecurityHandler(
+                username=username,
+                password=password,
+                org_url=portal_url,
+                token_url=token_url
+            )
+        else:
+            security_handler = security.AGSTokenSecurityHandler(
+                username=username,
+                password=password,
+                org_url=ags_url
+            )
+        return security_handler
+
+    def publish_gp(self, config_entry, filename, sddraft):
         if "result" in config_entry:
             result = self.config_parser.get_full_path(config_entry["result"])
         else:
@@ -49,7 +79,7 @@ class MapServicePublisher:
         arcpy.CreateGPSDDraft(
             result=result,
             out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
+            service_name=filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             connection_file_path=self.connection_file_path,
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -78,7 +108,7 @@ class MapServicePublisher:
         arcpy.mapping.CreateMapSDDraft(
             map_document=mxd,
             out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
+            service_name=filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             connection_file_path=self.connection_file_path,
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -93,7 +123,7 @@ class MapServicePublisher:
         arcpy.CreateImageSDDraft(
             raster_or_mosaic_layer=config_entry["input"],
             out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
+            service_name=filename,
             connection_file_path=self.connection_file_path,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -128,11 +158,10 @@ class MapServicePublisher:
         return os.path.join(output_path, '{}.' + extension).format(original_name)
 
     def publish_input(self, input_value):
-        input_was_published = self.check_service_type('mapServices', input_value)
-        if not input_was_published:
-            input_was_published = self.check_service_type('gpServices', input_value)
-        if not input_was_published:
-            input_was_published = self.check_service_type('imageServices', input_value)
+        input_was_published = False
+        for service_type in self.config_parser.service_types:
+            if not input_was_published:
+                input_was_published = self.check_service_type(service_type, input_value)
         if not input_was_published:
             raise ValueError('Input ' + input_value + ' was not found in config.')
 
@@ -163,12 +192,13 @@ class MapServicePublisher:
         for config_entry in self.config[type]['services']:
             self.publish_service(type, config_entry)
 
-    def publish_service(self, type, config_entry):
+    def publish_service(self, service_type, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
+        config_entry['json']['serviceName'] = filename
         sddraft = self.get_sddraft_output(filename, self.get_output_directory(config_entry))
         sd = self.get_sd_output(filename, self.get_output_directory(config_entry))
         self.message("Publishing " + config_entry["input"])
-        analysis = self._get_method_by_type(type)(config_entry, filename, sddraft)
+        analysis = self._get_method_by_type(service_type)(config_entry, filename, sddraft)
         if self.analysis_successful(analysis['errors']):
             self.publish_draft(sddraft, sd, config_entry)
             self.message(config_entry["input"] + " published successfully")
@@ -176,19 +206,32 @@ class MapServicePublisher:
             self.message("Error publishing " + config_entry['input'] + analysis)
 
     def publish_draft(self, sddraft, sd, config):
-        self.message("Setting service configuration...")
-        self.set_draft_configuration(sddraft, config["properties"] if "properties" in config else {})
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
+        self.message("Deleting old service...")
+        self.ags_admin.services.deleteService(config['json']['serviceName'],
+                                              config["folderName"] if "folderName" in config else None)
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, self.connection_file_path)
+        self.update_service(config)
 
-    def set_draft_configuration(self, sddraft, properties):
-        self.draft_parser.parse_sd_draft(sddraft)
-        self.draft_parser.set_as_replacement_service()
-        for key, value in properties.iteritems():
-            self.draft_parser.set_configuration_property(key, value)
-        self.draft_parser.save_sd_draft()
+    def update_service(self, config):
+        if 'json' in config:
+            if 'folder' in config:
+                self.ags_admin.folderName = config['folder']
+            services = self.ags_admin.services.services
+            [service] = [service for service in services if service.serviceName == config['json']['serviceName']] # throw if not found
+            json = self.config_parser.merge_json(str(service), config['json'])
+            service.edit(json)
+
+    def delete_all(self):
+        folders = self.ags_admin.services.folders
+        for folder in folders:
+            if folder != 'Utilities':
+                self.ags_admin.folderName = folder
+                services = self.ags_admin.services.services
+                for service in services:
+                    service.delete_service()
 
     def message(self, message):
         print message
@@ -245,6 +288,13 @@ def main():
     print "Loading config..."
     publisher.load_config(args.config)
     publisher.create_server_connection_file(args.username, args.password)
+    publisher.init_arcrest(
+        ags_url=publisher.config['agsUrl'],
+        token_url=publisher.config['tokenUrl'],
+        portal_url=publisher.config['portalUrl'] if 'portalUrl' in publisher.config else None,
+        username=args.username,
+        password=args.password
+    )
     if args.inputs:
         for i in args.inputs:
             publisher.publish_input(i)
