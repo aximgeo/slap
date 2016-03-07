@@ -213,6 +213,7 @@ class MapServicePublisher:
                                               config["folderName"] if "folderName" in config else None)
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, self.connection_file_path)
+        self.update_service(config)
 
     def update_service(self, config):
         if config['folder']:
