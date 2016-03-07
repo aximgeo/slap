@@ -102,10 +102,12 @@ class ConfigParser:
             return self.merge_json(config, self.gp_service_default_json.copy())
         raise ValueError('Invalid type: ' + service_type)
 
-    def merge_json(self, config, default_json):
-
-        config_json = config['json'].copy() if 'json' in config else {}
-        return self.merge(default_json, config_json)
+    def merge_json(self, default_json, config_json):
+        if isinstance(config_json, str):
+            config_json_copy = json.loads(config_json)
+        else:
+            config_json_copy = config_json.copy()
+        return self.merge(default_json, config_json_copy)
 
     @staticmethod
     def set_server_properties(config_json, server_input_path, filename):

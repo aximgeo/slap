@@ -214,6 +214,14 @@ class MapServicePublisher:
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, self.connection_file_path)
 
+    def update_service(self, config):
+        if config['folder']:
+            self.ags_admin.folderName = config['folder']
+        services = self.ags_admin.services.services
+        [service] = [service for service in services if service.name == config['json']['serviceName']] # throw if not found
+        json = self.config_parser.merge_json(str(service), config['json'] if 'json' in config else {})
+        service.edit(json)
+
     def delete_all(self):
         folders = self.ags_admin.services.folders
         for folder in folders:
