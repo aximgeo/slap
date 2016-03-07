@@ -214,6 +214,15 @@ class MapServicePublisher:
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, self.connection_file_path)
 
+    def delete_all(self):
+        folders = self.ags_admin.services.folders
+        for folder in folders:
+            if folder != 'Utilities':
+                self.ags_admin.folderName = folder
+                services = self.ags_admin.services.services
+                for service in services:
+                    service.delete_service()
+
     def message(self, message):
         print message
 
