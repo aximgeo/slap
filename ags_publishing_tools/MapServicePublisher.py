@@ -216,12 +216,13 @@ class MapServicePublisher:
         self.update_service(config)
 
     def update_service(self, config):
-        if 'folder' in config:
-            self.ags_admin.folderName = config['folder']
-        services = self.ags_admin.services.services
-        [service] = [service for service in services if service.serviceName == config['json']['serviceName']] # throw if not found
-        json = self.config_parser.merge_json(str(service), config['json'] if 'json' in config else {})
-        service.edit(json)
+        if 'json' in config:
+            if 'folder' in config:
+                self.ags_admin.folderName = config['folder']
+            services = self.ags_admin.services.services
+            [service] = [service for service in services if service.serviceName == config['json']['serviceName']] # throw if not found
+            json = self.config_parser.merge_json(str(service), config['json'])
+            service.edit(json)
 
     def delete_all(self):
         folders = self.ags_admin.services.folders
