@@ -241,16 +241,15 @@ class TestConfigParser(TestCase):
         self.assertEqual(expected, self.m.merge_json(default_json, config_json))
 
     def test_merge_json_string(self):
-        default_json = {
-            "type": "MapServer",
-            "capabilities": "Map,Query,Data",
+        default_json_string = '{"type": "MapServer","capabilities": "Map,Query,Data",' \
+                              '"properties": {"outputDir": "c:\\\\arcgis\\\\arcgisoutput","virtualOutputDir": ' \
+                              '"/rest/directories/arcgisoutput"}}'
+        config_json = {
+            "capabilities": "Map,Query",
             "properties": {
-                "outputDir": "c:\\arcgis\\arcgisoutput",
-                "virtualOutputDir": "/rest/directories/arcgisoutput"
-            },
+                "schemaLockingEnabled": False
+            }
         }
-        config_json_string = '{"capabilities": "Map,Query","properties": {"schemaLockingEnabled": false}}'
-
         expected = {
             "type": "MapServer",
             "capabilities": "Map,Query",
@@ -260,4 +259,4 @@ class TestConfigParser(TestCase):
                 "virtualOutputDir": "/rest/directories/arcgisoutput"
             }
         }
-        self.assertEqual(self.m.merge_json(default_json, config_json_string), expected)
+        self.assertEqual(self.m.merge_json(default_json_string, config_json), expected)

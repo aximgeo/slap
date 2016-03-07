@@ -63,11 +63,11 @@ class ConfigParser:
         return a
 
     def merge_json(self, default_json, config_json):
-        if isinstance(config_json, str):
-            config_json_copy = json.loads(config_json)
+        if isinstance(default_json, str):
+            default_json_copy = json.loads(default_json)
         else:
-            config_json_copy = config_json.copy()
-        return self.merge(default_json, config_json_copy)
+            default_json_copy = default_json.copy()
+        return self.merge(default_json_copy, config_json)
 
     @staticmethod
     def set_server_properties(config_json, server_input_path, filename):
