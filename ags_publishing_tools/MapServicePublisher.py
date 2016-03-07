@@ -216,7 +216,7 @@ class MapServicePublisher:
         self.update_service(config)
 
     def update_service(self, config):
-        if config['folder']:
+        if 'folder' in config:
             self.ags_admin.folderName = config['folder']
         services = self.ags_admin.services.services
         [service] = [service for service in services if service.name == config['json']['serviceName']] # throw if not found
