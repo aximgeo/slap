@@ -219,7 +219,7 @@ class MapServicePublisher:
         if 'folder' in config:
             self.ags_admin.folderName = config['folder']
         services = self.ags_admin.services.services
-        [service] = [service for service in services if service.name == config['json']['serviceName']] # throw if not found
+        [service] = [service for service in services if service.serviceName == config['json']['serviceName']] # throw if not found
         json = self.config_parser.merge_json(str(service), config['json'] if 'json' in config else {})
         service.edit(json)
 
