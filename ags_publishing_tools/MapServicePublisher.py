@@ -272,7 +272,7 @@ def main():
     publisher.init_arcrest(
         ags_url=publisher.config['agsUrl'],
         token_url=publisher.config['tokenUrl'],
-        portal_url=publisher.config['tokenUrl'] if 'tokenUrl' in publisher.config else None,
+        portal_url=publisher.config['portalUrl'] if 'portalUrl' in publisher.config else None,
         username=args.username,
         password=args.password
     )
