@@ -16,7 +16,6 @@ class MapServicePublisher:
     config_parser = ConfigParser()
     security_handler = None
     ags_admin = None
-    server_input_directory = None
 
     def __init__(self):
         pass
@@ -48,9 +47,6 @@ class MapServicePublisher:
             url=ags_url,
             securityHandler=self.security_handler
         )
-
-        server_directories = self.ags_admin.system.serverDirectories
-        self.server_input_directory = [d for d in server_directories if d.name == 'arcgisinput'][0].physicalPath
 
     @staticmethod
     def get_security_handler(ags_url, token_url, portal_url, username, password):
