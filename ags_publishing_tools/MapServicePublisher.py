@@ -136,11 +136,18 @@ class MapServicePublisher:
 
     def set_workspaces(self, path_to_mxd, workspaces):
         # opening a map document changes directories, so we have to re-open each time through :(
+        mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(path_to_mxd))
+        mxd.relativePaths = True
         for workspace in workspaces:
-            mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(path_to_mxd))
-            mxd.relativePaths = True
-            mxd.findAndReplaceWorkspacePaths(workspace["old"], workspace["new"], False)
-            mxd.save()
+            mxd.replaceWorkspaces(
+                old_workspace_path=workspace["old"],
+                old_workspace_type=workspace["old"]["type"] if "type" in workspace["old"] else "SDE_WORKSPACE",
+                new_workspace_path=workspace["new"],
+                new_workspace_type=workspace["new"]["type"] if "type" in workspace["new"] else "SDE_WORKSPACE",
+                False
+            )
+            # mxd.findAndReplaceWorkspacePaths(workspace["old"], workspace["new"], False)
+        mxd.save()
 
     def analysis_successful(self, analysis_errors):
         if analysis_errors == {}:
