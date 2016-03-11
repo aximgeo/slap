@@ -40,7 +40,7 @@ class TestMapServicePublisher(TestCase):
                             'serverUrl': 'some/path',
                             'workspaces': {'old': 'foo', 'new': 'bar'}
                             }, 'file', 'file.sddraft')
-        self.m.set_workspaces.assert_called_once_with({'mxd': 'myMap'}, {'new': 'bar', 'old': 'foo'})
+        self.m.set_workspaces.assert_called_once_with('someFile', {'new': 'bar', 'old': 'foo'})
 
     def test_publish_gp_with_defaults(self):
         mock_arcpy.CreateGPSDDraft = MagicMock()

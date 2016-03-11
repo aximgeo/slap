@@ -95,10 +95,12 @@ class MapServicePublisher:
         return arcpy.mapping.AnalyzeForSD(sddraft)
 
     def publish_mxd(self, config_entry, filename, sddraft):
-        mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(config_entry["input"]))
+        # mxd = arcpy.mapping.MapDocument())
 
         if "workspaces" in config_entry:
-            self.set_workspaces(mxd, config_entry["workspaces"])
+            self.set_workspaces(config_entry["input"], config_entry["workspaces"])
+
+        mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(config_entry["input"]))
 
         self.message("Generating service definition draft for mxd...")
         arcpy.mapping.CreateMapSDDraft(
@@ -132,12 +134,13 @@ class MapServicePublisher:
     def get_output_directory(self, config_entry):
         return self.config_parser.get_full_path(config_entry["output"]) if "output" in config_entry else self.config_parser.get_full_path('output')
 
-    def set_workspaces(self, mxd, workspaces):
-        os.chdir(self.config_parser.cwd)
-        mxd.relativePaths = True
+    def set_workspaces(self, path_to_mxd, workspaces):
+        # opening a map document changes directories, so we have to re-open each time through :(
         for workspace in workspaces:
+            mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(path_to_mxd))
+            mxd.relativePaths = True
             mxd.findAndReplaceWorkspacePaths(workspace["old"], workspace["new"], False)
-        mxd.save()
+            mxd.save()
 
     def analysis_successful(self, analysis_errors):
         if analysis_errors == {}:
