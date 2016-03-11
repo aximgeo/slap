@@ -133,6 +133,7 @@ class MapServicePublisher:
         return self.config_parser.get_full_path(config_entry["output"]) if "output" in config_entry else self.config_parser.get_full_path('output')
 
     def set_workspaces(self, mxd, workspaces):
+        os.chdir(self.config_parser.cwd)
         mxd.relativePaths = True
         for workspace in workspaces:
             mxd.findAndReplaceWorkspacePaths(workspace["old"], workspace["new"], False)

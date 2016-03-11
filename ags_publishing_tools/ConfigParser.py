@@ -13,6 +13,10 @@ class ConfigParser:
         # ESRI's tools will change the cwd, so set it at the beginning
         self.cwd = os.getcwd()
 
+    @property
+    def cwd(self):
+        return self.cwd
+
     def load_config(self, path_to_config):
         with open(path_to_config) as config_file:
             config = json.load(config_file)
