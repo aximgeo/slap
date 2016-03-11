@@ -144,7 +144,7 @@ class MapServicePublisher:
                 old_workspace_type=workspace["old"]["type"] if "type" in workspace["old"] else "SDE_WORKSPACE",
                 new_workspace_path=workspace["new"],
                 new_workspace_type=workspace["new"]["type"] if "type" in workspace["new"] else "SDE_WORKSPACE",
-                False
+                validate=False
             )
             # mxd.findAndReplaceWorkspacePaths(workspace["old"], workspace["new"], False)
         mxd.save()
