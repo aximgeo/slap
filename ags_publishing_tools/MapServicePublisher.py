@@ -135,10 +135,10 @@ class MapServicePublisher:
         return self.config_parser.get_full_path(config_entry["output"]) if "output" in config_entry else self.config_parser.get_full_path('output')
 
     def set_workspaces(self, path_to_mxd, workspaces):
+
+        mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(path_to_mxd))
         for workspace in workspaces:
             self.message("Replacing workspace " + workspace["old"] + " => " + workspace["new"])
-            mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(path_to_mxd))
-            mxd.relativePaths = True
             mxd.replaceWorkspaces(
                 old_workspace_path=workspace["old"],
                 old_workspace_type=workspace["old"]["type"] if "type" in workspace["old"] else "SDE_WORKSPACE",
@@ -146,6 +146,7 @@ class MapServicePublisher:
                 new_workspace_type=workspace["new"]["type"] if "type" in workspace["new"] else "SDE_WORKSPACE",
                 validate=False
             )
+            mxd.relativePaths = True
             mxd.save()
             del mxd
             # mxd.findAndReplaceWorkspacePaths(workspace["old"], workspace["new"], False)
