@@ -147,6 +147,7 @@ class MapServicePublisher:
                 validate=False
             )
             mxd.save()
+            del mxd
             # mxd.findAndReplaceWorkspacePaths(workspace["old"], workspace["new"], False)
 
 
