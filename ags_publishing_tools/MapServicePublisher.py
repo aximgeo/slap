@@ -135,10 +135,10 @@ class MapServicePublisher:
         return self.config_parser.get_full_path(config_entry["output"]) if "output" in config_entry else self.config_parser.get_full_path('output')
 
     def set_workspaces(self, path_to_mxd, workspaces):
-        # opening a map document changes directories, so we have to re-open each time through :(
         mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(path_to_mxd))
         mxd.relativePaths = True
         for workspace in workspaces:
+            self.message("Replacing workspace " + + workspace["old"] + " => " + workspace["new"])
             mxd.replaceWorkspaces(
                 old_workspace_path=workspace["old"],
                 old_workspace_type=workspace["old"]["type"] if "type" in workspace["old"] else "SDE_WORKSPACE",
