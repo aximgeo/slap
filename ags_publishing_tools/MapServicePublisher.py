@@ -135,23 +135,20 @@ class MapServicePublisher:
         return self.config_parser.get_full_path(config_entry["output"]) if "output" in config_entry else self.config_parser.get_full_path('output')
 
     def set_workspaces(self, path_to_mxd, workspaces):
-
-        mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(path_to_mxd))
+        full_mxd_path = self.config_parser.get_full_path(path_to_mxd)
+        mxd = arcpy.mapping.MapDocument(full_mxd_path)
         for workspace in workspaces:
-            old_path = self.config_parser.get_full_path(workspace["old"]["path"])
-            new_path = self.config_parser.get_full_path(workspace["new"]["path"])
-            self.message("Replacing workspace " + old_path + " => " + new_path)
+            self.message("Replacing workspace " + workspace["old"]["path"] + " => " + workspace["new"]["path"])
             mxd.replaceWorkspaces(
-                old_workspace_path=old_path,
+                old_workspace_path=workspace["old"]["path"],
                 old_workspace_type=workspace["old"]["type"] if "type" in workspace["old"] else "SDE_WORKSPACE",
-                new_workspace_path=new_path,
+                new_workspace_path=workspace["new"]["path"],
                 new_workspace_type=workspace["new"]["type"] if "type" in workspace["new"] else "SDE_WORKSPACE",
                 validate=False
             )
-            mxd.relativePaths = True
-            mxd.save()
-            del mxd
-            # mxd.findAndReplaceWorkspacePaths(workspace["old"], workspace["new"], False)
+        mxd.relativePaths = True
+        mxd.save()
+        del mxd
 
 
     def analysis_successful(self, analysis_errors):
