@@ -1,5 +1,5 @@
 import requests
-
+import wincertstore
 
 class Api:
 
@@ -9,6 +9,7 @@ class Api:
     _username = None
     _password = None
     _token = None
+    _certs = None
 
     def __init__(self, ags_url, token_url, portal_url, username, password):
         self._ags_url = ags_url
@@ -16,6 +17,9 @@ class Api:
         self._portal_url = portal_url
         self._username = username
         self._password = password
+        self._certs = wincertstore.CertFile()
+        self._certs.addcerts('ROOT')
+        self._certs.addcerts('CA')
 
     @property
     def token(self):
@@ -28,17 +32,14 @@ class Api:
             'f': 'json'
         }
 
-    @staticmethod
-    def post(url, params):
-        return Api._request(requests.post, url, params)
+    def post(self, url, params):
+        return self._request(requests.post, url, params)
 
-    @staticmethod
-    def get(url, params):
-        return Api._request(requests.get, url, params)
+    def get(self, url, params):
+        return self._request(requests.get, url, params)
 
-    @staticmethod
-    def _request(request_method, url, params):
-        response = request_method(url, params=params)
+    def _request(self, request_method, url, params):
+        response = request_method(url, params=params, verify=self._certs.name)
 
         if response.status_code != requests.codes.ok:
             response.raise_for_status()
