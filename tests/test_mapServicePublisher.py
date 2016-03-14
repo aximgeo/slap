@@ -9,6 +9,7 @@ patch.dict("sys.modules", arcpy=mock_arcpy).start()
 from ags_publishing_tools.MapServicePublisher import only_one
 from ags_publishing_tools.MapServicePublisher import MapServicePublisher
 
+
 class TestMapServicePublisher(TestCase):
     m = None
 
