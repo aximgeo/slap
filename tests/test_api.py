@@ -43,13 +43,7 @@ class TesApi(TestCase):
                 api = self.create_api()
                 getattr(api, method)(*args)
                 mock_token.assert_called_once_with()
-                mock_method.assert_called_once_with(
-                    url,
-                    {
-                        'token': 'my_token_value',
-                        'f': 'json'
-                    }
-                )
+                mock_method.assert_called_once_with(url, {'f': 'json', 'token': 'my_token_value'})
 
     def test_delete_map_service(self):
         self.post_url_test('http://myserver/arcgis/admin/services/myService/delete', 'delete_service', 'myService')
@@ -57,18 +51,6 @@ class TesApi(TestCase):
     def test_delete_map_service_with_folder(self):
         self.post_url_test('http://myserver/arcgis/admin/services/myFolder/myService/delete',
                            'delete_service', 'myService', 'myFolder')
-
-    def test_edit_map_service(self):
-        self.post_url_test('http://myserver/arcgis/admin/services/myService.MapServer/edit',
-                           'edit_service', 'myService')
-
-    def test_edit_map_service_with_folder(self):
-        self.post_url_test('http://myserver/arcgis/admin/services/myFolder/myService.MapServer/edit',
-                           'edit_service', 'myService', 'myFolder')
-
-    def test_edit_other_service(self):
-        self.post_url_test('http://myserver/arcgis/admin/services/myFolder/myService.ImageServer/edit',
-                           'edit_service', 'myService', 'myFolder', 'ImageServer')
 
     def test_get_map_service(self):
         self.get_url_test('http://myserver/arcgis/admin/services/myService.MapServer',
@@ -81,6 +63,28 @@ class TesApi(TestCase):
     def test_get_other_service(self):
         self.get_url_test('http://myserver/arcgis/admin/services/myFolder/myService.ImageServer',
                           'get_service_params', 'myService', 'myFolder', 'ImageServer')
+
+    def edit_test(self, url, method, *args):
+        with patch('ags_publishing_tools.api.Api.token', new_callable=PropertyMock) as mock_token:
+            with patch('ags_publishing_tools.api.Api.post') as mock_method:
+                mock_token.return_value = 'my_token_value'
+                api = self.create_api()
+                getattr(api, method)(*args)
+                mock_token.assert_called_once_with()
+                mock_method.assert_called_once_with(url, args[1])
+
+    def test_edit_map_service(self):
+        self.edit_test('http://myserver/arcgis/admin/services/myService.MapServer/edit', 'edit_service',
+                           'myService', {'foo': 'bar', 'f': 'json', 'token': 'my_token_value'})
+
+    def test_edit_map_service_with_folder(self):
+        self.edit_test('http://myserver/arcgis/admin/services/myFolder/myService.MapServer/edit', 'edit_service',
+                           'myService', {'foo': 'bar', 'f': 'json', 'token': 'my_token_value'}, 'myFolder')
+
+    def test_edit_other_service(self):
+        self.edit_test('http://myserver/arcgis/admin/services/myFolder/myService.ImageServer/edit', 'edit_service',
+                           'myService', {'foo': 'bar', 'f': 'json', 'token': 'my_token_value'}, 'myFolder',
+                           'ImageServer')
 
 if __name__ == '__main__':
 

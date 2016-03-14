@@ -1,7 +1,6 @@
 import os
 import argparse
-from arcrest.manageags import AGSAdministration
-from arcrest.security import security
+from ags_publishing_tools.api import Api
 from ags_publishing_tools.ConfigParser import ConfigParser
 from ags_publishing_tools import GitFileManager
 import arcpy
@@ -14,8 +13,7 @@ class MapServicePublisher:
     config = None
     connection_file_path = None
     config_parser = ConfigParser()
-    security_handler = None
-    ags_admin = None
+    api = None
 
     def __init__(self):
         pass
@@ -40,30 +38,14 @@ class MapServicePublisher:
             save_username_password=True
         )
 
-    def init_arcrest(self, ags_url, token_url, portal_url, username, password):
-        self.security_handler = self.get_security_handler(ags_url, token_url, portal_url, username, password)
-
-        self.ags_admin = AGSAdministration(
-            url=ags_url,
-            securityHandler=self.security_handler
+    def init_api(self, ags_url, token_url, portal_url, username, password):
+        self.api = Api(
+            ags_url=ags_url,
+            token_url=token_url,
+            portal_url=portal_url,
+            username=username,
+            password=password
         )
-
-    @staticmethod
-    def get_security_handler(ags_url, token_url, portal_url, username, password):
-        if token_url and portal_url:
-            security_handler = security.PortalTokenSecurityHandler(
-                username=username,
-                password=password,
-                org_url=portal_url,
-                token_url=token_url
-            )
-        else:
-            security_handler = security.AGSTokenSecurityHandler(
-                username=username,
-                password=password,
-                org_url=ags_url
-            )
-        return security_handler
 
     def publish_gp(self, config_entry, filename, sddraft):
         if "result" in config_entry:
@@ -95,8 +77,6 @@ class MapServicePublisher:
         return arcpy.mapping.AnalyzeForSD(sddraft)
 
     def publish_mxd(self, config_entry, filename, sddraft):
-        # mxd = arcpy.mapping.MapDocument())
-
         if "workspaces" in config_entry:
             self.set_workspaces(config_entry["input"], config_entry["workspaces"])
 
@@ -150,8 +130,8 @@ class MapServicePublisher:
         mxd.save()
         del mxd
 
-
-    def analysis_successful(self, analysis_errors):
+    @staticmethod
+    def analysis_successful(analysis_errors):
         if analysis_errors == {}:
             return True
         else:
@@ -163,7 +143,8 @@ class MapServicePublisher:
     def get_sd_output(self, original_name, output_path):
         return self._get_output_filename(original_name, output_path, 'sd')
 
-    def _get_output_filename(self, original_name, output_path, extension):
+    @staticmethod
+    def _get_output_filename(original_name, output_path, extension):
         return os.path.join(output_path, '{}.' + extension).format(original_name)
 
     def publish_input(self, input_value):
@@ -218,29 +199,24 @@ class MapServicePublisher:
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
         self.message("Deleting old service...")
-        self.ags_admin.services.deleteService(config['json']['serviceName'],
-                                              config["folderName"] if "folderName" in config else None)
+        self.api.delete_service(config['json']['serviceName'],
+                                config["folderName"] if "folderName" in config else None)
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, self.connection_file_path)
         self.update_service(config)
 
     def update_service(self, config):
         if 'json' in config:
-            if 'folder' in config:
-                self.ags_admin.folderName = config['folder']
-            services = self.ags_admin.services.services
-            [service] = [service for service in services if service.serviceName == config['json']['serviceName']] # throw if not found
-            json = self.config_parser.merge_json(str(service), config['json'])
-            service.edit(json)
-
-    def delete_all(self):
-        folders = self.ags_admin.services.folders
-        for folder in folders:
-            if folder != 'Utilities':
-                self.ags_admin.folderName = folder
-                services = self.ags_admin.services.services
-                for service in services:
-                    service.delete_service()
+            default_json = self.api.get_service_params(
+                service_name=config['json']['serviceName'],
+                folder=config["folderName"] if "folderName" in config else None
+            )
+            json = self.config_parser.merge_json(default_json, config['json'])
+            self.api.edit_service(
+                service_name=config['json']['serviceName'],
+                folder=config["folderName"] if "folderName" in config else None,
+                params=json
+            )
 
     def message(self, message):
         print message
@@ -297,7 +273,7 @@ def main():
     print "Loading config..."
     publisher.load_config(args.config)
     publisher.create_server_connection_file(args.username, args.password)
-    publisher.init_arcrest(
+    publisher.init_api(
         ags_url=publisher.config['agsUrl'],
         token_url=publisher.config['tokenUrl'],
         portal_url=publisher.config['portalUrl'] if 'portalUrl' in publisher.config else None,

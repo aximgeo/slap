@@ -63,10 +63,12 @@ class Api:
         url = '{0}/services/{1}{2}.{3}'.format(self._ags_url, folder, service_name, service_type)
         return self.get(url, self.params)
 
-    def edit_service(self, service_name, folder='', service_type='MapServer'):
+    def edit_service(self, service_name, params, folder='', service_type='MapServer'):
         folder = folder + '/' if folder else ''
         url = '{0}/services/{1}{2}.{3}/edit'.format(self._ags_url, folder, service_name, service_type)
-        return self.post(url, self.params)
+        params['f'] = 'json'
+        params['token'] = self.token
+        return self.post(url, params)
 
     def delete_service(self, service_name, folder=''):
         folder = folder + '/' if folder else ''
