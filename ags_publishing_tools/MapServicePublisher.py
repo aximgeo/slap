@@ -1,8 +1,8 @@
 import os
 import argparse
 from ags_publishing_tools.api import Api
-from ags_publishing_tools.ConfigParser import ConfigParser
-from ags_publishing_tools import GitFileManager
+from ags_publishing_tools.config import ConfigParser
+from ags_publishing_tools import git
 import arcpy
 
 arcpy.env.overwriteOutput = True
@@ -285,7 +285,7 @@ def main():
             publisher.publish_input(i)
     elif args.git:
         print "Getting changes from git..."
-        changed_files = GitFileManager.get_changed_mxds()
+        changed_files = git.get_changed_mxds()
         print changed_files
         for i in changed_files:
             publisher.publish_input(i)
