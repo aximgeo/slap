@@ -38,11 +38,12 @@ class MapServicePublisher:
             save_username_password=True
         )
 
-    def init_api(self, ags_url, token_url, portal_url, username, password):
+    def init_api(self, ags_url, token_url, portal_url, certs, username, password):
         self.api = Api(
             ags_url=ags_url,
             token_url=token_url,
             portal_url=portal_url,
+            certs=certs,
             username=username,
             password=password
         )
@@ -277,6 +278,7 @@ def main():
         ags_url=publisher.config['agsUrl'],
         token_url=publisher.config['tokenUrl'],
         portal_url=publisher.config['portalUrl'] if 'portalUrl' in publisher.config else None,
+        certs=publisher.config['certs'],
         username=args.username,
         password=args.password
     )

@@ -1,5 +1,4 @@
 import requests
-import wincertstore
 
 class Api:
 
@@ -11,15 +10,13 @@ class Api:
     _token = None
     _certs = None
 
-    def __init__(self, ags_url, token_url, portal_url, username, password):
+    def __init__(self, ags_url, token_url, portal_url, certs, username, password):
         self._ags_url = ags_url
         self._token_url = token_url if token_url else ags_url + '/generateToken'
         self._portal_url = portal_url
         self._username = username
         self._password = password
-        self._certs = wincertstore.CertFile()
-        self._certs.addcerts('ROOT')
-        self._certs.addcerts('CA')
+        self._certs = certs
 
     @property
     def token(self):
@@ -39,7 +36,7 @@ class Api:
         return self._request(requests.get, url, params)
 
     def _request(self, request_method, url, params):
-        response = request_method(url, params=params, verify=self._certs.name)
+        response = request_method(url, params=params, verify=self._certs)
 
         if response.status_code != requests.codes.ok:
             response.raise_for_status()
