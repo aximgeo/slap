@@ -17,6 +17,26 @@ class TesApi(TestCase):
         )
         return api
 
+    def test_token_url_no_portal(self):
+        api = Api(
+            ags_url='http://myserver/arcgis/admin',
+            token_url=None,
+            portal_url=None,
+            username='user',
+            password='pass'
+        )
+        self.assertEqual(api._token_url, 'http://myserver/arcgis/admin/generateToken')
+
+    def test_token_url_with_portal(self):
+        api = Api(
+            ags_url='http://myserver/arcgis/admin',
+            token_url='foo/generateToken',
+            portal_url='http://myserver/portal/sharing/rest',
+            username='user',
+            password='pass'
+        )
+        self.assertEqual(api._token_url, 'foo/generateToken')
+
     def test_token(self):
         api = self.create_api()
         api._token = 'my_token_value'
@@ -46,10 +66,10 @@ class TesApi(TestCase):
                 mock_method.assert_called_once_with(url, {'f': 'json', 'token': 'my_token_value'})
 
     def test_delete_map_service(self):
-        self.post_url_test('http://myserver/arcgis/admin/services/myService/delete', 'delete_service', 'myService')
+        self.post_url_test('http://myserver/arcgis/admin/services/myService.MapServer/delete', 'delete_service', 'myService')
 
     def test_delete_map_service_with_folder(self):
-        self.post_url_test('http://myserver/arcgis/admin/services/myFolder/myService/delete',
+        self.post_url_test('http://myserver/arcgis/admin/services/myFolder/myService.MapServer/delete',
                            'delete_service', 'myService', 'myFolder')
 
     def test_get_map_service(self):
