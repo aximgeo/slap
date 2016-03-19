@@ -15,7 +15,6 @@ class Api:
     def __init__(self, ags_url, token_url, portal_url, username, password, certs=True):
         self._ags_url = ags_url
         self._token_url = token_url if token_url else ags_url + '/generateToken'
-        print self._token_url
         self._portal_url = portal_url
         self._username = username
         self._password = password
@@ -38,12 +37,19 @@ class Api:
     def get(self, url, params):
         return self._request(url, params, 'GET')
 
-    def _request(self, url, params, method='GET'):
-        request = urllib2.Request(url, urllib.urlencode(params))
+    def _request(self, url, params, method):
+        encoded_params = urllib.urlencode(params)
+        print "Params:", params
+        if method == 'GET':
+            request = urllib2.Request(url + '?' + encoded_params)
+        else:
+            request = urllib2.Request(url, json.dumps(params))
+            request.add_header('Content-Type', 'application/json')
+
         request.get_method = lambda: method
         response = urllib2.urlopen(request)
         response_text = response.read()
-        print response_text
+        print "Response:", response_text
         parsed_response = json.loads(response_text)
 
         if 'status' in parsed_response and parsed_response['status'] == 'error':  # handle a 200 response with an error
@@ -72,9 +78,9 @@ class Api:
     def edit_service(self, service_name, params, folder='', service_type='MapServer'):
         folder = self.build_folder_string(folder)
         url = '{0}/services/{1}{2}.{3}/edit'.format(self._ags_url, folder, service_name, service_type)
-        params['f'] = 'json'
-        params['token'] = self.token
-        return self.post(url, params)
+        new_params = params.copy()
+        new_params.update(self.params)
+        return self.post(url, new_params)
 
     def delete_service(self, service_name, folder='', service_type='MapServer'):
         folder = self.build_folder_string(folder)
