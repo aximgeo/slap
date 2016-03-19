@@ -47,8 +47,8 @@ class Api:
         else:
             request = urllib2.Request(url)
             request.get_method = lambda: method
+            request.add_header('Content-Type', 'application/json')
             response = urllib2.urlopen(request, json.dumps(encoded_params))
-            # request.add_header('Content-Type', 'application/json')
 
         response_text = response.read()
         print "Response:", response_text
