@@ -1,6 +1,8 @@
 import urllib
 import urllib2
 import json
+import codecs
+
 
 class Api:
 
@@ -50,9 +52,12 @@ class Api:
             # request.add_header('Content-Type', 'application/json')
             response = urllib2.urlopen(request, encoded_params)
 
-        response_text = response.readall().decode('utf-8')
-        print "Response:", response_text
-        parsed_response = json.loads(response_text)
+        reader = codecs.getreader("utf-8")
+        parsed_response = json.load(reader(response))
+        print parsed_response
+        # response_text = response.readall().decode('utf-8')
+        # print "Response:", response_text
+        # parsed_response = json.loads(response_text)
 
         if 'status' in parsed_response and parsed_response['status'] == 'error':  # handle a 200 response with an error
             raise urllib2.URLError(parsed_response['status'] + ','.join(parsed_response['messages']))
