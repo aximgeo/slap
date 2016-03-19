@@ -48,9 +48,9 @@ class Api:
             request = urllib2.Request(url)
             request.get_method = lambda: method
             # request.add_header('Content-Type', 'application/json')
-            response = urllib2.urlopen(request, urllib.urlencode(json.load(params)))
+            response = urllib2.urlopen(request, encoded_params)
 
-        response_text = response.read()
+        response_text = response.readall().decode('utf-8')
         print "Response:", response_text
         parsed_response = json.loads(response_text)
 
