@@ -42,12 +42,14 @@ class Api:
         print "Params:", params
         if method == 'GET':
             request = urllib2.Request(url + '?' + encoded_params)
+            request.get_method = lambda: method
+            response = urllib2.urlopen(request)
         else:
-            request = urllib2.Request(url, json.dumps(params))
-            request.add_header('Content-Type', 'application/json')
+            request = urllib2.Request(url)
+            request.get_method = lambda: method
+            response = urllib2.urlopen(request, json.dumps(params))
+            # request.add_header('Content-Type', 'application/json')
 
-        request.get_method = lambda: method
-        response = urllib2.urlopen(request)
         response_text = response.read()
         print "Response:", response_text
         parsed_response = json.loads(response_text)
