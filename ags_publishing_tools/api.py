@@ -53,7 +53,7 @@ class Api:
             response = urllib2.urlopen(request, encoded_params)
 
         reader = codecs.getreader("utf-8")
-        parsed_response = json.load(reader(response))
+        parsed_response = self._byteify(json.loads(reader(response)))
         print parsed_response
         # response_text = response.readall().decode('utf-8')
         # print "Response:", response_text
@@ -63,6 +63,17 @@ class Api:
             raise urllib2.URLError(parsed_response['status'] + ','.join(parsed_response['messages']))
 
         return parsed_response
+
+    def _byteify(self, input):
+        if isinstance(input, dict):
+            return {self._byteify(key): self._byteify(value)
+                    for key, value in input.iteritems()}
+        elif isinstance(input, list):
+            return [self._byteify(element) for element in input]
+        elif isinstance(input, unicode):
+            return input.encode('utf-8')
+        else:
+            return input
 
     def get_token(self):
         params = {
