@@ -52,7 +52,7 @@ class Api:
             response = urllib2.urlopen(request, encoded_params)
 
         reader = codecs.getreader("utf-8")
-        parsed_response = json.loads(reader.read(response))
+        parsed_response = json.load(reader(response))
         print parsed_response
         # response_text = response.readall().decode('utf-8')
         # print "Response:", response_text
