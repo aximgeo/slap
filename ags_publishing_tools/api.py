@@ -49,11 +49,10 @@ class Api:
         else:
             request = urllib2.Request(url)
             request.get_method = lambda: method
-            # request.add_header('Content-Type', 'application/json')
             response = urllib2.urlopen(request, encoded_params)
 
         reader = codecs.getreader("utf-8")
-        parsed_response = self._byteify(json.loads(reader(response)))
+        parsed_response = json.loads(reader.read(response))
         print parsed_response
         # response_text = response.readall().decode('utf-8')
         # print "Response:", response_text
@@ -64,16 +63,16 @@ class Api:
 
         return parsed_response
 
-    def _byteify(self, input):
-        if isinstance(input, dict):
-            return {self._byteify(key): self._byteify(value)
-                    for key, value in input.iteritems()}
-        elif isinstance(input, list):
-            return [self._byteify(element) for element in input]
-        elif isinstance(input, unicode):
-            return input.encode('utf-8')
-        else:
-            return input
+    # def _byteify(self, input):
+    #     if isinstance(input, dict):
+    #         return {self._byteify(key): self._byteify(value)
+    #                 for key, value in input.iteritems()}
+    #     elif isinstance(input, list):
+    #         return [self._byteify(element) for element in input]
+    #     elif isinstance(input, unicode):
+    #         return input.encode('utf-8')
+    #     else:
+    #         return input
 
     def get_token(self):
         params = {
