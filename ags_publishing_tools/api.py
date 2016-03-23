@@ -40,8 +40,8 @@ class Api:
         return self._request(url, params, 'GET')
 
     def _request(self, url, params, method):
-        encoded_params = urllib.urlencode(params)
         print "Params:", params
+        encoded_params = urllib.urlencode(json.loads(json.dumps(params)))
         if method == 'GET':
             request = urllib2.Request(url + '?' + encoded_params)
             request.get_method = lambda: method
@@ -54,25 +54,11 @@ class Api:
         reader = codecs.getreader("utf-8")
         parsed_response = json.load(reader(response))
         print parsed_response
-        # response_text = response.readall().decode('utf-8')
-        # print "Response:", response_text
-        # parsed_response = json.loads(response_text)
 
         if 'status' in parsed_response and parsed_response['status'] == 'error':  # handle a 200 response with an error
             raise urllib2.URLError(parsed_response['status'] + ','.join(parsed_response['messages']))
 
         return parsed_response
-
-    # def _byteify(self, input):
-    #     if isinstance(input, dict):
-    #         return {self._byteify(key): self._byteify(value)
-    #                 for key, value in input.iteritems()}
-    #     elif isinstance(input, list):
-    #         return [self._byteify(element) for element in input]
-    #     elif isinstance(input, unicode):
-    #         return input.encode('utf-8')
-    #     else:
-    #         return input
 
     def get_token(self):
         params = {
