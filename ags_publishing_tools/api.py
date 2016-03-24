@@ -42,13 +42,11 @@ class Api:
         encoded_params = urllib.urlencode(json.loads(json.dumps(params)))
         if method == 'GET':
             request = urllib2.Request(url + '?' + encoded_params)
-            request.get_method = lambda: method
-            response = urllib2.urlopen(request)
         else:
-            request = urllib2.Request(url)
-            request.get_method = lambda: method
-            response = urllib2.urlopen(request, encoded_params)
+            request = urllib2.Request(url, encoded_params)
 
+        request.get_method = lambda: method
+        response = urllib2.urlopen(request)
         parsed_response = json.loads(response.read())
 
         if 'status' in parsed_response and parsed_response['status'] == 'error':  # handle a 200 response with an error
