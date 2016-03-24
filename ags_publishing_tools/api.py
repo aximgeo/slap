@@ -77,8 +77,8 @@ class Api:
     def edit_service(self, service_name, params, folder='', service_type='MapServer'):
         folder = self.build_folder_string(folder)
         url = '{0}/services/{1}{2}.{3}/edit'.format(self._ags_url, folder, service_name, service_type)
-        new_params = {'service': params.copy()}
-        new_params.update(self.params)
+        new_params = self.params.copy()
+        new_params['service'] = params.copy()
         return self.post(url, new_params)
 
     def delete_service(self, service_name, folder='', service_type='MapServer'):
