@@ -39,7 +39,7 @@ class Api:
         return self._request(url, params, 'GET')
 
     def _request(self, url, params, method):
-        encoded_params = urllib.quote(json.dumps(params))
+        encoded_params = urllib.urlencode(json.loads(json.dumps(params)))
         request = urllib2.Request(url + '?' + encoded_params) if method == 'GET' else urllib2.Request(url, encoded_params)
         request.get_method = lambda: method
         response = urllib2.urlopen(request)
@@ -72,7 +72,7 @@ class Api:
         folder = self.build_folder_string(folder)
         url = '{0}/services/{1}{2}.{3}/edit'.format(self._ags_url, folder, service_name, service_type)
         new_params = self.params.copy()
-        new_params['service'] = params.copy()
+        new_params['service'] = json.dumps(params.copy())
         return self.post(url, new_params)
 
     def delete_service(self, service_name, folder='', service_type='MapServer'):
