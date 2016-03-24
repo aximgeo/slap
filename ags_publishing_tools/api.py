@@ -41,7 +41,6 @@ class Api:
 
     def _request(self, url, params, method):
         encoded_params = urllib.urlencode(json.loads(json.dumps(params)))
-        print "Params:", encoded_params
         if method == 'GET':
             request = urllib2.Request(url + '?' + encoded_params)
             request.get_method = lambda: method
@@ -53,7 +52,6 @@ class Api:
 
         reader = codecs.getreader("utf-8")
         parsed_response = json.load(reader(response))
-        print parsed_response
 
         if 'status' in parsed_response and parsed_response['status'] == 'error':  # handle a 200 response with an error
             raise urllib2.URLError(parsed_response['status'] + ','.join(parsed_response['messages']))
@@ -81,7 +79,7 @@ class Api:
     def edit_service(self, service_name, params, folder='', service_type='MapServer'):
         folder = self.build_folder_string(folder)
         url = '{0}/services/{1}{2}.{3}/edit'.format(self._ags_url, folder, service_name, service_type)
-        new_params = params.copy()
+        new_params = {'service': params.copy()}
         new_params.update(self.params)
         return self.post(url, new_params)
 
