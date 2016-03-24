@@ -40,11 +40,7 @@ class Api:
 
     def _request(self, url, params, method):
         encoded_params = urllib.urlencode(json.loads(json.dumps(params)))
-        if method == 'GET':
-            request = urllib2.Request(url + '?' + encoded_params)
-        else:
-            request = urllib2.Request(url, encoded_params)
-
+        request = urllib2.Request(url + '?' + encoded_params) if method == 'GET' else urllib2.Request(url, encoded_params)
         request.get_method = lambda: method
         response = urllib2.urlopen(request)
         parsed_response = json.loads(response.read())
