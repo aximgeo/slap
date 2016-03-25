@@ -84,27 +84,30 @@ class TesApi(TestCase):
         self.get_url_test('http://myserver/arcgis/admin/services/myFolder/myService.ImageServer',
                           'get_service_params', 'myService', 'myFolder', 'ImageServer')
 
-    def edit_test(self, url, method, *args):
+    def edit_test(self, url, method, expected, *args):
         with patch('ags_publishing_tools.api.Api.token', new_callable=PropertyMock) as mock_token:
             with patch('ags_publishing_tools.api.Api.post') as mock_method:
                 mock_token.return_value = 'my_token_value'
                 api = self.create_api()
                 getattr(api, method)(*args)
                 mock_token.assert_called_once_with()
-                mock_method.assert_called_once_with(url, args[1])
+                mock_method.assert_called_once_with(url, expected)
 
     def test_edit_map_service(self):
         self.edit_test('http://myserver/arcgis/admin/services/myService.MapServer/edit', 'edit_service',
-                           'myService', {'foo': 'bar', 'f': 'json', 'token': 'my_token_value'})
+                       {'service': '{"foo": "bar"}', 'f': 'json', 'token': 'my_token_value'},
+                       'myService', {'foo': 'bar'})
 
     def test_edit_map_service_with_folder(self):
         self.edit_test('http://myserver/arcgis/admin/services/myFolder/myService.MapServer/edit', 'edit_service',
-                           'myService', {'foo': 'bar', 'f': 'json', 'token': 'my_token_value'}, 'myFolder')
+                      {'service': '{"foo": "bar"}', 'f': 'json', 'token': 'my_token_value'},
+                      'myService', {'foo': 'bar'}, 'myFolder')
 
     def test_edit_other_service(self):
         self.edit_test('http://myserver/arcgis/admin/services/myFolder/myService.ImageServer/edit', 'edit_service',
-                           'myService', {'foo': 'bar', 'f': 'json', 'token': 'my_token_value'}, 'myFolder',
-                           'ImageServer')
+                       {'service': '{"foo": "bar"}', 'f': 'json', 'token': 'my_token_value'},
+                        'myService', {'foo': 'bar'}, 'myFolder',
+                        'ImageServer')
 
 if __name__ == '__main__':
 
