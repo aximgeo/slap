@@ -1,9 +1,6 @@
-__author__ = 'ifirkin'
-
-import unittest
 from unittest import TestCase
 from mock import MagicMock
-from ags_publishing_tools import git
+from slap import git
 
 
 class TestGitFileManager(TestCase):
