@@ -1,14 +1,14 @@
 import os
 import argparse
-from ags_publishing_tools.api import Api
-from ags_publishing_tools.config import ConfigParser
-from ags_publishing_tools import git
+from slap.api import Api
+from slap.config import ConfigParser
+from slap import git
 import arcpy
 
 arcpy.env.overwriteOutput = True
 
 
-class MapServicePublisher:
+class Publisher:
 
     config = None
     connection_file_path = None
@@ -270,7 +270,7 @@ def get_args():
 
 def main():
     args = get_args()
-    publisher = MapServicePublisher()
+    publisher = Publisher()
     print "Loading config..."
     publisher.load_config(args.config)
     publisher.create_server_connection_file(args.username, args.password)

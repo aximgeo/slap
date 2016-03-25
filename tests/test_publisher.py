@@ -6,15 +6,15 @@ from mock import MagicMock, patch
 mock_arcpy = MagicMock()
 patch.dict("sys.modules", arcpy=mock_arcpy).start()
 
-from ags_publishing_tools.MapServicePublisher import only_one
-from ags_publishing_tools.MapServicePublisher import MapServicePublisher
+from slap.publisher import only_one
+from slap.publisher import Publisher
 
 
 class TestMapServicePublisher(TestCase):
     m = None
 
     def setUp(self):
-        self.m = MapServicePublisher()
+        self.m = Publisher()
         self.m.config = {
             'serverUrl': 'my/server',
             'mapServices': {
