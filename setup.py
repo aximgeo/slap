@@ -16,7 +16,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='ags_publishing_tools',
+    name='slap',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
@@ -27,7 +27,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://***REMOVED***/projects/PYT/repos/mapservicepublisher/browse',
+    url='https://***REMOVED***/projects/PYT/repos/slap/browse',
 
     # Author details
     author='Ian Firkin',
@@ -42,7 +42,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
@@ -100,8 +100,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'MapServicePublisher=ags_publishing_tools.MapServicePublisher:main',
-            'git_mxd_inputs=ags_publishing_tools.GitFileManager:get_args'
+            'slap=slap.publisher:main',
         ],
     },
 )

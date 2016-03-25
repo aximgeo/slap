@@ -1,6 +1,6 @@
 import unittest
 from unittest import TestCase
-from ags_publishing_tools.api import Api
+from slap.api import Api
 from mock import MagicMock, PropertyMock, patch
 
 
@@ -57,8 +57,8 @@ class TesApi(TestCase):
         self.url_test('get', url, method, *args)
 
     def url_test(self, mock_method, url, method, *args):
-        with patch('ags_publishing_tools.api.Api.token', new_callable=PropertyMock) as mock_token:
-            with patch('ags_publishing_tools.api.Api.' + mock_method) as mock_method:
+        with patch('slap.api.Api.token', new_callable=PropertyMock) as mock_token:
+            with patch('slap.api.Api.' + mock_method) as mock_method:
                 mock_token.return_value = 'my_token_value'
                 api = self.create_api()
                 getattr(api, method)(*args)
@@ -85,8 +85,8 @@ class TesApi(TestCase):
                           'get_service_params', 'myService', 'myFolder', 'ImageServer')
 
     def edit_test(self, url, method, expected, *args):
-        with patch('ags_publishing_tools.api.Api.token', new_callable=PropertyMock) as mock_token:
-            with patch('ags_publishing_tools.api.Api.post') as mock_method:
+        with patch('slap.api.Api.token', new_callable=PropertyMock) as mock_token:
+            with patch('slap.api.Api.post') as mock_method:
                 mock_token.return_value = 'my_token_value'
                 api = self.create_api()
                 getattr(api, method)(*args)
