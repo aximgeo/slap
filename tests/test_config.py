@@ -1,7 +1,7 @@
 import os
 import unittest
 from unittest import TestCase
-from ags_publishing_tools.ConfigParser import ConfigParser
+from ags_publishing_tools.config import ConfigParser
 
 
 class TestConfigParser(TestCase):
