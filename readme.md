@@ -43,33 +43,33 @@ Each service is included in the config file as an object, grouped by service typ
 
 An example configuration file might look like:
 
-``` json
+``` javascript
 {
-    "agsUrl": "https://myagsserver.com:6443/arcgis/admin", # Required, URL for AGS admin endpoint
-    "tokenUrl": "https://myagsserver.com:6443/arcgis/rest/getToken", # Required, URL for token service
-    "json": {} # Optional, specific parameters to use for all services, of all types.
+    "agsUrl": "https://myagsserver.com:6443/arcgis/admin", // Required, URL for AGS admin endpoint
+    "tokenUrl": "https://myagsserver.com:6443/arcgis/rest/getToken", // Required, URL for token service
+    "json": {} // Optional, specific parameters to use for all services, of all types.
     "mapServices": {
-        "json": {} # Optional, specific service parameters to use for all map services
+        "json": {} // Optional, specific service parameters to use for all map services
         "services": [
             {
-                "input": "mxd/my_map_document.mxd", # Required
-                "output": "output/", # Optional, defaults to "output/"
-                "serverType": "ARCGIS_SERVER", # Optional, defaults to "ARCGIS_SERVER"
-                "copyDataToServer": False, # Optional, defaults to False
-                "folderName": "AutomationTests", # Optional, defaults to ""
-                "summary": "Test map service published automagically", # Optional, defaults to ""
-                "workspaces": [ # Optional; defaults to *NOT* replace workspace paths
+                "input": "mxd/my_map_document.mxd", // Required
+                "output": "output/", // Optional, defaults to "output/"
+                "serverType": "ARCGIS_SERVER", // Optional, defaults to "ARCGIS_SERVER"
+                "copyDataToServer": False, // Optional, defaults to False
+                "folderName": "AutomationTests", // Optional, defaults to ""
+                "summary": "Test map service published automagically", // Optional, defaults to ""
+                "workspaces": [ // Optional; defaults to *NOT* replace workspace paths
                     {
                         "old": {
-                            "path": "c:/path/to/integration/connectionFile.sde", # Required if workspaces is defined
-                            "type": "SDE_WORKSPACE" # Optional, defaults to SDE_WORKSPACE
+                            "path": "c:/path/to/integration/connectionFile.sde", // Required if workspaces is defined
+                            "type": "SDE_WORKSPACE" // Optional, defaults to SDE_WORKSPACE
                         },
                         "new": {
-                            "path": "c:/path/to/production/connectionFile.sde", # Required if workspaces is defined
-                            "type": "SDE_WORKSPACE" # Optional, defaults to SDE_WORKSPACE 
+                            "path": "c:/path/to/production/connectionFile.sde", // Required if workspaces is defined
+                            "type": "SDE_WORKSPACE" // Optional, defaults to SDE_WORKSPACE 
                     }
                 ],
-                "json": {} # Optional, specific parameters for this service only
+                "json": {} // Optional, specific parameters for this service only
             }
         ]
     }
@@ -145,7 +145,7 @@ Our config file should look like:
     "tokenUrl": "https://prodagsserver.com:6443/arcgis/admin/generateToken",
     "mapServices": {
         "json": {
-            "maxIdleTime": 300
+            "maxIdleTime": 300,
             "properties": {
                 "schemaLockingEnabled": true
             }  
