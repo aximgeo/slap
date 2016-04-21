@@ -43,7 +43,7 @@ Each service is included in the config file as an object, grouped by service typ
 
 An example configuration file might look like:
 
-``` json
+``` javascript
 {
     "agsUrl": "https://myagsserver.com:6443/arcgis/admin", // Required, URL for AGS admin endpoint
     "tokenUrl": "https://myagsserver.com:6443/arcgis/rest/getToken", // Required, URL for token service
