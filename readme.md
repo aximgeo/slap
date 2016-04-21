@@ -145,7 +145,7 @@ Our config file should look like:
     "tokenUrl": "https://prodagsserver.com:6443/arcgis/admin/generateToken",
     "mapServices": {
         "json": {
-            "maxIdleTime": 300
+            "maxIdleTime": 300,
             "properties": {
                 "schemaLockingEnabled": true
             }  
