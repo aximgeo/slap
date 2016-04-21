@@ -27,7 +27,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://***REMOVED***/projects/PYT/repos/slap/browse',
+    url='https://github.com/gisinc/slap',
 
     # Author details
     author='Ian Firkin',
