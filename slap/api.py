@@ -80,6 +80,14 @@ class Api:
         url = '{0}/services/{1}{2}.{3}/delete'.format(self._ags_url, folder, service_name, service_type)
         return self.post(url, self.params)
 
+    def service_exists(self, service_name, folder='', service_type='MapServer'):
+        url = '{0}/services/exists/exists'.format(self._ags_url)
+        new_params = self.params.copy()
+        new_params['folderName'] = folder
+        new_params['serviceName'] = service_name
+        new_params['type'] = service_type
+        return self.post(url, new_params)
+
     @staticmethod
     def build_folder_string(folder):
         return folder + '/' if folder else ''
