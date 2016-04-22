@@ -186,8 +186,13 @@ class Publisher:
     def publish_service(self, service_type, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
         config_entry['json']['serviceName'] = filename
-        sddraft = self.get_sddraft_output(filename, self.get_output_directory(config_entry))
-        sd = self.get_sd_output(filename, self.get_output_directory(config_entry))
+
+        output_directory = self.get_output_directory(config_entry)
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+
+        sddraft = self.get_sddraft_output(filename, output_directory)
+        sd = self.get_sd_output(filename, output_directory)
         self.message("Publishing " + config_entry["input"])
         analysis = self._get_method_by_type(service_type)(config_entry, filename, sddraft)
         if self.analysis_successful(analysis['errors']):
