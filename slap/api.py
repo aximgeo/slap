@@ -54,8 +54,7 @@ class Api:
         params = {
             'username': self._username,
             'password': self._password,
-            'client': 'referer',
-            'referer': self._ags_url,
+            'client': 'requestip',
             'expiration': 60,
             'f': 'json'
         }
