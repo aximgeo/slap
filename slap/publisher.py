@@ -286,7 +286,7 @@ def main():
     publisher.create_server_connection_file(args.username, args.password)
     publisher.init_api(
         ags_url=publisher.config['agsUrl'],
-        token_url=publisher.config['tokenUrl'],
+        token_url=publisher.config['tokenUrl'] if 'tokenUrl' in publisher.config else None,
         portal_url=publisher.config['portalUrl'] if 'portalUrl' in publisher.config else None,
         certs=publisher.config['certs'] if 'certs' in publisher.config else True,
         username=args.username,
