@@ -205,9 +205,16 @@ class Publisher:
         self.update_service(config)
 
     def delete_service(self, config):
-        self.message("Deleting old service...")
-        self.api.delete_service(config['json']['serviceName'],
-                                config["folderName"] if "folderName" in config else None)
+        service_exists = self.api.service_exists(
+            config['json']['serviceName'],
+            config["folderName"] if "folderName" in config else None
+        )
+        if service_exists['exists']:
+            self.message("Deleting old service...")
+            self.api.delete_service(
+                config['json']['serviceName'],
+                config["folderName"] if "folderName" in config else None
+            )
 
     def update_service(self, config):
         if 'json' in config:
