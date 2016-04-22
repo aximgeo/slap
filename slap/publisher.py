@@ -199,12 +199,15 @@ class Publisher:
     def publish_draft(self, sddraft, sd, config):
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
-        self.message("Deleting old service...")
-        self.api.delete_service(config['json']['serviceName'],
-                                config["folderName"] if "folderName" in config else None)
+        self.delete_service(config)
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, self.connection_file_path)
         self.update_service(config)
+
+    def delete_service(self, config):
+        self.message("Deleting old service...")
+        self.api.delete_service(config['json']['serviceName'],
+                                config["folderName"] if "folderName" in config else None)
 
     def update_service(self, config):
         if 'json' in config:
