@@ -1,4 +1,4 @@
-<img src="https://travis-ci.org/gisinc/slap.svg?branch=master" />
+[![Build Status](https://travis-ci.org/gisinc/slap.svg?branch=master)](https://travis-ci.org/gisinc/slap)
 
 # SLAP Maps: Simple Library for Automated Publishing of Map Services
 
