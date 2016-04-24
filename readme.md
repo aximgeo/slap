@@ -1,3 +1,5 @@
+https://travis-ci.org/gisinc/slap.svg?branch=master
+
 # SLAP Maps: Simple Library for Automated Publishing of Map Services
 
 Provides a way to automate the process of publishing map services; there are two main use cases:
