@@ -1,10 +1,10 @@
 import unittest
 from unittest import TestCase
 from slap.api import Api
-from mock import MagicMock, PropertyMock, patch
+from mock import PropertyMock, patch
 
 
-class TesApi(TestCase):
+class TestApi(TestCase):
     api = None
 
     def create_api(self):
@@ -50,7 +50,7 @@ class TesApi(TestCase):
         token = api.token
         self.assertEqual(token, 'my_new_token_value')
 
-    def get_test(self, url, method, *args):
+    def get_mock(self, url, method, *args):
         with patch('slap.api.Api.token', new_callable=PropertyMock) as mock_token:
             with patch('slap.api.Api.get') as mock_method:
                 mock_token.return_value = 'my_token_value'
@@ -59,7 +59,7 @@ class TesApi(TestCase):
                 mock_token.assert_called_once_with()
                 mock_method.assert_called_once_with(url, {'f': 'json', 'token': 'my_token_value'})
 
-    def post_test(self, url, method, expected, *args):
+    def post_mock(self, url, method, expected, *args):
         with patch('slap.api.Api.token', new_callable=PropertyMock) as mock_token:
             with patch('slap.api.Api.post') as mock_method:
                 mock_token.return_value = 'my_token_value'
@@ -69,47 +69,47 @@ class TesApi(TestCase):
                 mock_method.assert_called_once_with(url, expected)
 
     def test_delete_map_service(self):
-        self.post_test('http://myserver/arcgis/admin/services/myService.MapServer/delete',
+        self.post_mock('http://myserver/arcgis/admin/services/myService.MapServer/delete',
                        'delete_service',
                        {'f': 'json', 'token': 'my_token_value'},
                        'myService')
 
     def test_delete_map_service_with_folder(self):
-        self.post_test('http://myserver/arcgis/admin/services/myFolder/myService.MapServer/delete',
+        self.post_mock('http://myserver/arcgis/admin/services/myFolder/myService.MapServer/delete',
                        'delete_service',
                        {'f': 'json', 'token': 'my_token_value'},
                        'myService', 'myFolder')
 
     def test_get_map_service(self):
-        self.get_test('http://myserver/arcgis/admin/services/myService.MapServer',
-                          'get_service_params', 'myService')
+        self.get_mock('http://myserver/arcgis/admin/services/myService.MapServer',
+                      'get_service_params', 'myService')
 
     def test_get_map_service_with_folder(self):
-        self.get_test('http://myserver/arcgis/admin/services/myFolder/myService.MapServer',
+        self.get_mock('http://myserver/arcgis/admin/services/myFolder/myService.MapServer',
                           'get_service_params', 'myService', 'myFolder')
 
     def test_get_other_service(self):
-        self.get_test('http://myserver/arcgis/admin/services/myFolder/myService.ImageServer',
-                          'get_service_params', 'myService', 'myFolder', 'ImageServer')
+        self.get_mock('http://myserver/arcgis/admin/services/myFolder/myService.ImageServer',
+                      'get_service_params', 'myService', 'myFolder', 'ImageServer')
 
     def test_edit_map_service(self):
-        self.post_test('http://myserver/arcgis/admin/services/myService.MapServer/edit', 'edit_service',
+        self.post_mock('http://myserver/arcgis/admin/services/myService.MapServer/edit', 'edit_service',
                        {'service': '{"foo": "bar"}', 'f': 'json', 'token': 'my_token_value'},
                        'myService', {'foo': 'bar'})
 
     def test_edit_map_service_with_folder(self):
-        self.post_test('http://myserver/arcgis/admin/services/myFolder/myService.MapServer/edit', 'edit_service',
+        self.post_mock('http://myserver/arcgis/admin/services/myFolder/myService.MapServer/edit', 'edit_service',
                        {'service': '{"foo": "bar"}', 'f': 'json', 'token': 'my_token_value'},
                        'myService', {'foo': 'bar'}, 'myFolder')
 
     def test_edit_other_service(self):
-        self.post_test('http://myserver/arcgis/admin/services/myFolder/myService.ImageServer/edit', 'edit_service',
+        self.post_mock('http://myserver/arcgis/admin/services/myFolder/myService.ImageServer/edit', 'edit_service',
                        {'service': '{"foo": "bar"}', 'f': 'json', 'token': 'my_token_value'},
                        'myService', {'foo': 'bar'}, 'myFolder',
                        'ImageServer')
 
     def test_map_service_exists(self):
-        self.post_test('http://myserver/arcgis/admin/services/exists/exists',
+        self.post_mock('http://myserver/arcgis/admin/services/exists/exists',
                        'service_exists',
                        {'folderName': 'myFolder', 'serviceName': 'myService', 'f': 'json', 'token': 'my_token_value',
                         'type': 'MapServer'},
