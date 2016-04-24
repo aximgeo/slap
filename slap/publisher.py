@@ -186,8 +186,13 @@ class Publisher:
     def publish_service(self, service_type, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
         config_entry['json']['serviceName'] = filename
-        sddraft = self.get_sddraft_output(filename, self.get_output_directory(config_entry))
-        sd = self.get_sd_output(filename, self.get_output_directory(config_entry))
+
+        output_directory = self.get_output_directory(config_entry)
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+
+        sddraft = self.get_sddraft_output(filename, output_directory)
+        sd = self.get_sd_output(filename, output_directory)
         self.message("Publishing " + config_entry["input"])
         analysis = self._get_method_by_type(service_type)(config_entry, filename, sddraft)
         if self.analysis_successful(analysis['errors']):
@@ -199,12 +204,22 @@ class Publisher:
     def publish_draft(self, sddraft, sd, config):
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
-        self.message("Deleting old service...")
-        self.api.delete_service(config['json']['serviceName'],
-                                config["folderName"] if "folderName" in config else None)
+        self.delete_service(config)
         self.message("Uploading service definition...")
         arcpy.UploadServiceDefinition_server(sd, self.connection_file_path)
         self.update_service(config)
+
+    def delete_service(self, config):
+        service_exists = self.api.service_exists(
+            config['json']['serviceName'],
+            config["folderName"] if "folderName" in config else None
+        )
+        if service_exists['exists']:
+            self.message("Deleting old service...")
+            self.api.delete_service(
+                config['json']['serviceName'],
+                config["folderName"] if "folderName" in config else None
+            )
 
     def update_service(self, config):
         if 'json' in config:
@@ -276,7 +291,7 @@ def main():
     publisher.create_server_connection_file(args.username, args.password)
     publisher.init_api(
         ags_url=publisher.config['agsUrl'],
-        token_url=publisher.config['tokenUrl'],
+        token_url=publisher.config['tokenUrl'] if 'tokenUrl' in publisher.config else None,
         portal_url=publisher.config['portalUrl'] if 'portalUrl' in publisher.config else None,
         certs=publisher.config['certs'] if 'certs' in publisher.config else True,
         username=args.username,
