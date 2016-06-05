@@ -261,8 +261,7 @@ def get_args():
                         action="store_true",
                         help="publish all entries in config")
     parser.add_argument("-g", "--git",
-                        action="store_true",
-                        help="publish all mxd files that have changed since the last commit")
+                        help="publish all mxd files that have changed between HEAD and this hash")
     args = parser.parse_args()
 
     if not args.username:
@@ -302,7 +301,7 @@ def main():
             publisher.publish_input(i)
     elif args.git:
         print "Getting changes from git..."
-        changed_files = git.get_changed_mxds()
+        changed_files = git.get_changed_mxds(args.git)
         print changed_files
         for i in changed_files:
             publisher.publish_input(i)
