@@ -30,6 +30,7 @@ class TestMapServicePublisher(TestCase):
         self.assertTrue(only_one([True, False, False]))
         self.assertTrue(only_one([False, ['foo', 'bar'], False]))
         self.assertTrue(only_one([True, [], False]))
+        self.assertTrue(only_one(["some sha", False, False]))
         self.assertFalse(only_one([True, True]))
         self.assertFalse(only_one([True, ['foo'], False]))
 

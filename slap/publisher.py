@@ -261,7 +261,7 @@ def get_args():
                         action="store_true",
                         help="publish all entries in config")
     parser.add_argument("-g", "--git",
-                        help="publish all mxd files that have changed between HEAD and this hash")
+                        help="publish all mxd files that have changed between HEAD and this commit (ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4")
     args = parser.parse_args()
 
     if not args.username:
