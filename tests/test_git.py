@@ -4,14 +4,15 @@ from mock import MagicMock, patch
 from slap import git
 
 
+@patch('slap.git.get_changed_files')
 class TestGitFileManager(TestCase):
 
-    def test_can_filter_mxds(self):
-        git.get_changed_files = MagicMock(return_value=['foo.mxd', 'bar.txt', 'baz.MXD'])
+    def test_can_filter_mxds(self, get_changed_files_mock):
+        get_changed_files_mock.return_value = ['foo.mxd', 'bar.txt', 'baz.MXD']
         self.assertEqual(git.get_changed_mxds(), ['foo.mxd', 'baz.MXD'])
 
-    def test_get_args(self):
-        git.get_changed_files = MagicMock(return_value=['foo.mxd', 'bar.txt', 'baz.MXD'])
+    def test_get_args(self, get_changed_files_mock):
+        get_changed_files_mock.return_value = ['foo.mxd', 'bar.txt', 'baz.MXD']
         self.assertEqual(git.build_args(), '-i foo.mxd -i baz.MXD')
 
 
