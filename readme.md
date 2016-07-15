@@ -22,7 +22,7 @@ There are a few artifacts that need to be generated (via ArcMap) per service and
 The script supports three main ways to specify MXD inputs: `--all`, `--git` and `--inputs`
 
 ### --all
-Publish all MXDs specified in the config file, i.e. 
+Publish all MXDs specified in the config file, i.e.
 ```
 slap --config int.json --username <myUsername> --password <myPassword> --all
 ```
@@ -34,7 +34,7 @@ slap --config int.json --username <myUsername> --password <myPassword> --git
 ```
 
 ### --inputs
-Publish one or more specific MXDs; note that `--inputs` can be specifed multiple times, i.e. 
+Publish one or more specific MXDs; note that `--inputs` can be specifed multiple times, i.e.
 ```
 slap --config int.json --username <myUsername> --password <myPassword> --inputs map1.mxd, --inputs map2.mxd
 ```
@@ -43,21 +43,21 @@ slap --config int.json --username <myUsername> --password <myPassword> --inputs 
 Configuration files are handled per-environment; for example, you might have three separate config files, `INT_config.json`, `UAT_config.json`, and `PROD_config.json`.
 Each service is included in the config file as an object, grouped by service type.  *Note*:  Currently, only map services are supported.
 
-An example configuration file might look like:
+An example configuration file might look like below.  *Note:* The comments would need to be removed, json is not valid with them.
 
 ``` javascript
 {
     "agsUrl": "https://myagsserver.com:6443/arcgis/admin", // Required, URL for AGS admin endpoint
     "tokenUrl": "https://myagsserver.com:6443/arcgis/rest/getToken", // Required, URL for token service
-    "json": {} // Optional, specific parameters to use for all services, of all types.
+    "json": {}, // Optional, specific parameters to use for all services, of all types.
     "mapServices": {
-        "json": {} // Optional, specific service parameters to use for all map services
+        "json": {}, // Optional, specific service parameters to use for all map services
         "services": [
             {
                 "input": "mxd/my_map_document.mxd", // Required
                 "output": "output/", // Optional, defaults to "output/"
                 "serverType": "ARCGIS_SERVER", // Optional, defaults to "ARCGIS_SERVER"
-                "copyDataToServer": False, // Optional, defaults to False
+                "copyDataToServer": "False", // Optional, defaults to False
                 "folderName": "AutomationTests", // Optional, defaults to ""
                 "summary": "Test map service published automagically", // Optional, defaults to ""
                 "workspaces": [ // Optional; defaults to *NOT* replace workspace paths
@@ -68,7 +68,8 @@ An example configuration file might look like:
                         },
                         "new": {
                             "path": "c:/path/to/production/connectionFile.sde", // Required if workspaces is defined
-                            "type": "SDE_WORKSPACE" // Optional, defaults to SDE_WORKSPACE 
+                            "type": "SDE_WORKSPACE" // Optional, defaults to SDE_WORKSPACE
+                          }
                     }
                 ],
                 "json": {} // Optional, specific parameters for this service only
@@ -79,7 +80,7 @@ An example configuration file might look like:
 ```
 
 ## Specifying service parameters
-Service properties can be specified at multiple levels in the file; the most specific property will be used (i.e., service level, then type level, then global).  This allows for a minimum of 
+Service properties can be specified at multiple levels in the file; the most specific property will be used (i.e., service level, then type level, then global).  This allows for a minimum of
 configuration, while also allowing for service parameters to vary.  Note that the `json` parameter is identical what's specified in ESRI's [REST API](http://resources.arcgis.com/en/help/arcgis-rest-api/index.html#/Create_Service/02r3000001tr000000/)
 
 ## Example setup
@@ -106,7 +107,7 @@ Assuming we want to publish both services with schema locks disabled, our config
 
 ``` json
 {
-    "agsUrl": "https://myagsserver.com:6443/arcgis/admin", 
+    "agsUrl": "https://myagsserver.com:6443/arcgis/admin",
     "tokenUrl": "https://myagsserver.com:6443/arcgis/admin/generateToken",
     "mapServices": {
         "json": {
@@ -143,7 +144,7 @@ Our config file should look like:
 
 ``` json
 {
-    "agsUrl": "https://prodagsserver.com:6443/arcgis/admin", 
+    "agsUrl": "https://prodagsserver.com:6443/arcgis/admin",
     "tokenUrl": "https://prodagsserver.com:6443/arcgis/admin/generateToken",
     "mapServices": {
         "json": {
@@ -193,10 +194,7 @@ A few notes and caveats:
 
 - Ideally, database connections will be via SDE, and use a connection file.  Sourcing from a File Geodatabase is also supported; note that the FGDB will likely not be checked into version control.
 - If the FGDB sits on a share, consider using a UNC path rather than a drive letter, unless you are **sure** that the drive will always be mapped.
-- For network shares (i.e., sourcing a FGDB), you *must* use JSON-escaped backslashes in the config (i.e., `\\`).  The `inputs` parameter should *not* add escapes (i.e., use `\`). 
+- For network shares (i.e., sourcing a FGDB), you *must* use JSON-escaped backslashes in the config (i.e., `\\`).  The `inputs` parameter should *not* add escapes (i.e., use `\`).
 
-## TODO 
+## TODO
 - Add support for Image Services, GP Services, etc.
-
-
-
