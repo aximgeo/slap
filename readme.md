@@ -48,7 +48,7 @@ An example configuration file might look like below.  *Note:* The comments would
 ``` javascript
 {
     "agsUrl": "https://myagsserver.com:6443/arcgis/admin", // Required, URL for AGS admin endpoint
-    "tokenUrl": "https://myagsserver.com:6443/arcgis/rest/getToken", // Required, URL for token service
+    "tokenUrl": "https://myagsserver.com:6443/arcgis/tokens/generateToken", // Required, URL for token service
     "json": {}, // Optional, specific parameters to use for all services, of all types.
     "mapServices": {
         "json": {}, // Optional, specific service parameters to use for all map services
@@ -108,7 +108,7 @@ Assuming we want to publish both services with schema locks disabled, our config
 ``` json
 {
     "agsUrl": "https://myagsserver.com:6443/arcgis/admin",
-    "tokenUrl": "https://myagsserver.com:6443/arcgis/admin/generateToken",
+    "tokenUrl": "https://myagsserver.com:6443/arcgis/tokens/generateToken",
     "mapServices": {
         "json": {
             "properties": {
@@ -145,7 +145,7 @@ Our config file should look like:
 ``` json
 {
     "agsUrl": "https://prodagsserver.com:6443/arcgis/admin",
-    "tokenUrl": "https://prodagsserver.com:6443/arcgis/admin/generateToken",
+    "tokenUrl": "https://prodagsserver.com:6443/arcgis/tokens/generateToken",
     "mapServices": {
         "json": {
             "maxIdleTime": 300,
