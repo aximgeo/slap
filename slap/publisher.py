@@ -58,7 +58,7 @@ class Publisher:
         arcpy.CreateGPSDDraft(
             result=result,
             out_sddraft=sddraft,
-            service_name=filename,
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             connection_file_path=self.connection_file_path,
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -87,7 +87,7 @@ class Publisher:
         arcpy.mapping.CreateMapSDDraft(
             map_document=mxd,
             out_sddraft=sddraft,
-            service_name=filename,
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             connection_file_path=self.connection_file_path,
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -102,7 +102,7 @@ class Publisher:
         arcpy.CreateImageSDDraft(
             raster_or_mosaic_layer=config_entry["input"],
             out_sddraft=sddraft,
-            service_name=filename,
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             connection_file_path=self.connection_file_path,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -185,7 +185,7 @@ class Publisher:
 
     def publish_service(self, service_type, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
-        config_entry['json']['serviceName'] = filename
+        config_entry['json']['serviceName'] = config_entry["serviceName"] if "serviceName" in config_entry else filename
 
         output_directory = self.get_output_directory(config_entry)
         if not os.path.exists(output_directory):
