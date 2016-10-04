@@ -194,6 +194,25 @@ class TestMapServicePublisher(TestCase):
             tags='Tags tags'
         )
 
+    def test_setting_service_initial_state(self):
+        mock_arcpy.UploadServiceDefinition_server = MagicMock()
+        config = json.loads('{"initialState": "STOPPED"}')
+        self.m.upload_service_definition("test", config)
+        mock_arcpy.UploadServiceDefinition_server.assert_called_once_with(
+            in_sd_file='test',
+            in_server=self.m.connection_file_path,
+            in_startupType='STOPPED'
+        )
+
+    def test_setting_service_initial_state_defaults_to_started(self):
+        mock_arcpy.UploadServiceDefinition_server = MagicMock()
+        self.m.upload_service_definition("test", [])
+        mock_arcpy.UploadServiceDefinition_server.assert_called_once_with(
+            in_sd_file='test',
+            in_server=self.m.connection_file_path,
+            in_startupType='STARTED'
+        )
+
     def test_raise_exception_when_input_not_found(self):
         with self.assertRaises(ValueError):
             self.m.publish_input('bar')

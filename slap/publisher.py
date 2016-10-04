@@ -202,12 +202,22 @@ class Publisher:
             self.message("Error publishing " + config_entry['input'] + analysis)
 
     def publish_draft(self, sddraft, sd, config):
+        self.stage_service_definition(sddraft, sd)
+        self.delete_service(config)
+        self.upload_service_definition(sd, config)
+        self.update_service(config)
+
+    def stage_service_definition(self, sddraft, sd):
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
-        self.delete_service(config)
+
+    def upload_service_definition(self, sd, config):
         self.message("Uploading service definition...")
-        arcpy.UploadServiceDefinition_server(sd, self.connection_file_path)
-        self.update_service(config)
+        arcpy.UploadServiceDefinition_server(
+            in_sd_file=sd,
+            in_server=self.connection_file_path,
+            in_startupType=config["initialState"] if "initialState" in config else "STARTED"
+        )
 
     def delete_service(self, config):
         service_exists = self.api.service_exists(
