@@ -56,6 +56,7 @@ An example configuration file might look like below.  *Note:* The comments would
             {
                 "input": "mxd/my_map_document.mxd", // Required
                 "output": "output/", // Optional, defaults to "output/"
+                "serviceName": "MyMapDocument", // Optional, defaults to MXD filename, "my_map_document" here
                 "serverType": "ARCGIS_SERVER", // Optional, defaults to "ARCGIS_SERVER"
                 "copyDataToServer": "False", // Optional, defaults to False
                 "folderName": "AutomationTests", // Optional, defaults to ""
