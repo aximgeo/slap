@@ -60,6 +60,7 @@ An example configuration file might look like below.  *Note:* The comments would
                 "copyDataToServer": "False", // Optional, defaults to False
                 "folderName": "AutomationTests", // Optional, defaults to ""
                 "summary": "Test map service published automagically", // Optional, defaults to ""
+                "initialState": "STOPPED", // Optional, defaults to "STARTED"
                 "workspaces": [ // Optional; defaults to *NOT* replace workspace paths
                     {
                         "old": {
