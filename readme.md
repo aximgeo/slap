@@ -56,6 +56,7 @@ An example configuration file might look like below.  *Note:* The comments would
             {
                 "input": "mxd/my_map_document.mxd", // Required
                 "output": "output/", // Optional, defaults to "output/"
+                "serviceName": "MyMapDocument", // Optional, defaults to MXD filename, "my_map_document" here
                 "serverType": "ARCGIS_SERVER", // Optional, defaults to "ARCGIS_SERVER"
                 "copyDataToServer": "False", // Optional, defaults to False
                 "folderName": "AutomationTests", // Optional, defaults to ""
@@ -65,11 +66,11 @@ An example configuration file might look like below.  *Note:* The comments would
                     {
                         "old": {
                             "path": "c:/path/to/integration/connectionFile.sde", // Required if workspaces is defined
-                            "type": "SDE_WORKSPACE" // Optional, defaults to SDE_WORKSPACE
+                            "type": "SDE_WORKSPACE" // Optional, defaults to SDE_WORKSPACE, for file geodatabase, use "FILEGDB_WORKSPACE"
                         },
                         "new": {
                             "path": "c:/path/to/production/connectionFile.sde", // Required if workspaces is defined
-                            "type": "SDE_WORKSPACE" // Optional, defaults to SDE_WORKSPACE
+                            "type": "SDE_WORKSPACE" // Optional, defaults to SDE_WORKSPACE, for file geodatabase, use "FILEGDB_WORKSPACE"
                           }
                     }
                 ],
@@ -193,9 +194,11 @@ the script will replace each `old` workspace path (i.e., path to a connection fi
 
 A few notes and caveats:
 
-- Ideally, database connections will be via SDE, and use a connection file.  Sourcing from a File Geodatabase is also supported; note that the FGDB will likely not be checked into version control.
+- Ideally, database connections will be via SDE, and use a connection file.  Sourcing from a File Geodatabase is also supported; 
+  note that the FGDB will likely not be checked into version control. For file geodatabase, `"type": "FILEGDB_WORKSPACE"`
 - If the FGDB sits on a share, consider using a UNC path rather than a drive letter, unless you are **sure** that the drive will always be mapped.
 - For network shares (i.e., sourcing a FGDB), you *must* use JSON-escaped backslashes in the config (i.e., `\\`).  The `inputs` parameter should *not* add escapes (i.e., use `\`).
+- It is possible to source from both an enterprise geodatabase(s) and file geodatabases(s) in the same MXD.
 
 ## TODO
 - Add support for Image Services, GP Services, etc.
