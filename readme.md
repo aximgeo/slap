@@ -192,6 +192,10 @@ To republish all the services using the production config file, we can do
 slap --config prod.json --username <myProductionUsername> --password <myProductionPassword> --all
 ```
 
+## Integrating SLAP into another process
+
+You can also [import SLAP](docs/importing.md) into a module and call it.
+
 ## Replacing workspace paths
 To use separate credentials/data sources for different environments, you can supply an array of find/replace values under the `workspaces` key.  If this key is found,
 the script will replace each `old` workspace path (i.e., path to a connection file) with the `new` value.
