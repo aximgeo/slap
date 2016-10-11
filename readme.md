@@ -82,8 +82,13 @@ An example configuration file might look like below.  *Note:* The comments would
 ```
 
 ## Specifying service parameters
-Service properties can be specified at multiple levels in the file; the most specific property will be used (i.e., service level, then type level, then global).  This allows for a minimum of
-configuration, while also allowing for service parameters to vary.  Note that the `json` parameter is identical what's specified in ESRI's [REST API](http://resources.arcgis.com/en/help/arcgis-rest-api/index.html#/Create_Service/02r3000001tr000000/)
+Service properties can be specified at multiple levels in the file; the most 
+specific property will be used (i.e., service level, then type level, then 
+global).  This allows for a minimum of configuration, while also allowing 
+for service parameters to vary.  Note that the `json` parameter is identical 
+what's specified in ESRI's [REST API](http://resources.arcgis.com/en/help/arcgis-rest-api/index.html#/Create_Service/02r3000001tr000000/). 
+An example of the utilizing the `json` parameter is [enabling feature access](docs/publishfeatureservice.md) 
+on a service.
 
 ## Example setup
 
@@ -187,6 +192,10 @@ To republish all the services using the production config file, we can do
 ```
 slap --config prod.json --username <myProductionUsername> --password <myProductionPassword> --all
 ```
+
+## Integrating SLAP into another process
+
+You can also [import SLAP](docs/importing.md) into a module and call it.
 
 ## Replacing workspace paths
 To use separate credentials/data sources for different environments, you can supply an array of find/replace values under the `workspaces` key.  If this key is found,
