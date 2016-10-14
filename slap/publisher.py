@@ -4,18 +4,21 @@ from .api import Api
 from .config import ConfigParser
 import arcpy
 
-arcpy.env.overwriteOutput = True
-
 
 class Publisher:
 
-    config = None
-    connection_file_path = None
     config_parser = ConfigParser()
-    api = None
 
     def __init__(self):
-        pass
+
+        arcpy.env.overwriteOutput = True
+        
+        connection_file_name = 'temp.ags'
+        self.output_path = self.config_parser.get_full_path('./')
+        self.connection_file_path = os.path.join(self.output_path, connection_file_name)
+
+        self.config = None
+        self.api = None
 
     def load_config(self, path_to_config):
         self.config = self.config_parser.load_config(path_to_config)
@@ -26,12 +29,12 @@ class Publisher:
         self.connection_file_path = os.path.join(output_path, connection_file_name)
         arcpy.mapping.CreateGISServerConnectionFile(
             connection_type='PUBLISH_GIS_SERVICES',
-            out_folder_path=output_path,
+            out_folder_path=self.output_path,
             out_name=connection_file_name,
             server_url=self.config['agsUrl'],
             server_type='ARCGIS_SERVER',
             use_arcgis_desktop_staging_folder=False,
-            staging_folder_path=output_path,
+            staging_folder_path=self.output_path,
             username=username,
             password=password,
             save_username_password=True
