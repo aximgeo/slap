@@ -1,10 +1,15 @@
 import os
 import unittest
-from unittest import TestCase
+
+from mock import MagicMock, patch
+
+mock_arcpy = MagicMock()
+patch.dict("sys.modules", arcpy=mock_arcpy).start()
+
 from slap.config import ConfigParser
 
 
-class TestConfigParser(TestCase):
+class TestConfigParser(unittest.TestCase):
     m = None
 
     def setUp(self):

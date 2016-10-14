@@ -1,11 +1,14 @@
 import unittest
-from unittest import TestCase
-from mock import patch
+
+from mock import MagicMock, patch
+mock_arcpy = MagicMock()
+patch.dict("sys.modules", arcpy=mock_arcpy).start()
+
 from slap import git
 
 
 @patch('slap.git.get_changed_files')
-class TestGitFileManager(TestCase):
+class TestGitFileManager(unittest.TestCase):
 
     def test_can_filter_mxds(self, get_changed_files_mock):
         get_changed_files_mock.return_value = ['foo.mxd', 'bar.txt', 'baz.MXD']
@@ -17,7 +20,7 @@ class TestGitFileManager(TestCase):
 
 
 @patch('slap.git.check_output')
-class TestGitArguments(TestCase):
+class TestGitArguments(unittest.TestCase):
 
     def test_default_revision(self, mock_check_output):
         expected = ['git',  'diff', '--name-only',  'HEAD', 'HEAD~1']

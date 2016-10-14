@@ -1,7 +1,7 @@
 import os
 import json
 import unittest
-from unittest import TestCase
+
 from mock import MagicMock, patch
 mock_arcpy = MagicMock()
 patch.dict("sys.modules", arcpy=mock_arcpy).start()
@@ -10,7 +10,7 @@ from slap.publisher import only_one
 from slap.publisher import Publisher
 
 
-class TestMapServicePublisher(TestCase):
+class TestMapServicePublisher(unittest.TestCase):
 
     def setUp(self):
         self.m = Publisher()

@@ -1,10 +1,12 @@
 import unittest
-from unittest import TestCase
+
+from mock import PropertyMock, MagicMock, patch
+mock_arcpy = MagicMock()
+patch.dict("sys.modules", arcpy=mock_arcpy).start()
+
 from slap.api import Api
-from mock import PropertyMock, patch
 
-
-class TestApi(TestCase):
+class TestApi(unittest.TestCase):
     api = None
 
     def create_api(self):
