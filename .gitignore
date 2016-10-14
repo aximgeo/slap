@@ -3,3 +3,4 @@
 build/
 dist/
 slap.egg-info/
+venv/

@@ -21,7 +21,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.5.1',
+    version='0.6.0-dev0',
 
     description='A set of scripts for publishing ESRI services',
     long_description=long_description,
@@ -80,7 +80,7 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         'dev': ['check-manifest'],
-        'test': ['unittest'],
+        'test': ['mock'],
     },
 
     # If there are data files included in your packages that need to be
@@ -100,7 +100,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'slap=slap.publisher:main',
+            'slap=slap.cli:main',
         ],
     },
 )

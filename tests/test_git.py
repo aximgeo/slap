@@ -1,6 +1,6 @@
 import unittest
 from unittest import TestCase
-from mock import MagicMock, patch
+from mock import patch
 from slap import git
 
 
@@ -21,7 +21,7 @@ class TestGitArguments(TestCase):
 
     def test_default_revision(self, mock_check_output):
         expected = ['git',  'diff', '--name-only',  'HEAD', 'HEAD~1']
-        git.get_changed_files()
+        git.get_changed_files('HEAD~1')
         mock_check_output.assert_called_once_with(expected)
 
     def test_specified_revision(self, mock_check_output):
