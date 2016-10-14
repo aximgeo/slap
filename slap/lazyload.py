@@ -30,4 +30,7 @@ class LazyLoad(object):
         return getattr(self.real_modules[self.module_name], name)
 
 def lazyload(module_name):
+    if module_name in sys.modules:
+        logging.warning("module %s is already loaded; not lazy loading", module_name)
+        return
     sys.modules[module_name] = LazyLoad(module_name)

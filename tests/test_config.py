@@ -1,4 +1,5 @@
 import os
+import unittest
 from unittest import TestCase
 from slap.config import ConfigParser
 
@@ -259,3 +260,7 @@ class TestConfigParser(TestCase):
             }
         }
         self.assertEqual(self.m.merge_json(default_json_string, config_json), expected)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -1,5 +1,5 @@
 
-from . import lazyload
+from .lazyload import lazyload
 lazyload("arcpy")
 
 from . import api

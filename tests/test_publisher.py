@@ -11,7 +11,6 @@ from slap.publisher import Publisher
 
 
 class TestMapServicePublisher(TestCase):
-    m = None
 
     def setUp(self):
         self.m = Publisher()
@@ -244,5 +243,4 @@ class TestMapServicePublisher(TestCase):
             self.m._get_method_by_type('foo')
 
 if __name__ == '__main__':
-
     unittest.main()
