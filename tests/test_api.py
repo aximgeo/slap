@@ -1,8 +1,8 @@
 import unittest
 
-from mock import PropertyMock, MagicMock, patch
-mock_arcpy = MagicMock()
-patch.dict("sys.modules", arcpy=mock_arcpy).start()
+from mock import PropertyMock, patch
+
+import mock_arcpy
 
 from slap.api import Api
 

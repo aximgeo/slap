@@ -1,10 +1,7 @@
 import os
 import unittest
 
-from mock import MagicMock, patch
-
-mock_arcpy = MagicMock()
-patch.dict("sys.modules", arcpy=mock_arcpy).start()
+import mock_arcpy
 
 from slap.config import ConfigParser
 

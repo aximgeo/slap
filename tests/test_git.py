@@ -1,8 +1,8 @@
 import unittest
 
-from mock import MagicMock, patch
-mock_arcpy = MagicMock()
-patch.dict("sys.modules", arcpy=mock_arcpy).start()
+from mock import patch
+
+import mock_arcpy
 
 from slap import git
 

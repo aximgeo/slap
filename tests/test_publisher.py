@@ -2,9 +2,9 @@ import os
 import json
 import unittest
 
-from mock import MagicMock, patch
-mock_arcpy = MagicMock()
-patch.dict("sys.modules", arcpy=mock_arcpy).start()
+from mock import MagicMock
+
+from mock_arcpy import mock_arcpy
 
 from slap.publisher import only_one
 from slap.publisher import Publisher
