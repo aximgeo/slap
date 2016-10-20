@@ -38,16 +38,6 @@ class Publisher:
         else:
             raise RuntimeError('Analysis contained errors: ', analysis_errors)
 
-    def get_sddraft_output(self, original_name, output_path):
-        return self._get_output_filename(original_name, output_path, 'sddraft')
-
-    def get_sd_output(self, original_name, output_path):
-        return self._get_output_filename(original_name, output_path, 'sd')
-
-    @staticmethod
-    def _get_output_filename(original_name, output_path, extension):
-        return os.path.join(output_path, '{}.' + extension).format(original_name)
-
     def publish_input(self, input_value):
         input_was_published = False
         for service_type in self.config_parser.service_types:
@@ -91,8 +81,8 @@ class Publisher:
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
 
-        sddraft = self.get_sddraft_output(filename, output_directory)
-        sd = self.get_sd_output(filename, output_directory)
+        sddraft = os.path.join(output_directory, '{}.' + "sddraft").format(filename)
+        sd = os.path.join(output_directory, '{}.' + "sd").format(filename)
         self.message("Publishing " + config_entry["input"])
         analysis = self._get_method_by_type(service_type)(config_entry, filename, sddraft)
         if self.analysis_successful(analysis['errors']):
