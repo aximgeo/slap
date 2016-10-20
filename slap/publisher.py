@@ -6,11 +6,6 @@ from slap.esri import ArcpyHelper
 
 class Publisher:
 
-    config = None
-    arcpy_helper = None
-    config_parser = None
-    api = None
-
     def __init__(self, username, password, config):
         self.config_parser = ConfigParser()
         self.config = self.config_parser.load_config(config) if isinstance(config, basestring) else config

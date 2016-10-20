@@ -5,19 +5,13 @@ import json
 
 class Api:
 
-    _ags_url = None
-    _token_url = None
-    _portal_url = None
-    _username = None
-    _password = None
-    _token = None
-
     def __init__(self, ags_url, token_url, portal_url, username, password):
         self._ags_url = ags_url
         self._token_url = token_url if token_url else ags_url + '/generateToken'
         self._portal_url = portal_url
         self._username = username
         self._password = password
+        self._token = None
 
     @property
     def token(self):
@@ -36,7 +30,8 @@ class Api:
     def get(self, url, params):
         return self._request(url, params, 'GET')
 
-    def _request(self, url, params, method):
+    @staticmethod
+    def _request(url, params, method):
         encoded_params = urllib.urlencode(json.loads(json.dumps(params)))
         request = urllib2.Request(url + '?' + encoded_params) if method == 'GET' else urllib2.Request(url, encoded_params)
         request.get_method = lambda: method

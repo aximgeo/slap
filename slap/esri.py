@@ -4,8 +4,6 @@ import os
 
 class ArcpyHelper:
 
-    _cwd = None
-
     def __init__(self, username, password, ags_admin_url, connection_file_name='temp.ags'):
 
         arcpy.env.overwriteOutput = True

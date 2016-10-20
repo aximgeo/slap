@@ -4,9 +4,11 @@ import json
 
 class ConfigParser:
 
-    config = None
     service_types = ['mapServices', 'gpServices', 'imageServices']
     required_keys = ['input', 'agsUrl']
+
+    def __init__(self):
+        pass
 
     def load_config(self, path_to_config):
         with open(path_to_config) as config_file:
