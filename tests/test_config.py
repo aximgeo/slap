@@ -181,7 +181,7 @@ class TestConfigParser(TestCase):
     def check_missing_key(self, config):
         self.m.config = config
         with self.assertRaises(KeyError):
-            self.m.check_required_keys()
+            self.m.check_required_keys(config)
 
     def test_raises_for_missing_server_url(self):
         self.check_missing_key( {

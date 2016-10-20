@@ -11,13 +11,15 @@ class ArcpyHelper:
         arcpy.env.overwriteOutput = True
 
         # ESRI's tools will change the cwd, so set it at the beginning
+        self._cwd = os.getcwd()
+
         self.connection_file_path = self.create_server_connection_file(
             username,
             password,
             ags_admin_url,
             connection_file_name
         )
-        self._cwd = os.getcwd()
+
 
     @property
     def cwd(self):

@@ -1,10 +1,12 @@
 import os
 import json
 from unittest import TestCase
-from slap.arcpy_helper import ArcpyHelper
 from mock import MagicMock, patch
+
+# We need to mock arcpy before we import the helper
 mock_arcpy = MagicMock()
 patch.dict("sys.modules", arcpy=mock_arcpy).start()
+from slap.arcpy_helper import ArcpyHelper
 
 
 class TestArcpyHelper(TestCase):

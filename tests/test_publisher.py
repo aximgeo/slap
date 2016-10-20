@@ -11,6 +11,7 @@ class TestMapServicePublisher(TestCase):
 
     def setUp(self):
         self.m = Publisher()
+        self.m.init_arcpy_helper('user', 'pwd', 'my/server')
         self.m.config = {
             'serverUrl': 'my/server',
             'mapServices': {

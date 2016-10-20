@@ -19,7 +19,7 @@ class Publisher:
     def load_config(self, path_to_config):
         self.config = self.config_parser.load_config(path_to_config)
 
-    def init_arcpy_helper(self, username, password, ags_admin_url, filename):
+    def init_arcpy_helper(self, username, password, ags_admin_url, filename='temp.ags'):
         self.arcpy_helper = ArcpyHelper(username, password, ags_admin_url, filename)
 
     def init_api(self, ags_url, token_url, portal_url, certs, username, password):
