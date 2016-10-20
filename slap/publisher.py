@@ -27,7 +27,6 @@ class Publisher:
             ags_url=ags_url,
             token_url=token_url,
             portal_url=portal_url,
-            certs=certs,
             username=username,
             password=password
         )
