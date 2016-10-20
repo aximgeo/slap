@@ -2,7 +2,7 @@ import os
 import argparse
 from slap.api import Api
 from slap.config import ConfigParser
-from slap.arcpy_helper import ArcpyHelper
+from slap.esri import ArcpyHelper
 from slap import git
 
 
