@@ -11,15 +11,13 @@ class Api:
     _username = None
     _password = None
     _token = None
-    _certs = None
 
-    def __init__(self, ags_url, token_url, portal_url, username, password, certs=True):
+    def __init__(self, ags_url, token_url, portal_url, username, password):
         self._ags_url = ags_url
         self._token_url = token_url if token_url else ags_url + '/generateToken'
         self._portal_url = portal_url
         self._username = username
         self._password = password
-        self._certs = certs  # Use system certs, unless we passed in a file path
 
     @property
     def token(self):
