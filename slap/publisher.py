@@ -10,23 +10,21 @@ class Publisher:
 
     config = None
     arcpy_helper = None
-    config_parser = ConfigParser()
+    config_parser = None
     api = None
 
-    def __init__(self):
-        pass
-
-    def load_config(self, path_to_config):
-        self.config = self.config_parser.load_config(path_to_config)
-
-    def init_arcpy_helper(self, username, password, ags_admin_url, filename='temp.ags'):
-        self.arcpy_helper = ArcpyHelper(username, password, ags_admin_url, filename)
-
-    def init_api(self, ags_url, token_url, portal_url, certs, username, password):
+    def __init__(self, username, password, config):
+        self.config_parser = ConfigParser()
+        self.config = self.config_parser.load_config(config) if isinstance(config, basestring) else config
+        self.arcpy_helper = ArcpyHelper(
+            username=username,
+            password=password,
+            ags_admin_url=self.config['agsUrl']
+        )
         self.api = Api(
-            ags_url=ags_url,
-            token_url=token_url,
-            portal_url=portal_url,
+            ags_url=self.config['agsUrl'],
+            token_url=self.config['tokenUrl'] if 'tokenUrl' in self.config else None,
+            portal_url=self.config['portalUrl'] if 'portalUrl' in self.config else None,
             username=username,
             password=password
         )
@@ -182,17 +180,8 @@ def get_args():
 
 def main():
     args = get_args()
-    publisher = Publisher()
-    print "Loading config..."
-    publisher.load_config(args.config)
-    publisher.init_arcpy_helper(args.username, args.password, publisher.config['agsUrl'])
-    publisher.init_api(
-        ags_url=publisher.config['agsUrl'],
-        token_url=publisher.config['tokenUrl'] if 'tokenUrl' in publisher.config else None,
-        portal_url=publisher.config['portalUrl'] if 'portalUrl' in publisher.config else None,
-        username=args.username,
-        password=args.password
-    )
+    publisher = Publisher(args.username, args.password, args.config)
+
     if args.inputs:
         for i in args.inputs:
             publisher.publish_input(i)
