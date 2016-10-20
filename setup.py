@@ -80,7 +80,7 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         'dev': ['check-manifest'],
-        'test': ['unittest'],
+        'test': ['mock'],
     },
 
     # If there are data files included in your packages that need to be
@@ -100,7 +100,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'slap=slap.publisher:main',
+            'slap=slap.cli:main'
         ],
     },
 )

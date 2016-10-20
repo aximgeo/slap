@@ -2,7 +2,6 @@ import json
 import unittest
 from unittest import TestCase
 from mock import MagicMock, patch
-from slap.publisher import only_one
 from slap.publisher import Publisher
 
 
@@ -21,14 +20,6 @@ class TestMapServicePublisher(TestCase):
             }
         }
         self.publisher = Publisher('user', 'pwd', config)
-
-    def test_only_one(self):
-        self.assertTrue(only_one([True, False, False]))
-        self.assertTrue(only_one([False, ['foo', 'bar'], False]))
-        self.assertTrue(only_one([True, [], False]))
-        self.assertTrue(only_one(["some sha", False, False]))
-        self.assertFalse(only_one([True, True]))
-        self.assertFalse(only_one([True, ['foo'], False]))
 
     def test_service_name_set_by_param(self):
         config = {
