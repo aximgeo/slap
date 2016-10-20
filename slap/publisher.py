@@ -2,16 +2,14 @@ import os
 import argparse
 from slap.api import Api
 from slap.config import ConfigParser
+from slap.arcpy_helper import ArcpyHelper
 from slap import git
-import arcpy
-
-arcpy.env.overwriteOutput = True
 
 
 class Publisher:
 
     config = None
-    connection_file_path = None
+    arcpy_helper = None
     config_parser = ConfigParser()
     api = None
 
@@ -21,22 +19,8 @@ class Publisher:
     def load_config(self, path_to_config):
         self.config = self.config_parser.load_config(path_to_config)
 
-    def create_server_connection_file(self, username, password):
-        connection_file_name = 'temp.ags'
-        output_path = self.config_parser.get_full_path('./')
-        self.connection_file_path = os.path.join(output_path, connection_file_name)
-        arcpy.mapping.CreateGISServerConnectionFile(
-            connection_type='PUBLISH_GIS_SERVICES',
-            out_folder_path=output_path,
-            out_name=connection_file_name,
-            server_url=self.config['agsUrl'],
-            server_type='ARCGIS_SERVER',
-            use_arcgis_desktop_staging_folder=False,
-            staging_folder_path=output_path,
-            username=username,
-            password=password,
-            save_username_password=True
-        )
+    def init_arcpy_helper(self, username, password, ags_admin_url, filename):
+        self.arcpy_helper = ArcpyHelper(username, password, ags_admin_url, filename)
 
     def init_api(self, ags_url, token_url, portal_url, certs, username, password):
         self.api = Api(
@@ -47,89 +31,6 @@ class Publisher:
             username=username,
             password=password
         )
-
-    def publish_gp(self, config_entry, filename, sddraft):
-        if "result" in config_entry:
-            result = self.config_parser.get_full_path(config_entry["result"])
-        else:
-            raise Exception("Result must be included in config for publishing a GP tool")
-
-        self.message("Generating service definition draft for gp tool...")
-        arcpy.CreateGPSDDraft(
-            result=result,
-            out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
-            server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
-            connection_file_path=self.connection_file_path,
-            copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
-            folder_name=config_entry["folderName"] if "folderName" in config_entry else None,
-            summary=config_entry["summary"] if "summary" in config_entry else None,
-            tags=config_entry["tags"] if "tags" in config_entry else None,
-            executionType=config_entry["executionType"] if "executionType" in config_entry else 'Asynchronous',
-            resultMapServer=False,
-            showMessages="INFO",
-            maximumRecords=5000,
-            minInstances=2,
-            maxInstances=3,
-            maxUsageTime=100,
-            maxWaitTime=10,
-            maxIdleTime=180
-        )
-        return arcpy.mapping.AnalyzeForSD(sddraft)
-
-    def publish_mxd(self, config_entry, filename, sddraft):
-        if "workspaces" in config_entry:
-            self.set_workspaces(config_entry["input"], config_entry["workspaces"])
-
-        mxd = arcpy.mapping.MapDocument(self.config_parser.get_full_path(config_entry["input"]))
-
-        self.message("Generating service definition draft for mxd...")
-        arcpy.mapping.CreateMapSDDraft(
-            map_document=mxd,
-            out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
-            server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
-            connection_file_path=self.connection_file_path,
-            copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
-            folder_name=config_entry["folderName"] if "folderName" in config_entry else None,
-            summary=config_entry["summary"] if "summary" in config_entry else None,
-            tags=config_entry["tags"] if "tags" in config_entry else None
-        )
-        return arcpy.mapping.AnalyzeForSD(sddraft)
-
-    def publish_image_service(self, config_entry, filename, sddraft):
-        self.message("Generating service definition draft for image service...")
-        arcpy.CreateImageSDDraft(
-            raster_or_mosaic_layer=config_entry["input"],
-            out_sddraft=sddraft,
-            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
-            connection_file_path=self.connection_file_path,
-            server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
-            copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
-            folder_name=config_entry["folderName"] if "folderName" in config_entry else None,
-            summary=config_entry["summary"] if "summary" in config_entry else None,
-            tags=config_entry["tags"] if "tags" in config_entry else None
-        )
-        return arcpy.mapping.AnalyzeForSD(sddraft)
-
-    def get_output_directory(self, config_entry):
-        return self.config_parser.get_full_path(config_entry["output"]) if "output" in config_entry else self.config_parser.get_full_path('output')
-
-    def set_workspaces(self, path_to_mxd, workspaces):
-        full_mxd_path = self.config_parser.get_full_path(path_to_mxd)
-        mxd = arcpy.mapping.MapDocument(full_mxd_path)
-        for workspace in workspaces:
-            self.message("Replacing workspace " + workspace["old"]["path"] + " => " + workspace["new"]["path"])
-            mxd.replaceWorkspaces(
-                old_workspace_path=workspace["old"]["path"],
-                old_workspace_type=workspace["old"]["type"] if "type" in workspace["old"] else "SDE_WORKSPACE",
-                new_workspace_path=workspace["new"]["path"],
-                new_workspace_type=workspace["new"]["type"] if "type" in workspace["new"] else "SDE_WORKSPACE",
-                validate=False
-            )
-        mxd.relativePaths = True
-        mxd.save()
-        del mxd
 
     @staticmethod
     def analysis_successful(analysis_errors):
@@ -172,11 +73,11 @@ class Publisher:
 
     def _get_method_by_type(self, type):
         if type == 'mapServices':
-            return self.publish_mxd
+            return self.arcpy_helper.publish_mxd
         if type == 'imageServices':
-            return self.publish_image_service
+            return self.arcpy_helper.publish_image_service
         if type == 'gpServices':
-            return self.publish_gp
+            return self.arcpy_helper.publish_gp
         raise ValueError('Invalid type: ' + type)
 
     def publish_services(self, type):
@@ -187,7 +88,7 @@ class Publisher:
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
         config_entry['json']['serviceName'] = self._get_service_name_from_config(config_entry)
 
-        output_directory = self.get_output_directory(config_entry)
+        output_directory = self.arcpy_helper.get_output_directory(config_entry)
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
 
@@ -211,22 +112,10 @@ class Publisher:
             return os.path.splitext(os.path.split(config_entry["input"])[1])[0]
 
     def publish_draft(self, sddraft, sd, config):
-        self.stage_service_definition(sddraft, sd)
+        self.arcpy_helper.stage_service_definition(sddraft, sd)
         self.delete_service(config)
-        self.upload_service_definition(sd, config)
+        self.arcpy_helper.upload_service_definition(sd, config)
         self.update_service(config)
-
-    def stage_service_definition(self, sddraft, sd):
-        self.message("Staging service definition...")
-        arcpy.StageService_server(sddraft, sd)
-
-    def upload_service_definition(self, sd, config):
-        self.message("Uploading service definition...")
-        arcpy.UploadServiceDefinition_server(
-            in_sd_file=sd,
-            in_server=self.connection_file_path,
-            in_startupType=config["initialState"] if "initialState" in config else "STARTED"
-        )
 
     def delete_service(self, config):
         service_exists = self.api.service_exists(
@@ -253,7 +142,8 @@ class Publisher:
                 params=json
             )
 
-    def message(self, message):
+    @staticmethod
+    def message(message):
         print message
 
 
@@ -306,7 +196,7 @@ def main():
     publisher = Publisher()
     print "Loading config..."
     publisher.load_config(args.config)
-    publisher.create_server_connection_file(args.username, args.password)
+    publisher.init_arcpy_helper(args.username, args.password, publisher.config['agsUrl'])
     publisher.init_api(
         ags_url=publisher.config['agsUrl'],
         token_url=publisher.config['tokenUrl'] if 'tokenUrl' in publisher.config else None,

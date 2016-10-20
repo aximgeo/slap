@@ -1,4 +1,3 @@
-import os
 from unittest import TestCase
 from slap.config import ConfigParser
 
@@ -11,9 +10,6 @@ class TestConfigParser(TestCase):
         self.m.map_service_default_json = {}
         self.m.image_service_default_json = {}
         self.m.gp_service_default_json = {}
-
-    def test_get_full_path(self):
-        self.assertEqual(os.path.join(os.getcwd(), 'foo'), self.m.get_full_path('foo'))
 
     def test_empty_config(self):
         self.assertEqual(self.m.parse_config({}), {
