@@ -83,6 +83,7 @@ class TestMapServicePublisher(TestCase):
             'serverType': 'MY_SERVER_TYPE',
             'copyDataToServer': True,
             'folderName': 'myFolder',
+            'serviceName': 'myNamedService',
             'summary': 'My Summary',
             'executionType': 'Synchronous',
             'tags': 'Tags tags'
@@ -90,7 +91,7 @@ class TestMapServicePublisher(TestCase):
         mock_arcpy.CreateGPSDDraft.assert_called_once_with(
             result=os.path.join(os.getcwd(), 'my/result'),
             out_sddraft='myFile.sddraft',
-            service_name='myFile',
+            service_name='myNamedService',
             server_type='MY_SERVER_TYPE',
             connection_file_path=os.path.join(self.m.config_parser.cwd, 'some/path'),
             copy_data_to_server=True,
@@ -137,13 +138,14 @@ class TestMapServicePublisher(TestCase):
             'serverType': 'MY_SERVER_TYPE',
             'copyDataToServer': True,
             'folderName': 'myFolder',
+            'serviceName': 'myNamedService',
             'summary': 'My Summary',
             'tags': 'Tags tags'
         }, 'myFile', 'myFile.sddraft')
         mock_arcpy.mapping.CreateMapSDDraft.assert_called_once_with(
             map_document={'mxd': 'myMap'},
             out_sddraft='myFile.sddraft',
-            service_name='myFile',
+            service_name='myNamedService',
             server_type='MY_SERVER_TYPE',
             connection_file_path=os.path.join(self.m.config_parser.cwd, 'some/path'),
             copy_data_to_server=True,
@@ -180,13 +182,14 @@ class TestMapServicePublisher(TestCase):
             'serverType': 'MY_SERVER_TYPE',
             'copyDataToServer': True,
             'folderName': 'myFolder',
+            'serviceName': 'myNamedService',
             'summary': 'My Summary',
             'tags': 'Tags tags'
         }, 'myFile', 'myFile.sddraft')
         mock_arcpy.CreateImageSDDraft.assert_called_once_with(
             raster_or_mosaic_layer='//share/dir/fgdb.gdb/myFile',
             out_sddraft='myFile.sddraft',
-            service_name='myFile',
+            service_name='myNamedService',
             server_type='MY_SERVER_TYPE',
             connection_file_path=os.path.join(self.m.config_parser.cwd, 'some/path'),
             copy_data_to_server=True,
