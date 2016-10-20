@@ -185,7 +185,7 @@ class Publisher:
 
     def publish_service(self, service_type, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
-        config_entry['json']['serviceName'] = config_entry["serviceName"] if "serviceName" in config_entry else filename
+        config_entry['json']['serviceName'] = self._get_service_name_from_config(config_entry)
 
         output_directory = self.get_output_directory(config_entry)
         if not os.path.exists(output_directory):
@@ -200,6 +200,15 @@ class Publisher:
             self.message(config_entry["input"] + " published successfully")
         else:
             self.message("Error publishing " + config_entry['input'] + analysis)
+
+    @staticmethod
+    def _get_service_name_from_config(config_entry):
+        if "serviceName" in config_entry:
+            return config_entry['serviceName']
+        elif 'json' in config_entry and 'serviceName' in config_entry['json']:
+            return config_entry['json']['serviceName']
+        else:
+            return os.path.splitext(os.path.split(config_entry["input"])[1])[0]
 
     def publish_draft(self, sddraft, sd, config):
         self.stage_service_definition(sddraft, sd)

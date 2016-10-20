@@ -217,6 +217,31 @@ class TestMapServicePublisher(TestCase):
             in_startupType='STARTED'
         )
 
+    def test_service_name_set_by_param(self):
+        config = {
+            'input': 'my/filename.mxd',
+            'serviceName': 'foo',
+            'json': {
+                'serviceName': 'bar'
+            }
+        }
+        self.assertEqual(self.m._get_service_name_from_config(config), 'foo')
+
+    def test_service_name_set_by_json(self):
+        config = {
+            'input': 'my/filename.mxd',
+            'json': {
+                'serviceName': 'baz'
+            }
+        }
+        self.assertEqual(self.m._get_service_name_from_config(config), 'baz')
+
+    def test_service_name_set_by_filename(self):
+        config = {
+            'input': 'my/filename.mxd',
+        }
+        self.assertEqual(self.m._get_service_name_from_config(config), 'filename')
+
     def test_raise_exception_when_input_not_found(self):
         with self.assertRaises(ValueError):
             self.m.publish_input('bar')
