@@ -56,19 +56,21 @@ An example configuration file might look like below.  *Note:* The comments would
             {
                 "input": "mxd/my_map_document.mxd", // Required
                 "output": "output/", // Optional, defaults to "output/"
+                "serviceName": "MyMapDocument", // Optional, defaults to MXD filename, "my_map_document" here
                 "serverType": "ARCGIS_SERVER", // Optional, defaults to "ARCGIS_SERVER"
                 "copyDataToServer": "False", // Optional, defaults to False
                 "folderName": "AutomationTests", // Optional, defaults to ""
                 "summary": "Test map service published automagically", // Optional, defaults to ""
+                "initialState": "STOPPED", // Optional, defaults to "STARTED"
                 "workspaces": [ // Optional; defaults to *NOT* replace workspace paths
                     {
                         "old": {
                             "path": "c:/path/to/integration/connectionFile.sde", // Required if workspaces is defined
-                            "type": "SDE_WORKSPACE" // Optional, defaults to SDE_WORKSPACE
+                            "type": "SDE_WORKSPACE" // Optional, defaults to SDE_WORKSPACE, for file geodatabase, use "FILEGDB_WORKSPACE"
                         },
                         "new": {
                             "path": "c:/path/to/production/connectionFile.sde", // Required if workspaces is defined
-                            "type": "SDE_WORKSPACE" // Optional, defaults to SDE_WORKSPACE
+                            "type": "SDE_WORKSPACE" // Optional, defaults to SDE_WORKSPACE, for file geodatabase, use "FILEGDB_WORKSPACE"
                           }
                     }
                 ],
@@ -80,8 +82,13 @@ An example configuration file might look like below.  *Note:* The comments would
 ```
 
 ## Specifying service parameters
-Service properties can be specified at multiple levels in the file; the most specific property will be used (i.e., service level, then type level, then global).  This allows for a minimum of
-configuration, while also allowing for service parameters to vary.  Note that the `json` parameter is identical what's specified in ESRI's [REST API](http://resources.arcgis.com/en/help/arcgis-rest-api/index.html#/Create_Service/02r3000001tr000000/)
+Service properties can be specified at multiple levels in the file; the most 
+specific property will be used (i.e., service level, then type level, then 
+global).  This allows for a minimum of configuration, while also allowing 
+for service parameters to vary.  Note that the `json` parameter is identical 
+what's specified in ESRI's [REST API](http://resources.arcgis.com/en/help/arcgis-rest-api/index.html#/Create_Service/02r3000001tr000000/). 
+An example of the utilizing the `json` parameter is [enabling feature access](docs/publishfeatureservice.md) 
+on a service.
 
 ## Example setup
 
@@ -186,15 +193,21 @@ To republish all the services using the production config file, we can do
 slap --config prod.json --username <myProductionUsername> --password <myProductionPassword> --all
 ```
 
+## Integrating SLAP into another process
+
+You can also [import SLAP](docs/importing.md) into a module and call it.
+
 ## Replacing workspace paths
 To use separate credentials/data sources for different environments, you can supply an array of find/replace values under the `workspaces` key.  If this key is found,
 the script will replace each `old` workspace path (i.e., path to a connection file) with the `new` value.
 
 A few notes and caveats:
 
-- Ideally, database connections will be via SDE, and use a connection file.  Sourcing from a File Geodatabase is also supported; note that the FGDB will likely not be checked into version control.
+- Ideally, database connections will be via SDE, and use a connection file.  Sourcing from a File Geodatabase is also supported; 
+  note that the FGDB will likely not be checked into version control. For file geodatabase, `"type": "FILEGDB_WORKSPACE"`
 - If the FGDB sits on a share, consider using a UNC path rather than a drive letter, unless you are **sure** that the drive will always be mapped.
 - For network shares (i.e., sourcing a FGDB), you *must* use JSON-escaped backslashes in the config (i.e., `\\`).  The `inputs` parameter should *not* add escapes (i.e., use `\`).
+- It is possible to source from both an enterprise geodatabase(s) and file geodatabases(s) in the same MXD.
 
 ## TODO
 - Add support for Image Services, GP Services, etc.

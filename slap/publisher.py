@@ -58,7 +58,7 @@ class Publisher:
         arcpy.CreateGPSDDraft(
             result=result,
             out_sddraft=sddraft,
-            service_name=filename,
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             connection_file_path=self.connection_file_path,
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -87,7 +87,7 @@ class Publisher:
         arcpy.mapping.CreateMapSDDraft(
             map_document=mxd,
             out_sddraft=sddraft,
-            service_name=filename,
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             connection_file_path=self.connection_file_path,
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -102,7 +102,7 @@ class Publisher:
         arcpy.CreateImageSDDraft(
             raster_or_mosaic_layer=config_entry["input"],
             out_sddraft=sddraft,
-            service_name=filename,
+            service_name=config_entry["serviceName"] if "serviceName" in config_entry else filename,
             connection_file_path=self.connection_file_path,
             server_type=config_entry["serverType"] if "serverType" in config_entry else 'ARCGIS_SERVER',
             copy_data_to_server=config_entry["copyDataToServer"] if "copyDataToServer" in config_entry else False,
@@ -185,7 +185,7 @@ class Publisher:
 
     def publish_service(self, service_type, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
-        config_entry['json']['serviceName'] = filename
+        config_entry['json']['serviceName'] = config_entry["serviceName"] if "serviceName" in config_entry else filename
 
         output_directory = self.get_output_directory(config_entry)
         if not os.path.exists(output_directory):
@@ -202,12 +202,22 @@ class Publisher:
             self.message("Error publishing " + config_entry['input'] + analysis)
 
     def publish_draft(self, sddraft, sd, config):
+        self.stage_service_definition(sddraft, sd)
+        self.delete_service(config)
+        self.upload_service_definition(sd, config)
+        self.update_service(config)
+
+    def stage_service_definition(self, sddraft, sd):
         self.message("Staging service definition...")
         arcpy.StageService_server(sddraft, sd)
-        self.delete_service(config)
+
+    def upload_service_definition(self, sd, config):
         self.message("Uploading service definition...")
-        arcpy.UploadServiceDefinition_server(sd, self.connection_file_path)
-        self.update_service(config)
+        arcpy.UploadServiceDefinition_server(
+            in_sd_file=sd,
+            in_server=self.connection_file_path,
+            in_startupType=config["initialState"] if "initialState" in config else "STARTED"
+        )
 
     def delete_service(self, config):
         service_exists = self.api.service_exists(
@@ -261,8 +271,7 @@ def get_args():
                         action="store_true",
                         help="publish all entries in config")
     parser.add_argument("-g", "--git",
-                        action="store_true",
-                        help="publish all mxd files that have changed since the last commit")
+                        help="publish all mxd files that have changed between HEAD and this commit (ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4")
     args = parser.parse_args()
 
     if not args.username:
@@ -302,7 +311,7 @@ def main():
             publisher.publish_input(i)
     elif args.git:
         print "Getting changes from git..."
-        changed_files = git.get_changed_mxds()
+        changed_files = git.get_changed_mxds(args.git)
         print changed_files
         for i in changed_files:
             publisher.publish_input(i)
