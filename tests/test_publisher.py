@@ -6,7 +6,6 @@ from slap.publisher import Publisher
 
 
 class TestMapServicePublisher(TestCase):
-    publisher = None
 
     def setUp(self):
         config = {

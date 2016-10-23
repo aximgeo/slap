@@ -9,24 +9,24 @@ from mock import MagicMock, patch
 class TestArcpyHelper(TestCase):
 
     def setUp(self):
-        self.m = ArcpyHelper('user', 'pwd', 'my/ags')
+        self.arcpy_helper = ArcpyHelper('user', 'pwd', 'my/ags')
 
     def test_get_full_path(self, mock_arcpy):
-        self.assertEqual(os.path.join(os.getcwd(), 'foo'), self.m.get_full_path('foo'))
+        self.assertEqual(os.path.join(os.getcwd(), 'foo'), self.arcpy_helper.get_full_path('foo'))
 
     def test_set_workspaces(self, mock_arcpy):
         mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
         mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
-        self.m.set_workspaces = MagicMock()
-        self.m.publish_mxd({'input': 'someFile',
+        self.arcpy_helper.set_workspaces = MagicMock()
+        self.arcpy_helper.publish_mxd({'input': 'someFile',
                             'serverUrl': 'some/path',
                             'workspaces': {'old': 'foo', 'new': 'bar'}
-                            }, 'file', 'file.sddraft')
-        self.m.set_workspaces.assert_called_once_with('someFile', {'new': 'bar', 'old': 'foo'})
+                                       }, 'file', 'file.sddraft')
+        self.arcpy_helper.set_workspaces.assert_called_once_with('someFile', {'new': 'bar', 'old': 'foo'})
 
     def test_publish_gp_with_defaults(self, mock_arcpy):
-        self.m.connection_file_path = os.path.join(self.m.cwd, 'some/path')
-        self.m.publish_gp({
+        self.arcpy_helper.connection_file_path = os.path.join(self.arcpy_helper.cwd, 'some/path')
+        self.arcpy_helper.publish_gp({
             'input': 'gp/myFile.tbx',
             'result': 'my/result',
             'serverUrl': 'some/path'
@@ -36,7 +36,7 @@ class TestArcpyHelper(TestCase):
             out_sddraft='file.sddraft',
             service_name='file',
             server_type='ARCGIS_SERVER',
-            connection_file_path=os.path.join(self.m.cwd, 'some/path'),
+            connection_file_path=os.path.join(self.arcpy_helper.cwd, 'some/path'),
             copy_data_to_server=False,
             folder_name=None,
             summary=None,
@@ -54,8 +54,8 @@ class TestArcpyHelper(TestCase):
 
     def test_publish_gp_with_config_values(self, mock_arcpy):
         mock_arcpy.CreateGPSDDraft = MagicMock()
-        self.m.connection_file_path = os.path.join(self.m.cwd, 'some/path')
-        self.m.publish_gp({
+        self.arcpy_helper.connection_file_path = os.path.join(self.arcpy_helper.cwd, 'some/path')
+        self.arcpy_helper.publish_gp({
             'input': 'gp/myFile.tbx',
             'result': 'my/result',
             'serverUrl': 'some/path',
@@ -72,7 +72,7 @@ class TestArcpyHelper(TestCase):
             out_sddraft='myFile.sddraft',
             service_name='myNamedService',
             server_type='MY_SERVER_TYPE',
-            connection_file_path=os.path.join(self.m.cwd, 'some/path'),
+            connection_file_path=os.path.join(self.arcpy_helper.cwd, 'some/path'),
             copy_data_to_server=True,
             folder_name='myFolder',
             summary='My Summary',
@@ -91,8 +91,8 @@ class TestArcpyHelper(TestCase):
     def test_publish_mxd_with_defaults(self, mock_arcpy):
         mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
         mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
-        self.m.connection_file_path = os.path.join(self.m.cwd, 'some/path')
-        self.m.publish_mxd({
+        self.arcpy_helper.connection_file_path = os.path.join(self.arcpy_helper.cwd, 'some/path')
+        self.arcpy_helper.publish_mxd({
             'input': 'myFile.mxd',
             'serverUrl': 'some/path'
         }, 'file', 'file.sddraft')
@@ -101,7 +101,7 @@ class TestArcpyHelper(TestCase):
             out_sddraft='file.sddraft',
             service_name='file',
             server_type='ARCGIS_SERVER',
-            connection_file_path=os.path.join(self.m.cwd, 'some/path'),
+            connection_file_path=os.path.join(self.arcpy_helper.cwd, 'some/path'),
             copy_data_to_server=False,
             folder_name=None,
             summary=None,
@@ -111,8 +111,8 @@ class TestArcpyHelper(TestCase):
     def test_publish_mxd_with_config_values(self, mock_arcpy):
         mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
         mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
-        self.m.connection_file_path = os.path.join(self.m.cwd, 'some/path')
-        self.m.publish_mxd({
+        self.arcpy_helper.connection_file_path = os.path.join(self.arcpy_helper.cwd, 'some/path')
+        self.arcpy_helper.publish_mxd({
             'input': 'myFile.mxd',
             'serverType': 'MY_SERVER_TYPE',
             'copyDataToServer': True,
@@ -126,7 +126,7 @@ class TestArcpyHelper(TestCase):
             out_sddraft='myFile.sddraft',
             service_name='myNamedService',
             server_type='MY_SERVER_TYPE',
-            connection_file_path=os.path.join(self.m.cwd, 'some/path'),
+            connection_file_path=os.path.join(self.arcpy_helper.cwd, 'some/path'),
             copy_data_to_server=True,
             folder_name='myFolder',
             summary='My Summary',
@@ -135,8 +135,8 @@ class TestArcpyHelper(TestCase):
 
     def test_publish_image_service_with_defaults(self, mock_arcpy):
         mock_arcpy.CreateImageSDDraft = MagicMock()
-        self.m.connection_file_path = os.path.join(self.m.cwd, 'some/path')
-        self.m.publish_image_service({
+        self.arcpy_helper.connection_file_path = os.path.join(self.arcpy_helper.cwd, 'some/path')
+        self.arcpy_helper.publish_image_service({
             'input': '//share/dir/fgdb.gdb/myFile',
             'serverUrl': 'some/path'
         }, 'myFile', 'myFile.sddraft')
@@ -145,7 +145,7 @@ class TestArcpyHelper(TestCase):
             out_sddraft='myFile.sddraft',
             service_name='myFile',
             server_type='ARCGIS_SERVER',
-            connection_file_path=os.path.join(self.m.cwd, 'some/path'),
+            connection_file_path=os.path.join(self.arcpy_helper.cwd, 'some/path'),
             copy_data_to_server=False,
             folder_name=None,
             summary=None,
@@ -154,8 +154,8 @@ class TestArcpyHelper(TestCase):
 
     def test_publish_image_service_with_config_values(self, mock_arcpy):
         mock_arcpy.CreateImageSDDraft = MagicMock()
-        self.m.connection_file_path = os.path.join(self.m.cwd, 'some/path')
-        self.m.publish_image_service({
+        self.arcpy_helper.connection_file_path = os.path.join(self.arcpy_helper.cwd, 'some/path')
+        self.arcpy_helper.publish_image_service({
             'input': '//share/dir/fgdb.gdb/myFile',
             'serverUrl': 'some/path',
             'serverType': 'MY_SERVER_TYPE',
@@ -170,7 +170,7 @@ class TestArcpyHelper(TestCase):
             out_sddraft='myFile.sddraft',
             service_name='myNamedService',
             server_type='MY_SERVER_TYPE',
-            connection_file_path=os.path.join(self.m.cwd, 'some/path'),
+            connection_file_path=os.path.join(self.arcpy_helper.cwd, 'some/path'),
             copy_data_to_server=True,
             folder_name='myFolder',
             summary='My Summary',
@@ -180,18 +180,18 @@ class TestArcpyHelper(TestCase):
     def test_setting_service_initial_state(self, mock_arcpy):
         mock_arcpy.UploadServiceDefinition_server = MagicMock()
         config = json.loads('{"initialState": "STOPPED"}')
-        self.m.upload_service_definition("test", config)
+        self.arcpy_helper.upload_service_definition("test", config)
         mock_arcpy.UploadServiceDefinition_server.assert_called_once_with(
             in_sd_file='test',
-            in_server=self.m.connection_file_path,
+            in_server=self.arcpy_helper.connection_file_path,
             in_startupType='STOPPED'
         )
 
     def test_setting_service_initial_state_defaults_to_started(self, mock_arcpy):
         mock_arcpy.UploadServiceDefinition_server = MagicMock()
-        self.m.upload_service_definition("test", [])
+        self.arcpy_helper.upload_service_definition("test", [])
         mock_arcpy.UploadServiceDefinition_server.assert_called_once_with(
             in_sd_file='test',
-            in_server=self.m.connection_file_path,
+            in_server=self.arcpy_helper.connection_file_path,
             in_startupType='STARTED'
         )
