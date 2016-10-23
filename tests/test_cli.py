@@ -5,6 +5,7 @@ module_patcher = patch.dict('sys.modules', {'arcpy': mock_arcpy})
 module_patcher.start()
 from slap import cli
 
+
 class TestCli(TestCase):
 
     def test_only_one(self):
