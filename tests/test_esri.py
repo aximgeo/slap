@@ -4,23 +4,28 @@ from unittest import TestCase
 from mock import MagicMock, patch
 
 # We need to mock arcpy before we import the helper
-mock_arcpy = MagicMock()
-patch.dict("sys.modules", arcpy=mock_arcpy).start()
-from slap.esri import ArcpyHelper
+
+
 
 
 class TestArcpyHelper(TestCase):
-    m = None
 
     def setUp(self):
+        self.mock_arcpy = MagicMock()
+        self.module_patcher = patch.dict('sys.modules', {'arcpy': self.mock_arcpy})
+        self.module_patcher.start()
+        from slap.esri import ArcpyHelper
         self.m = ArcpyHelper('user', 'pwd', 'my/ags')
+
+    def tearDown(self):
+        self.module_patcher.stop()
 
     def test_get_full_path(self):
         self.assertEqual(os.path.join(os.getcwd(), 'foo'), self.m.get_full_path('foo'))
 
     def test_set_workspaces(self):
-        mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
-        mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
+        self.mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
+        self.mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
         self.m.set_workspaces = MagicMock()
         self.m.publish_mxd({'input': 'someFile',
                             'serverUrl': 'some/path',
@@ -29,14 +34,14 @@ class TestArcpyHelper(TestCase):
         self.m.set_workspaces.assert_called_once_with('someFile', {'new': 'bar', 'old': 'foo'})
 
     def test_publish_gp_with_defaults(self):
-        mock_arcpy.CreateGPSDDraft = MagicMock()
+        self.mock_arcpy.CreateGPSDDraft = MagicMock()
         self.m.connection_file_path = os.path.join(self.m.cwd, 'some/path')
         self.m.publish_gp({
             'input': 'gp/myFile.tbx',
             'result': 'my/result',
             'serverUrl': 'some/path'
         }, 'file', 'file.sddraft')
-        mock_arcpy.CreateGPSDDraft.assert_called_once_with(
+        self.mock_arcpy.CreateGPSDDraft.assert_called_once_with(
             result=os.path.join(os.getcwd(), 'my/result'),
             out_sddraft='file.sddraft',
             service_name='file',
@@ -58,7 +63,7 @@ class TestArcpyHelper(TestCase):
         )
 
     def test_publish_gp_with_config_values(self):
-        mock_arcpy.CreateGPSDDraft = MagicMock()
+        self.mock_arcpy.CreateGPSDDraft = MagicMock()
         self.m.connection_file_path = os.path.join(self.m.cwd, 'some/path')
         self.m.publish_gp({
             'input': 'gp/myFile.tbx',
@@ -72,7 +77,7 @@ class TestArcpyHelper(TestCase):
             'executionType': 'Synchronous',
             'tags': 'Tags tags'
         }, 'myFile', 'myFile.sddraft')
-        mock_arcpy.CreateGPSDDraft.assert_called_once_with(
+        self.mock_arcpy.CreateGPSDDraft.assert_called_once_with(
             result=os.path.join(os.getcwd(), 'my/result'),
             out_sddraft='myFile.sddraft',
             service_name='myNamedService',
@@ -94,14 +99,14 @@ class TestArcpyHelper(TestCase):
         )
 
     def test_publish_mxd_with_defaults(self):
-        mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
-        mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
+        self.mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
+        self.mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
         self.m.connection_file_path = os.path.join(self.m.cwd, 'some/path')
         self.m.publish_mxd({
             'input': 'myFile.mxd',
             'serverUrl': 'some/path'
         }, 'file', 'file.sddraft')
-        mock_arcpy.mapping.CreateMapSDDraft.assert_called_once_with(
+        self.mock_arcpy.mapping.CreateMapSDDraft.assert_called_once_with(
             map_document={'mxd': 'myMap'},
             out_sddraft='file.sddraft',
             service_name='file',
@@ -114,8 +119,8 @@ class TestArcpyHelper(TestCase):
         )
 
     def test_publish_mxd_with_config_values(self):
-        mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
-        mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
+        self.mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
+        self.mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
         self.m.connection_file_path = os.path.join(self.m.cwd, 'some/path')
         self.m.publish_mxd({
             'input': 'myFile.mxd',
@@ -126,7 +131,7 @@ class TestArcpyHelper(TestCase):
             'summary': 'My Summary',
             'tags': 'Tags tags'
         }, 'myFile', 'myFile.sddraft')
-        mock_arcpy.mapping.CreateMapSDDraft.assert_called_once_with(
+        self.mock_arcpy.mapping.CreateMapSDDraft.assert_called_once_with(
             map_document={'mxd': 'myMap'},
             out_sddraft='myFile.sddraft',
             service_name='myNamedService',
@@ -139,13 +144,13 @@ class TestArcpyHelper(TestCase):
         )
 
     def test_publish_image_service_with_defaults(self):
-        mock_arcpy.CreateImageSDDraft = MagicMock()
+        self.mock_arcpy.CreateImageSDDraft = MagicMock()
         self.m.connection_file_path = os.path.join(self.m.cwd, 'some/path')
         self.m.publish_image_service({
             'input': '//share/dir/fgdb.gdb/myFile',
             'serverUrl': 'some/path'
         }, 'myFile', 'myFile.sddraft')
-        mock_arcpy.CreateImageSDDraft.assert_called_once_with(
+        self.mock_arcpy.CreateImageSDDraft.assert_called_once_with(
             raster_or_mosaic_layer='//share/dir/fgdb.gdb/myFile',
             out_sddraft='myFile.sddraft',
             service_name='myFile',
@@ -158,7 +163,7 @@ class TestArcpyHelper(TestCase):
         )
 
     def test_publish_image_service_with_config_values(self):
-        mock_arcpy.CreateImageSDDraft = MagicMock()
+        self.mock_arcpy.CreateImageSDDraft = MagicMock()
         self.m.connection_file_path = os.path.join(self.m.cwd, 'some/path')
         self.m.publish_image_service({
             'input': '//share/dir/fgdb.gdb/myFile',
@@ -170,7 +175,7 @@ class TestArcpyHelper(TestCase):
             'summary': 'My Summary',
             'tags': 'Tags tags'
         }, 'myFile', 'myFile.sddraft')
-        mock_arcpy.CreateImageSDDraft.assert_called_once_with(
+        self.mock_arcpy.CreateImageSDDraft.assert_called_once_with(
             raster_or_mosaic_layer='//share/dir/fgdb.gdb/myFile',
             out_sddraft='myFile.sddraft',
             service_name='myNamedService',
@@ -183,19 +188,19 @@ class TestArcpyHelper(TestCase):
         )
 
     def test_setting_service_initial_state(self):
-        mock_arcpy.UploadServiceDefinition_server = MagicMock()
+        self.mock_arcpy.UploadServiceDefinition_server = MagicMock()
         config = json.loads('{"initialState": "STOPPED"}')
         self.m.upload_service_definition("test", config)
-        mock_arcpy.UploadServiceDefinition_server.assert_called_once_with(
+        self.mock_arcpy.UploadServiceDefinition_server.assert_called_once_with(
             in_sd_file='test',
             in_server=self.m.connection_file_path,
             in_startupType='STOPPED'
         )
 
     def test_setting_service_initial_state_defaults_to_started(self):
-        mock_arcpy.UploadServiceDefinition_server = MagicMock()
+        self.mock_arcpy.UploadServiceDefinition_server = MagicMock()
         self.m.upload_service_definition("test", [])
-        mock_arcpy.UploadServiceDefinition_server.assert_called_once_with(
+        self.mock_arcpy.UploadServiceDefinition_server.assert_called_once_with(
             in_sd_file='test',
             in_server=self.m.connection_file_path,
             in_startupType='STARTED'

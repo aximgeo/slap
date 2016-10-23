@@ -1,6 +1,9 @@
 from unittest import TestCase
+from mock import MagicMock, patch
+mock_arcpy = MagicMock()
+module_patcher = patch.dict('sys.modules', {'arcpy': mock_arcpy})
+module_patcher.start()
 from slap import cli
-
 
 class TestCli(TestCase):
 

@@ -48,8 +48,8 @@ class Publisher:
         return ret
 
     def publish_all(self):
-        for type in self.config_parser.service_types:
-            self.publish_services(type)
+        for service_type in self.config_parser.service_types:
+            self.publish_services(service_type)
 
     def _get_method_by_type(self, type):
         if type == 'mapServices':
