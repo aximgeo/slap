@@ -23,6 +23,17 @@ We welcome any contributions of code, tests, documentation, or feature and bug r
   * Descriptive - Commit messages should be clear, well-formatted, and detailed
 * Submit a [pull request](https://help.github.com/articles/creating-a-pull-request/)
 
+A sample commit message might look like:
+
+```
+Fixes really bad bug, should be < 50 chars
+
+Body of the commit message, describing the changes in more detail if necessary.  This can be as long
+as makes sense, depending on the commit.
+
+Issue #5
+```
+
 ## Tests and CI
 * All new features should include tests as well
 * If you are fixing a bug, please provide a test that would have caught the bug in the first place, if possible
