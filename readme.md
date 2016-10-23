@@ -211,3 +211,6 @@ A few notes and caveats:
 
 ## TODO
 - Add support for Image Services, GP Services, etc.
+
+## Contributing
+We welcome feedback and contributions; please see the [contribution guide](CONTRIBUTING.md) for details
