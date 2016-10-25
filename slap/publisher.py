@@ -1,22 +1,24 @@
 import os
-import argparse
-from slap.api import Api
-from slap.config import ConfigParser
-from slap import git
-import arcpy
 
-arcpy.env.overwriteOutput = True
+from .api import Api
+from .config import ConfigParser
+import arcpy
 
 
 class Publisher:
 
-    config = None
-    connection_file_path = None
     config_parser = ConfigParser()
-    api = None
 
     def __init__(self):
-        pass
+
+        arcpy.env.overwriteOutput = True
+        
+        connection_file_name = 'temp.ags'
+        self.output_path = self.config_parser.get_full_path('./')
+        self.connection_file_path = os.path.join(self.output_path, connection_file_name)
+
+        self.config = None
+        self.api = None
 
     def load_config(self, path_to_config):
         self.config = self.config_parser.load_config(path_to_config)
@@ -27,12 +29,12 @@ class Publisher:
         self.connection_file_path = os.path.join(output_path, connection_file_name)
         arcpy.mapping.CreateGISServerConnectionFile(
             connection_type='PUBLISH_GIS_SERVICES',
-            out_folder_path=output_path,
+            out_folder_path=self.output_path,
             out_name=connection_file_name,
             server_url=self.config['agsUrl'],
             server_type='ARCGIS_SERVER',
             use_arcgis_desktop_staging_folder=False,
-            staging_folder_path=output_path,
+            staging_folder_path=self.output_path,
             username=username,
             password=password,
             save_username_password=True
@@ -251,72 +253,3 @@ class Publisher:
 def only_one(iterable):
     it = iter(iterable)
     return any(it) and not any(it)
-
-
-def get_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-u", "--username",
-                        required=True,
-                        help="Portal or AGS username (ex: --username john)")
-    parser.add_argument("-p", "--password",
-                        required=True,
-                        help="Portal or AGS password (ex: --password myPassword)")
-    parser.add_argument("-c", "--config",
-                        required=True,
-                        help="full path to config file (ex: --config c:/configs/int_config.json)")
-    parser.add_argument("-i", "--inputs",
-                        action="append",
-                        help="one or more inputs to publish (ex: -i mxd/bar.mxd -i mxd/foo.mxd")
-    parser.add_argument("-a", "--all",
-                        action="store_true",
-                        help="publish all entries in config")
-    parser.add_argument("-g", "--git",
-                        help="publish all mxd files that have changed between HEAD and this commit (ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4")
-    args = parser.parse_args()
-
-    if not args.username:
-        parser.error("username is required")
-
-    if not args.password:
-        parser.error("password is required")
-
-    if not args.config:
-        parser.error("Full path to config file is required")
-
-    if not only_one([args.git, args.inputs, args.all]):
-        parser.error("Specify only one of --git, --all, or --inputs")
-
-    if not args.all and not args.inputs and not args.git:
-        parser.error("Specify one of --git, --all, or --inputs")
-
-    return args
-
-
-def main():
-    args = get_args()
-    publisher = Publisher()
-    print "Loading config..."
-    publisher.load_config(args.config)
-    publisher.create_server_connection_file(args.username, args.password)
-    publisher.init_api(
-        ags_url=publisher.config['agsUrl'],
-        token_url=publisher.config['tokenUrl'] if 'tokenUrl' in publisher.config else None,
-        portal_url=publisher.config['portalUrl'] if 'portalUrl' in publisher.config else None,
-        certs=publisher.config['certs'] if 'certs' in publisher.config else True,
-        username=args.username,
-        password=args.password
-    )
-    if args.inputs:
-        for i in args.inputs:
-            publisher.publish_input(i)
-    elif args.git:
-        print "Getting changes from git..."
-        changed_files = git.get_changed_mxds(args.git)
-        print changed_files
-        for i in changed_files:
-            publisher.publish_input(i)
-    elif args.all:
-        publisher.publish_all()
-
-if __name__ == "__main__":
-    main()

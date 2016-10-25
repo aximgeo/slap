@@ -1,9 +1,12 @@
 import os
-from unittest import TestCase
+import unittest
+
+import mock_arcpy
+
 from slap.config import ConfigParser
 
 
-class TestConfigParser(TestCase):
+class TestConfigParser(unittest.TestCase):
     m = None
 
     def setUp(self):
@@ -259,3 +262,7 @@ class TestConfigParser(TestCase):
             }
         }
         self.assertEqual(self.m.merge_json(default_json_string, config_json), expected)
+
+
+if __name__ == '__main__':
+    unittest.main()

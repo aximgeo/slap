@@ -1,10 +1,12 @@
 import unittest
-from unittest import TestCase
-from slap.api import Api
+
 from mock import PropertyMock, patch
 
+import mock_arcpy
 
-class TestApi(TestCase):
+from slap.api import Api
+
+class TestApi(unittest.TestCase):
     api = None
 
     def create_api(self):

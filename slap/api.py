@@ -3,15 +3,7 @@ import urllib2
 import json
 
 
-class Api:
-
-    _ags_url = None
-    _token_url = None
-    _portal_url = None
-    _username = None
-    _password = None
-    _token = None
-    _certs = None
+class Api(object):
 
     def __init__(self, ags_url, token_url, portal_url, username, password, certs=True):
         self._ags_url = ags_url
@@ -20,6 +12,7 @@ class Api:
         self._username = username
         self._password = password
         self._certs = certs  # Use system certs, unless we passed in a file path
+        self._token = None
 
     @property
     def token(self):
