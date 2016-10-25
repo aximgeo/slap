@@ -19,6 +19,9 @@ def get_args():
     parser.add_argument("-c", "--config",
                         required=True,
                         help="full path to config file (ex: --config c:/configs/int_config.json)")
+    parser.add_argument("-s", "--site",
+                        action="store_true",
+                        help="create a site before publishing")
     parser.add_argument("-i", "--inputs",
                         action="append",
                         help="one or more inputs to publish (ex: -i mxd/bar.mxd -i mxd/foo.mxd")
@@ -51,6 +54,9 @@ def main():
     args = get_args()
     publisher = Publisher(args.username, args.password, args.config)
 
+    if args.site:
+        if config
+        publisher.api.create_site()
     if args.inputs:
         for i in args.inputs:
             publisher.publish_input(i)
