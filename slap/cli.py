@@ -55,8 +55,11 @@ def main():
     publisher = Publisher(args.username, args.password, args.config)
 
     if args.site:
-        if config
-        publisher.api.create_site()
+        if "site" in publisher.config and publisher.config["site"]["create"]:
+            if "json" in publisher.config["site"]:
+                publisher.api.create_site(args.username, args.password, publisher.config["site"]["json"])
+            else:
+                publisher.api.create_default_site()
     if args.inputs:
         for i in args.inputs:
             publisher.publish_input(i)
