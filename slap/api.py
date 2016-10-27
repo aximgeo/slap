@@ -85,6 +85,8 @@ class Api:
         new_params = params.copy()
         new_params['username'] = username
         new_params['password'] = password
+        new_params['confirmPassword'] = password
+        new_params['f'] = 'json'
         # new_params.update(self.params)
         return self.post('{0}/createNewSite'.format(self._ags_url), new_params)
     
@@ -128,7 +130,6 @@ class Api:
         return {
             'configStoreConnection': json.dumps(config_store_connection),
             'directories': json.dumps(directories),
-            'f': 'json'
         }
 
     @staticmethod
