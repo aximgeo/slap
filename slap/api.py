@@ -123,11 +123,11 @@ class Api:
                           virtualPath='')
 
         # Serialize directory information to JSON
-        directories_json = json.dumps(dict(directories=[cache_dir, jobs_dir, output_dir, system_dir]))
+        directories = dict(directories=[cache_dir, jobs_dir, output_dir, system_dir])
 
         return {
-            'configStoreConnection': config_store_connection,
-            'directories': directories_json,
+            'configStoreConnection': json.dumps(config_store_connection),
+            'directories': json.dumps(directories),
             'f': 'json'
         }
 
