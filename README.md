@@ -209,5 +209,3 @@ A few notes and caveats:
 - For network shares (i.e., sourcing a FGDB), you *must* use JSON-escaped backslashes in the config (i.e., `\\`).  The `inputs` parameter should *not* add escapes (i.e., use `\`).
 - It is possible to source from both an enterprise geodatabase(s) and file geodatabases(s) in the same MXD.
 
-## TODO
-- Add support for Image Services, GP Services, etc.
