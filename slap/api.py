@@ -85,7 +85,7 @@ class Api:
         new_params = params.copy()
         new_params['username'] = username
         new_params['password'] = password
-        return self.post('{0}/createSite'.format(self._ags_url), params)
+        return self.post('{0}/createNewSite'.format(self._ags_url), params)
     
     def create_default_site(self):
         return self.create_site(self._username, self._password, self.get_default_site_params())
