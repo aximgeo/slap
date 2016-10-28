@@ -24,6 +24,28 @@ class TestArcpyHelper(TestCase):
                                        }, 'file', 'file.sddraft')
         self.arcpy_helper.set_workspaces.assert_called_once_with('someFile', {'new': 'bar', 'old': 'foo'})
 
+    def test_add_data_store_item_folder(self, mock_arcpy):
+        path = "path/to/folder"
+        self.arcpy_helper.connection_file_path = os.path.join(self.arcpy_helper.cwd, 'some/path')
+        self.arcpy_helper.add_data_store_item(path=path, name="myFolder")
+        mock_arcpy.AddDataStoreItem.assert_called_once_with(
+            connection_file=self.arcpy_helper.connection_file_path,
+            datastore_type='FOLDER',
+            connection_name='myFolder',
+            server_path=path
+        )
+
+    def test_add_data_store_item_sde(self, mock_arcpy):
+        path = "path/to/database_connection.sde"
+        self.arcpy_helper.connection_file_path = os.path.join(self.arcpy_helper.cwd, 'some/path')
+        self.arcpy_helper.add_data_store_item(path=path, name="myDatabase")
+        mock_arcpy.AddDataStoreItem.assert_called_once_with(
+            connection_file=self.arcpy_helper.connection_file_path,
+            datastore_type='DATABASE',
+            connection_name='myDatabase',
+            server_path=path
+        )
+
     def test_publish_gp_with_defaults(self, mock_arcpy):
         self.arcpy_helper.connection_file_path = os.path.join(self.arcpy_helper.cwd, 'some/path')
         self.arcpy_helper.publish_gp({

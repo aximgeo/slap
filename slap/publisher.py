@@ -124,6 +124,11 @@ class Publisher:
                 params=json
             )
 
+    def register_data_sources(self):
+        if "dataSources" in self.config:
+            for dataSource in self.config["dataSources"]:
+                self.arcpy_helper.add_data_store_item(dataSource["path"], dataSource["name"])
+
     @staticmethod
     def message(message):
         print message

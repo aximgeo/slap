@@ -60,6 +60,9 @@ def main():
                 publisher.api.create_site(args.username, args.password, publisher.config["site"]["json"])
             else:
                 publisher.api.create_default_site()
+
+    publisher.register_data_sources()
+
     if args.inputs:
         for i in args.inputs:
             publisher.publish_input(i)
