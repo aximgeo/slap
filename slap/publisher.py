@@ -66,6 +66,8 @@ class Publisher:
 
     def publish_service(self, service_type, config_entry):
         filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
+        if 'json' not in config_entry:
+            config_entry['json'] = {}
         config_entry['json']['serviceName'] = self._get_service_name_from_config(config_entry)
 
         output_directory = self.arcpy_helper.get_output_directory(config_entry)
