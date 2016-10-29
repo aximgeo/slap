@@ -34,13 +34,23 @@ class ArcpyHelper:
     def stage_service_definition(sddraft, sd):
         arcpy.StageService_server(sddraft, sd)
 
-    def add_data_store_item(self, path, name):
+    def register_data_sources(self, data_sources):
+        existing_data_sources = arcpy.ListDataStoreItems(self.connection_file_path, "FOLDER") + \
+                                arcpy.ListDataStoreItems(self.connection_file_path, "DATABASE")
+        for data_source in data_sources:
+            if data_source["name"] not in existing_data_sources:
+                self.register_data_source(data_source)
+
+    def register_data_source(self, data_source):
+        server_path = data_source["serverPath"]
+        client_path = data_source["clientPath"] if "clientPath" in data_source else server_path
+        name = data_source["name"]
         arcpy.AddDataStoreItem(
             connection_file=self.connection_file_path,
-            datastore_type='DATABASE' if path.endswith('.sde') else 'FOLDER',
+            datastore_type='DATABASE' if server_path.endswith('.sde') else 'FOLDER',
             connection_name=name,
-            server_path=self.get_full_path(path),
-            client_path=self.get_full_path(path)
+            server_path=self.get_full_path(server_path),
+            client_path=self.get_full_path(client_path)
         )
 
     def upload_service_definition(self, sd, config):
