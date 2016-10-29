@@ -24,7 +24,8 @@ class ArcpyHelper:
         return self._cwd
 
     def get_full_path(self, config_path):
-        return config_path if os.path.isabs(config_path) else os.path.join(self.cwd, config_path)
+        return os.path.normpath(config_path) if os.path.isabs(config_path) \
+            else os.path.normpath(os.path.join(self.cwd, config_path))
 
     def get_output_directory(self, config_entry):
         return self.get_full_path(config_entry["output"]) if "output" in config_entry else self.get_full_path('output')
@@ -38,7 +39,8 @@ class ArcpyHelper:
             connection_file=self.connection_file_path,
             datastore_type='DATABASE' if path.endswith('.sde') else 'FOLDER',
             connection_name=name,
-            server_path=path
+            server_path=self.get_full_path(path),
+            client_path=self.get_full_path(path)
         )
 
     def upload_service_definition(self, sd, config):
