@@ -69,8 +69,15 @@ An example configuration file might look like below.  *Note:* The comments would
 {
     "agsUrl": "https://myagsserver.com:6443/arcgis/admin", // Required, URL for AGS admin endpoint
     "tokenUrl": "https://myagsserver.com:6443/arcgis/tokens/generateToken", // Optional, URL for token service; defaults to AGS token endpoint
-    "site": {}, // Optional, directory structure for created site
+    "site": {}, // Optional, directory structure for creating a site
     "json": {}, // Optional, specific parameters to use for all services, of all types.
+    "dataSources": [ // Optional, list of data items to add to the server store
+        {
+            "name": "slap-test",
+            "serverPath": "slap-test.gdb",
+            "clientPath": "slap-test.gdb"
+        }
+    ],
     "mapServices": {
         "json": {}, // Optional, specific service parameters to use for all map services
         "services": [

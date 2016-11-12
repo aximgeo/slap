@@ -63,8 +63,12 @@ def main():
             else:
                 publisher.api.create_default_site()
 
+    print "Registering data sources..."
+    publisher.register_data_sources()
+
     if args.inputs:
         for i in args.inputs:
+            print "Publishing {}...".format(i)
             publisher.publish_input(i)
     elif args.git:
         print "Getting changes from git..."
@@ -73,6 +77,7 @@ def main():
         for i in changed_files:
             publisher.publish_input(i)
     elif args.all:
+        print "Publishing all..."
         publisher.publish_all()
 
 if __name__ == "__main__":
