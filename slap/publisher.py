@@ -5,9 +5,13 @@ from slap.config import ConfigParser
 
 class Publisher:
 
-    def __init__(self, username, password, config):
+    def __init__(self, username, password, config, hostname=None):
         self.config_parser = ConfigParser()
         self.config = self.config_parser.load_config(config) if isinstance(config, basestring) else config
+
+        # Allow the user to specify a host as an argument, in case it's set dynamically
+        if hostname:
+            self.config['agsUrl'] = self.config_parser.update_hostname(self.config['agsUrl'], hostname)
 
         # This is a S-L-O-W import, so defer as long as possible
         from slap.esri import ArcpyHelper
@@ -16,6 +20,7 @@ class Publisher:
             password=password,
             ags_admin_url=self.config['agsUrl']
         )
+
         self.api = Api(
             ags_url=self.config['agsUrl'],
             token_url=self.config['tokenUrl'] if 'tokenUrl' in self.config else None,

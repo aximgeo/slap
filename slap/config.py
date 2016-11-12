@@ -1,5 +1,7 @@
 import os
 import json
+import urlparse
+import re
 
 
 class ConfigParser:
@@ -65,6 +67,12 @@ class ConfigParser:
         else:
             default_json_copy = default_json.copy()
         return self.merge(default_json_copy, config_json)
+
+    @staticmethod
+    def update_hostname(url, hostname):
+        url_parts = urlparse.urlsplit(url)
+        url_parts = url_parts._replace(netloc=re.sub('^[^:]*', hostname, url_parts.netloc))
+        return urlparse.urlunsplit(url_parts)
 
     @staticmethod
     def set_server_properties(config_json, server_input_path, filename):
