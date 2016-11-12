@@ -1,7 +1,6 @@
 import os
 from slap.api import Api
 from slap.config import ConfigParser
-from slap.esri import ArcpyHelper
 
 
 class Publisher:
@@ -9,6 +8,9 @@ class Publisher:
     def __init__(self, username, password, config):
         self.config_parser = ConfigParser()
         self.config = self.config_parser.load_config(config) if isinstance(config, basestring) else config
+
+        # This is a S-L-O-W import, so defer as long as possible
+        from slap.esri import ArcpyHelper
         self.arcpy_helper = ArcpyHelper(
             username=username,
             password=password,
@@ -123,6 +125,10 @@ class Publisher:
                 folder=config["folderName"] if "folderName" in config else None,
                 params=json
             )
+
+    def register_data_sources(self):
+        if "dataSources" in self.config:
+            self.arcpy_helper.register_data_sources(self.config["dataSources"])
 
     @staticmethod
     def message(message):

@@ -24,7 +24,8 @@ class ArcpyHelper:
         return self._cwd
 
     def get_full_path(self, config_path):
-        return config_path if os.path.isabs(config_path) else os.path.join(self.cwd, config_path)
+        return os.path.normpath(config_path) if os.path.isabs(config_path) \
+            else os.path.normpath(os.path.join(self.cwd, config_path))
 
     def get_output_directory(self, config_entry):
         return self.get_full_path(config_entry["output"]) if "output" in config_entry else self.get_full_path('output')
@@ -32,6 +33,25 @@ class ArcpyHelper:
     @staticmethod
     def stage_service_definition(sddraft, sd):
         arcpy.StageService_server(sddraft, sd)
+
+    def register_data_sources(self, data_sources):
+        existing_data_sources = arcpy.ListDataStoreItems(self.connection_file_path, "FOLDER") + \
+                                arcpy.ListDataStoreItems(self.connection_file_path, "DATABASE")
+        for data_source in data_sources:
+            if data_source["name"] not in existing_data_sources:
+                self.register_data_source(data_source)
+
+    def register_data_source(self, data_source):
+        server_path = data_source["serverPath"]
+        client_path = data_source["clientPath"] if "clientPath" in data_source else server_path
+        name = data_source["name"]
+        arcpy.AddDataStoreItem(
+            connection_file=self.connection_file_path,
+            datastore_type='DATABASE' if server_path.endswith('.sde') else 'FOLDER',
+            connection_name=name,
+            server_path=self.get_full_path(server_path),
+            client_path=self.get_full_path(client_path)
+        )
 
     def upload_service_definition(self, sd, config):
         arcpy.UploadServiceDefinition_server(
