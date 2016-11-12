@@ -13,5 +13,6 @@ class TestCli(TestCase):
         self.assertTrue(cli.only_one([False, ['foo', 'bar'], False]))
         self.assertTrue(cli.only_one([True, [], False]))
         self.assertTrue(cli.only_one(["some sha", False, False]))
+        self.assertTrue(cli.only_one([True, False]))
         self.assertFalse(cli.only_one([True, True]))
         self.assertFalse(cli.only_one([True, ['foo'], False]))
