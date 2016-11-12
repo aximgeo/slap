@@ -22,6 +22,8 @@ def get_args():
     parser.add_argument("-s", "--site",
                         action="store_true",
                         help="create a site before publishing")
+    parser.add_argument("-n", "--name",
+                        help="override the hostname in config")
     parser.add_argument("-i", "--inputs",
                         action="append",
                         help="one or more inputs to publish (ex: -i mxd/bar.mxd -i mxd/foo.mxd")
@@ -53,7 +55,7 @@ def get_args():
 
 def main():
     args = get_args()
-    publisher = Publisher(args.username, args.password, args.config)
+    publisher = Publisher(args.username, args.password, args.config, args.name)
 
     if args.site:
         print "Creating site..."
