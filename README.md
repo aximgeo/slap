@@ -10,6 +10,26 @@ Provides a way to automate the process of publishing map services; there are two
 # Quick Setup
 Install from pip using `pip install slap`
 
+# Usage
+```shell
+  -h, --help            show this help message and exit
+  -u USERNAME, --username USERNAME
+                        Portal or AGS username (ex: --username john)
+  -p PASSWORD, --password PASSWORD
+                        Portal or AGS password (ex: --password myPassword)
+  -c CONFIG, --config CONFIG
+                        full path to config file (ex: --config
+                        c:/configs/int_config.json)
+  -s, --site            create a site before publishing
+  -i INPUTS, --inputs INPUTS
+                        one or more inputs to publish (ex: -i mxd/bar.mxd -i
+                        mxd/foo.mxd
+  -a, --all             publish all entries in config
+  -g GIT, --git GIT     publish all mxd files that have changed between HEAD
+                        and this commit (ex: -g
+                        b45e095834af1bc8f4c348bb4aad66bddcadeab4
+```
+
 ## Required Artifacts
 There are a few artifacts that need to be generated (via ArcMap) per service and/or environment, which are required for the process to run.  These can be checked into source control if desired, and pulled down as needed.
 
@@ -48,8 +68,16 @@ An example configuration file might look like below.  *Note:* The comments would
 ``` javascript
 {
     "agsUrl": "https://myagsserver.com:6443/arcgis/admin", // Required, URL for AGS admin endpoint
-    "tokenUrl": "https://myagsserver.com:6443/arcgis/tokens/generateToken", // Required, URL for token service
+    "tokenUrl": "https://myagsserver.com:6443/arcgis/tokens/generateToken", // Optional, URL for token service; defaults to AGS token endpoint
+    "site": {}, // Optional, directory structure for creating a site
     "json": {}, // Optional, specific parameters to use for all services, of all types.
+    "dataSources": [ // Optional, list of data items to add to the server store
+        {
+            "name": "slap-test",
+            "serverPath": "slap-test.gdb",
+            "clientPath": "slap-test.gdb"
+        }
+    ],
     "mapServices": {
         "json": {}, // Optional, specific service parameters to use for all map services
         "services": [
@@ -209,8 +237,6 @@ A few notes and caveats:
 - For network shares (i.e., sourcing a FGDB), you *must* use JSON-escaped backslashes in the config (i.e., `\\`).  The `inputs` parameter should *not* add escapes (i.e., use `\`).
 - It is possible to source from both an enterprise geodatabase(s) and file geodatabases(s) in the same MXD.
 
-## TODO
-- Add support for Image Services, GP Services, etc.
 
 ## Contributing
 We welcome feedback and contributions; please see the [contribution guide](CONTRIBUTING.md) for details

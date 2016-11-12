@@ -1,22 +1,17 @@
-import os
 from unittest import TestCase
 from slap.config import ConfigParser
 
 
 class TestConfigParser(TestCase):
-    m = None
 
     def setUp(self):
-        self.m = ConfigParser()
-        self.m.map_service_default_json = {}
-        self.m.image_service_default_json = {}
-        self.m.gp_service_default_json = {}
-
-    def test_get_full_path(self):
-        self.assertEqual(os.path.join(os.getcwd(), 'foo'), self.m.get_full_path('foo'))
+        self.config_parser = ConfigParser()
+        self.config_parser.map_service_default_json = {}
+        self.config_parser.image_service_default_json = {}
+        self.config_parser.gp_service_default_json = {}
 
     def test_empty_config(self):
-        self.assertEqual(self.m.parse_config({}), {
+        self.assertEqual(self.config_parser.parse_config({}), {
             'mapServices': {
                 'services': []
             },
@@ -29,7 +24,7 @@ class TestConfigParser(TestCase):
         })
 
     def test_root_only_config(self):
-        self.assertEqual(self.m.parse_config({'serverUrl': 'https://my/server'}), {
+        self.assertEqual(self.config_parser.parse_config({'serverUrl': 'https://my/server'}), {
             'serverUrl': 'https://my/server',
             'mapServices': {
                 'services': []
@@ -52,7 +47,7 @@ class TestConfigParser(TestCase):
                 'services': [{'input': 'image', 'json': {}}]
             }
         }
-        self.assertEqual(self.m.parse_config(config), {
+        self.assertEqual(self.config_parser.parse_config(config), {
             'serverUrl': 'https://my/server',
             'mapServices': {
                 'services': []
@@ -75,7 +70,7 @@ class TestConfigParser(TestCase):
                 'services': [{'input': 'image', 'json': {}}]
             }
         }
-        self.assertEqual(self.m.parse_config(config), {
+        self.assertEqual(self.config_parser.parse_config(config), {
             'serverUrl': 'https://my/server',
             'mapServices': {
                 'services': [{'serverUrl': 'https://my/server', 'input': 'map', 'json': {}}]
@@ -98,7 +93,7 @@ class TestConfigParser(TestCase):
                 'services': [{'input': 'map', 'json': {}}]
             }
         }
-        self.assertEqual(self.m.parse_config(config), {
+        self.assertEqual(self.config_parser.parse_config(config), {
             'serverUrl': 'https://my/server',
             'mapServices': {
                 'services': [{'serverUrl': 'https://my/server', 'input': 'map', 'json': {}}]
@@ -121,7 +116,7 @@ class TestConfigParser(TestCase):
                 }]
             }
         }
-        self.assertEqual(self.m.get_root_keys(config), {'root_level': 'root'})
+        self.assertEqual(self.config_parser.get_root_keys(config), {'root_level': 'root'})
 
     def test_get_type_keys(self):
         config = {
@@ -133,7 +128,7 @@ class TestConfigParser(TestCase):
                 }]
             }
         }
-        self.assertEqual(self.m.get_type_keys(config, 'mapServices'), {'type_level': 'type'})
+        self.assertEqual(self.config_parser.get_type_keys(config, 'mapServices'), {'type_level': 'type'})
 
     def test_flattening_keys(self):
         config = {
@@ -150,7 +145,7 @@ class TestConfigParser(TestCase):
             'root_level': 'root',
             'type_level': 'type'
          }
-        self.assertEqual(self.m.parse_config(config)['mapServices']['services'][0], expected)
+        self.assertEqual(self.config_parser.parse_config(config)['mapServices']['services'][0], expected)
 
     def test_flattening_nested_keys(self):
         config = {
@@ -171,7 +166,7 @@ class TestConfigParser(TestCase):
                 }]
             }
         }
-        self.assertEqual(self.m.parse_config(config)['mapServices']['services'][0], {
+        self.assertEqual(self.config_parser.parse_config(config)['mapServices']['services'][0], {
                                                              'input': 'map',
                                                              'root_level': 'root',
                                                              'type_level': 'type',
@@ -183,9 +178,9 @@ class TestConfigParser(TestCase):
                                                          })
 
     def check_missing_key(self, config):
-        self.m.config = config
+        self.config_parser.config = config
         with self.assertRaises(KeyError):
-            self.m.check_required_keys()
+            self.config_parser.check_required_keys(config)
 
     def test_raises_for_missing_server_url(self):
         self.check_missing_key( {
@@ -237,7 +232,7 @@ class TestConfigParser(TestCase):
                 "virtualOutputDir": "/rest/directories/arcgisoutput"
             }
         }
-        self.assertEqual(expected, self.m.merge_json(default_json, config_json))
+        self.assertEqual(expected, self.config_parser.merge_json(default_json, config_json))
 
     def test_merge_json_string(self):
         default_json_string = '{"type": "MapServer","capabilities": "Map,Query,Data",' \
@@ -258,4 +253,4 @@ class TestConfigParser(TestCase):
                 "virtualOutputDir": "/rest/directories/arcgisoutput"
             }
         }
-        self.assertEqual(self.m.merge_json(default_json_string, config_json), expected)
+        self.assertEqual(self.config_parser.merge_json(default_json_string, config_json), expected)
