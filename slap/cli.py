@@ -27,9 +27,6 @@ def get_args():
     parser.add_argument("-i", "--inputs",
                         action="append",
                         help="one or more inputs to publish (ex: -i mxd/bar.mxd -i mxd/foo.mxd")
-    parser.add_argument("-a", "--all",
-                        action="store_true",
-                        help="publish all entries in config")
     parser.add_argument("-g", "--git",
                         help="publish all mxd files that have changed between HEAD and this commit "
                              "(ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4")
@@ -44,11 +41,8 @@ def get_args():
     if not args.config:
         parser.error("Full path to config file is required")
 
-    if not only_one([args.git, args.inputs, args.all]):
-        parser.error("Specify only one of --git, --all, or --inputs")
-
-    if not args.all and not args.inputs and not args.git:
-        parser.error("Specify one of --git, --all, or --inputs")
+    if not only_one([args.git, args.inputs]):
+        parser.error("Specify only one of --git or --inputs")
 
     return args
 
@@ -78,7 +72,7 @@ def main():
         print changed_files
         for i in changed_files:
             publisher.publish_input(i)
-    elif args.all:
+    else:
         print "Publishing all..."
         publisher.publish_all()
 

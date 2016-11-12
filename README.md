@@ -21,10 +21,11 @@ Install from pip using `pip install slap`
                         full path to config file (ex: --config
                         c:/configs/int_config.json)
   -s, --site            create a site before publishing
+  -n NAME, --name NAME
+                        override the hostname specified in config
   -i INPUTS, --inputs INPUTS
                         one or more inputs to publish (ex: -i mxd/bar.mxd -i
                         mxd/foo.mxd
-  -a, --all             publish all entries in config
   -g GIT, --git GIT     publish all mxd files that have changed between HEAD
                         and this commit (ex: -g
                         b45e095834af1bc8f4c348bb4aad66bddcadeab4
@@ -39,13 +40,8 @@ There are a few artifacts that need to be generated (via ArcMap) per service and
 - Username/password: Credentials for publishing.  These are *not* specified in the configuration file, but are passed in at the command line.
 
 ## Specifying inputs to publish
-The script supports three main ways to specify MXD inputs: `--all`, `--git` and `--inputs`
-
-### --all
-Publish all MXDs specified in the config file, i.e.
-```
-slap --config int.json --username <myUsername> --password <myPassword> --all
-```
+By default, slap will publish all entries in the config file.  The script also supports two additional ways to specify
+MXD inputs: `--git` and `--inputs`.
 
 ### --git
 Publish all MXDs that changed since the last git revision; this is mainly used from a CI server.
@@ -218,7 +214,7 @@ Our config file should look like:
 
 To republish all the services using the production config file, we can do
 ```
-slap --config prod.json --username <myProductionUsername> --password <myProductionPassword> --all
+slap --config prod.json --username <myProductionUsername> --password <myProductionPassword>
 ```
 
 ## Integrating SLAP into another process

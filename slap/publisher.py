@@ -13,20 +13,20 @@ class Publisher:
         if hostname:
             self.config['agsUrl'] = self.config_parser.update_hostname(self.config['agsUrl'], hostname)
 
-        # This is a S-L-O-W import, so defer as long as possible
-        from slap.esri import ArcpyHelper
-        self.arcpy_helper = ArcpyHelper(
-            username=username,
-            password=password,
-            ags_admin_url=self.config['agsUrl']
-        )
-
         self.api = Api(
             ags_url=self.config['agsUrl'],
             token_url=self.config['tokenUrl'] if 'tokenUrl' in self.config else None,
             portal_url=self.config['portalUrl'] if 'portalUrl' in self.config else None,
             username=username,
             password=password
+        )
+
+        # This is a S-L-O-W import, so defer as long as possible
+        from slap.esri import ArcpyHelper
+        self.arcpy_helper = ArcpyHelper(
+            username=username,
+            password=password,
+            ags_admin_url=self.config['agsUrl']
         )
 
     @staticmethod
