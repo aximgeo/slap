@@ -1,7 +1,6 @@
 import os
 from slap.api import Api
 from slap.config import ConfigParser
-from slap.esri import ArcpyHelper
 
 
 class Publisher:
@@ -9,6 +8,9 @@ class Publisher:
     def __init__(self, username, password, config):
         self.config_parser = ConfigParser()
         self.config = self.config_parser.load_config(config) if isinstance(config, basestring) else config
+
+        # This is a S-L-O-W import, so defer as long as possible
+        from slap.esri import ArcpyHelper
         self.arcpy_helper = ArcpyHelper(
             username=username,
             password=password,
