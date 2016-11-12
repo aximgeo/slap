@@ -4,18 +4,11 @@ import json
 
 class ConfigParser:
 
-    config = None
-    cwd = None
     service_types = ['mapServices', 'gpServices', 'imageServices']
     required_keys = ['input', 'agsUrl']
 
     def __init__(self):
-        # ESRI's tools will change the cwd, so set it at the beginning
-        self.cwd = os.getcwd()
-
-    @property
-    def cwd(self):
-        return self.cwd
+        pass
 
     def load_config(self, path_to_config):
         with open(path_to_config) as config_file:
@@ -79,12 +72,9 @@ class ConfigParser:
         config_json['properties']['filePath'] = msd_path
         config_json['serviceName'] = filename
 
-    def get_full_path(self, config_path):
-        return config_path if os.path.isabs(config_path) else os.path.join(self.cwd, config_path)
-
-    def check_required_keys(self):
+    def check_required_keys(self, config):
         for key in self.required_keys:
-            test = self.config[key]
+            test = config[key]
 
     @staticmethod
     def get_msd_path(server_input_path, filename):
