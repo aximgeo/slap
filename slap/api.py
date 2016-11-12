@@ -103,10 +103,11 @@ class Api:
         config_store_connection = {'connectionString': config_store_path, 'type': 'FILESYSTEM'}
 
         # Set up paths for server directories
-        cache_dir_path = os.path.join(root_dir_path, 'arcgiscache')
-        jobs_dir_path = os.path.join(root_dir_path, 'arcgisjobs')
-        output_dir_path = os.path.join(root_dir_path, 'arcgisoutput')
-        system_dir_path = os.path.join(root_dir_path, 'arcgissystem')
+        # This will run in wine on linux, so we don't want os.path.separator here
+        cache_dir_path = root_dir_path + '/arcgiscache'
+        jobs_dir_path = root_dir_path + '/arcgisjobs'
+        output_dir_path = root_dir_path + '/arcgisoutput'
+        system_dir_path = root_dir_path + '/arcgissystem'
 
         # Create Python dictionaries representing server directories
         cache_dir = dict(name='arcgiscache', physicalPath=cache_dir_path, directoryType='CACHE', cleanupMode='NONE',
