@@ -4,6 +4,55 @@ from slap.esri import ArcpyHelper
 from unittest import TestCase
 from mock import MagicMock, patch
 
+@patch('slap.esri.arcpy')
+class TestRegisterDataSources(TestCase):
+
+    def setUp(self):
+        self.arcpy_helper = ArcpyHelper('user', 'pwd', 'my/ags')
+
+    def test_does_not_add_existing_sources(self, mock_arcpy):
+        mock_arcpy.ListDataStoreItems = MagicMock(return_value=["foo", "bar"])
+        self.arcpy_helper.register_data_source = MagicMock()
+        data_sources = [
+            {
+                "name": "foo",
+                "serverPath": "path/to/database_connection.sde"
+            },
+            {
+                "name": "bar",
+                "serverPath": "path/to/database_connection.gdb"
+            }
+        ]
+        self.arcpy_helper.register_data_sources(data_sources)
+        self.arcpy_helper.register_data_source.assert_not_called()
+
+    def test_add_data_store_item_folder(self, mock_arcpy):
+        data_source = {
+            "name": "myFolder",
+            "serverPath": "path/to/database_connection.gdb"
+        }
+        self.arcpy_helper.register_data_source(data_source)
+        mock_arcpy.AddDataStoreItem.assert_called_once_with(
+            connection_file=self.arcpy_helper.connection_file_path,
+            datastore_type='FOLDER',
+            connection_name='myFolder',
+            server_path=self.arcpy_helper.get_full_path(data_source["serverPath"]),
+            client_path=self.arcpy_helper.get_full_path(data_source["serverPath"])
+        )
+
+    def test_add_data_store_item_sde(self, mock_arcpy):
+        data_source = {
+            "name": "myDatabase",
+            "serverPath": "path/to/database_connection.sde"
+        }
+        self.arcpy_helper.register_data_source(data_source)
+        mock_arcpy.AddDataStoreItem.assert_called_once_with(
+            connection_file=self.arcpy_helper.connection_file_path,
+            datastore_type='DATABASE',
+            connection_name='myDatabase',
+            server_path=self.arcpy_helper.get_full_path(data_source["serverPath"]),
+            client_path=self.arcpy_helper.get_full_path(data_source["serverPath"])
+        )
 
 @patch('slap.esri.arcpy')
 class TestArcpyHelper(TestCase):
@@ -32,7 +81,7 @@ class TestArcpyHelper(TestCase):
             'serverUrl': 'some/path'
         }, 'file', 'file.sddraft')
         mock_arcpy.CreateGPSDDraft.assert_called_once_with(
-            result=os.path.join(os.getcwd(), 'my/result'),
+            result=self.arcpy_helper.get_full_path('my/result'),
             out_sddraft='file.sddraft',
             service_name='file',
             server_type='ARCGIS_SERVER',
@@ -68,7 +117,7 @@ class TestArcpyHelper(TestCase):
             'tags': 'Tags tags'
         }, 'myFile', 'myFile.sddraft')
         mock_arcpy.CreateGPSDDraft.assert_called_once_with(
-            result=os.path.join(os.getcwd(), 'my/result'),
+            result=self.arcpy_helper.get_full_path('my/result'),
             out_sddraft='myFile.sddraft',
             service_name='myNamedService',
             server_type='MY_SERVER_TYPE',
