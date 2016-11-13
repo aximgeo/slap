@@ -41,7 +41,7 @@ def get_args():
     if not args.config:
         parser.error("Full path to config file is required")
 
-    if not only_one([args.git, args.inputs]):
+    if args.git and args.inputs:
         parser.error("Specify only one of --git or --inputs")
 
     return args
