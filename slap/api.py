@@ -4,12 +4,13 @@ import json
 
 class Api:
 
-    def __init__(self, ags_url, token_url, portal_url, username, password):
+    def __init__(self, ags_url, token_url, portal_url, username, password, verify_certs=False):
         self._ags_url = ags_url
         self._token_url = token_url if token_url else ags_url + '/generateToken'
         self._portal_url = portal_url
         self._username = username
         self._password = password
+        self._verify_certs = verify_certs
         self._token = None
 
     @property
