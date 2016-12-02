@@ -1,6 +1,4 @@
-import os
-import urllib
-import urllib2
+import requests
 import json
 
 
@@ -26,21 +24,20 @@ class Api:
         }
 
     def post(self, url, params):
-        return self._request(url, params, 'POST')
+        return self._request(requests.post, url, params)
 
     def get(self, url, params):
-        return self._request(url, params, 'GET')
+        return self._request(requests.get, url, params)
 
-    @staticmethod
-    def _request(url, params, method):
-        encoded_params = urllib.urlencode(json.loads(json.dumps(params)))
-        request = urllib2.Request(url + '?' + encoded_params) if method == 'GET' else urllib2.Request(url, encoded_params)
-        request.get_method = lambda: method
-        response = urllib2.urlopen(request)
-        parsed_response = json.loads(response.read())
+    def _request(self, request_method, url, params):
+        response = request_method(url, params=params, verify=False)
 
-        if 'status' in parsed_response and parsed_response['status'] == 'error':  # handle a 200 response with an error
-            raise urllib2.URLError(parsed_response['status'] + ','.join(parsed_response['messages']))
+        if response.status_code != requests.codes.ok:
+            response.raise_for_status()
+
+        parsed_response = response.json()
+        if parsed_response['status'] == 'error':  # handle a 200 response with an error
+            raise requests.exceptions.RequestException(parsed_response['messages'][0])
 
         return parsed_response
 
