@@ -31,7 +31,7 @@ class Api:
         return self._request(requests.get, url, params)
 
     def _request(self, request_method, url, params):
-        response = request_method(url, params=params, verify=False)
+        response = request_method(url, params=params, verify=self._verify_certs)
 
         if response.status_code != requests.codes.ok:
             response.raise_for_status()
