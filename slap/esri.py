@@ -53,11 +53,11 @@ class ArcpyHelper:
             client_path=self.get_full_path(client_path)
         )
 
-    def upload_service_definition(self, sd, config):
+    def upload_service_definition(self, sd, initial_state="STARTED"):
         arcpy.UploadServiceDefinition_server(
             in_sd_file=sd,
             in_server=self.connection_file_path,
-            in_startupType=config["initialState"] if "initialState" in config else "STARTED"
+            in_startupType=initial_state
         )
 
     def create_server_connection_file(self, username, password, ags_admin_url, connection_file_name='temp.ags'):

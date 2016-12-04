@@ -228,8 +228,7 @@ class TestArcpyHelper(TestCase):
 
     def test_setting_service_initial_state(self, mock_arcpy):
         mock_arcpy.UploadServiceDefinition_server = MagicMock()
-        config = json.loads('{"initialState": "STOPPED"}')
-        self.arcpy_helper.upload_service_definition("test", config)
+        self.arcpy_helper.upload_service_definition("test", 'STOPPED')
         mock_arcpy.UploadServiceDefinition_server.assert_called_once_with(
             in_sd_file='test',
             in_server=self.arcpy_helper.connection_file_path,
@@ -238,7 +237,7 @@ class TestArcpyHelper(TestCase):
 
     def test_setting_service_initial_state_defaults_to_started(self, mock_arcpy):
         mock_arcpy.UploadServiceDefinition_server = MagicMock()
-        self.arcpy_helper.upload_service_definition("test", [])
+        self.arcpy_helper.upload_service_definition("test")
         mock_arcpy.UploadServiceDefinition_server.assert_called_once_with(
             in_sd_file='test',
             in_server=self.arcpy_helper.connection_file_path,
