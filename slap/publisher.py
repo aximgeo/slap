@@ -70,7 +70,7 @@ class Publisher:
         self.message("Publishing " + input_path)
         analysis = self._get_method_by_service_type(service_type)(config_entry, filename, sddraft)
         if self.analysis_successful(analysis['errors']):
-            self.publish_draft(sddraft, sd, service_name, folder_name, initial_state, json)
+            self.publish_sd_draft(sddraft, sd, service_name, folder_name, initial_state, json)
             self.message(input_path + " published successfully")
         else:
             self.message("Error publishing " + input_path + analysis)
@@ -111,7 +111,7 @@ class Publisher:
             return self.arcpy_helper.publish_gp
         raise ValueError('Invalid type: ' + service_type)
 
-    def publish_draft(self, path_to_sddraft, path_to_sd, service_name, folder_name=None, initial_state='STARTED', json=None):
+    def publish_sd_draft(self, path_to_sddraft, path_to_sd, service_name, folder_name=None, initial_state='STARTED', json=None):
         self.arcpy_helper.stage_service_definition(sddraft=path_to_sddraft, sd=path_to_sd)
         self.delete_service(service_name=service_name, folder_name=folder_name)
         self.arcpy_helper.upload_service_definition(sd=path_to_sd, initial_state=initial_state)
