@@ -58,14 +58,14 @@ class Publisher:
         for service_type in self.config_parser.service_types:
             self.publish_services(service_type)
 
-    def _get_method_by_type(self, type):
-        if type == 'mapServices':
+    def _get_method_by_service_type(self, service_type):
+        if service_type == 'mapServices':
             return self.arcpy_helper.publish_mxd
-        if type == 'imageServices':
+        if service_type == 'imageServices':
             return self.arcpy_helper.publish_image_service
-        if type == 'gpServices':
+        if service_type == 'gpServices':
             return self.arcpy_helper.publish_gp
-        raise ValueError('Invalid type: ' + type)
+        raise ValueError('Invalid type: ' + service_type)
 
     def publish_services(self, type):
         for config_entry in self.config[type]['services']:
@@ -89,7 +89,7 @@ class Publisher:
         initial_state = config_entry["initialState"] if "initialState" in config_entry else "STARTED"
 
         self.message("Publishing " + config_entry["input"])
-        analysis = self._get_method_by_type(service_type)(config_entry, filename, sddraft)
+        analysis = self._get_method_by_service_type(service_type)(config_entry, filename, sddraft)
         if self.analysis_successful(analysis['errors']):
             self.publish_draft(sddraft, sd, service_name, folder_name, initial_state, json)
             self.message(config_entry["input"] + " published successfully")

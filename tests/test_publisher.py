@@ -78,12 +78,12 @@ class TestMapServicePublisher(TestCase):
             self.publisher.analysis_successful({'foo': 'bar'})
 
     def test_get_method_by_type(self):
-        self.assertEqual(self.publisher.arcpy_helper.publish_mxd, self.publisher._get_method_by_type('mapServices'))
-        self.assertEqual(self.publisher.arcpy_helper.publish_gp, self.publisher._get_method_by_type('gpServices'))
+        self.assertEqual(self.publisher.arcpy_helper.publish_mxd, self.publisher._get_method_by_service_type('mapServices'))
+        self.assertEqual(self.publisher.arcpy_helper.publish_gp, self.publisher._get_method_by_service_type('gpServices'))
         self.assertEqual(self.publisher.arcpy_helper.publish_image_service,
-                         self.publisher._get_method_by_type('imageServices'))
+                         self.publisher._get_method_by_service_type('imageServices'))
         with self.assertRaises(ValueError):
-            self.publisher._get_method_by_type('foo')
+            self.publisher._get_method_by_service_type('foo')
 
 
 @patch('slap.config.ConfigParser.load_config')
