@@ -111,20 +111,20 @@ class Publisher:
         else:
             return os.path.splitext(os.path.split(config_entry["input"])[1])[0]
 
-    def publish_draft(self, sddraft, sd, service_name, folder_name, initial_state, json):
-        self.arcpy_helper.stage_service_definition(sddraft=sddraft, sd=sd)
+    def publish_draft(self, path_to_sddraft, path_to_sd, service_name, folder_name=None, initial_state='STARTED', json=None):
+        self.arcpy_helper.stage_service_definition(sddraft=path_to_sddraft, sd=path_to_sd)
         self.delete_service(service_name=service_name, folder_name=folder_name)
-        self.arcpy_helper.upload_service_definition(sd=sd, initial_state=initial_state)
+        self.arcpy_helper.upload_service_definition(sd=path_to_sd, initial_state=initial_state)
         if json:
-            self.update_service(service_name=service_name, folder_name=folder_name, json=json)
+            self.update_service(service_name=service_name, json=json, folder_name=folder_name)
 
-    def delete_service(self, service_name, folder_name):
+    def delete_service(self, service_name, folder_name=None):
         service_exists = self.api.service_exists(service_name=service_name, folder=folder_name)
         if service_exists['exists']:
             self.message("Deleting old service...")
             self.api.delete_service(service_name=service_name, folder=folder_name)
 
-    def update_service(self, service_name, folder_name, json):
+    def update_service(self, service_name, json, folder_name=None):
         default_json = self.api.get_service_params(service_name=service_name, folder=folder_name)
         json = self.config_parser.merge_json(default_json, json)
         self.api.edit_service(service_name=service_name, folder=folder_name, params=json)
