@@ -18,7 +18,6 @@ class ArcpyHelper:
             connection_file_name
         )
 
-
     @property
     def cwd(self):
         return self._cwd
