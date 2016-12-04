@@ -113,28 +113,15 @@ class Publisher:
             self.update_service(service_name=service_name, folder_name=folder_name, json=json)
 
     def delete_service(self, service_name, folder_name):
-        service_exists = self.api.service_exists(
-            service_name=service_name,
-            folder=folder_name
-        )
+        service_exists = self.api.service_exists(service_name=service_name, folder=folder_name)
         if service_exists['exists']:
             self.message("Deleting old service...")
-            self.api.delete_service(
-                service_name=service_name,
-                folder=folder_name
-            )
+            self.api.delete_service(service_name=service_name, folder=folder_name)
 
     def update_service(self, service_name, folder_name, json):
-        default_json = self.api.get_service_params(
-            service_name=service_name,
-            folder=folder_name
-        )
+        default_json = self.api.get_service_params(service_name=service_name, folder=folder_name)
         json = self.config_parser.merge_json(default_json, json)
-        self.api.edit_service(
-            service_name=service_name,
-            folder=folder_name,
-            params=json
-        )
+        self.api.edit_service(service_name=service_name, folder=folder_name, params=json)
 
     def register_data_sources(self):
         if "dataSources" in self.config:
