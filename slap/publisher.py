@@ -58,15 +58,6 @@ class Publisher:
         for service_type in self.config_parser.service_types:
             self.publish_services(service_type)
 
-    def _get_method_by_service_type(self, service_type):
-        if service_type == 'mapServices':
-            return self.arcpy_helper.publish_mxd
-        if service_type == 'imageServices':
-            return self.arcpy_helper.publish_image_service
-        if service_type == 'gpServices':
-            return self.arcpy_helper.publish_gp
-        raise ValueError('Invalid type: ' + service_type)
-
     def publish_services(self, service_type):
         for config_entry in self.config[service_type]['services']:
             self.publish_service(service_type, config_entry)
@@ -93,6 +84,15 @@ class Publisher:
         initial_state = config_entry["initialState"] if "initialState" in config_entry else "STARTED"
         return input_path, output_path, service_name, folder_name, json, initial_state
 
+    @staticmethod
+    def _get_service_name_from_config(config_entry):
+        if "serviceName" in config_entry:
+            return config_entry['serviceName']
+        elif 'json' in config_entry and 'serviceName' in config_entry['json']:
+            return config_entry['json']['serviceName']
+        else:
+            return os.path.splitext(os.path.split(config_entry["input"])[1])[0]
+
     def _get_service_definition_paths(self, output):
         filename = os.path.splitext(os.path.split(input)[1])[0]
         output_directory = self.arcpy_helper.get_full_path(output)
@@ -102,14 +102,14 @@ class Publisher:
         sd = os.path.join(output_directory, '{}.' + "sd").format(filename)
         return filename, sddraft, sd
 
-    @staticmethod
-    def _get_service_name_from_config(config_entry):
-        if "serviceName" in config_entry:
-            return config_entry['serviceName']
-        elif 'json' in config_entry and 'serviceName' in config_entry['json']:
-            return config_entry['json']['serviceName']
-        else:
-            return os.path.splitext(os.path.split(config_entry["input"])[1])[0]
+    def _get_method_by_service_type(self, service_type):
+        if service_type == 'mapServices':
+            return self.arcpy_helper.publish_mxd
+        if service_type == 'imageServices':
+            return self.arcpy_helper.publish_image_service
+        if service_type == 'gpServices':
+            return self.arcpy_helper.publish_gp
+        raise ValueError('Invalid type: ' + service_type)
 
     def publish_draft(self, path_to_sddraft, path_to_sd, service_name, folder_name=None, initial_state='STARTED', json=None):
         self.arcpy_helper.stage_service_definition(sddraft=path_to_sddraft, sd=path_to_sd)
