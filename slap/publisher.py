@@ -40,11 +40,11 @@ class Publisher:
         input_was_published = False
         for service_type in self.config_parser.service_types:
             if not input_was_published:
-                input_was_published = self.check_service_type(service_type, input_value)
+                input_was_published = self._check_service_type(service_type, input_value)
         if not input_was_published:
             raise ValueError('Input ' + input_value + ' was not found in config.')
 
-    def check_service_type(self, service_type, value):
+    def _check_service_type(self, service_type, value):
         ret = False
         if service_type in self.config:
             for config in self.config[service_type]['services']:
@@ -67,34 +67,40 @@ class Publisher:
             return self.arcpy_helper.publish_gp
         raise ValueError('Invalid type: ' + service_type)
 
-    def publish_services(self, type):
-        for config_entry in self.config[type]['services']:
-            self.publish_service(type, config_entry)
+    def publish_services(self, service_type):
+        for config_entry in self.config[service_type]['services']:
+            self.publish_service(service_type, config_entry)
 
     def publish_service(self, service_type, config_entry):
-        filename = os.path.splitext(os.path.split(config_entry["input"])[1])[0]
-        if 'json' not in config_entry:
-            config_entry['json'] = {}
-        config_entry['json']['serviceName'] = self._get_service_name_from_config(config_entry)
+        input_path, output_path, service_name, folder_name, json, initial_state = \
+            self._get_publishing_params_from_config(config_entry)
+        filename, sd, sddraft = self._get_service_definition_paths(output_path)
 
-        output_directory = self.arcpy_helper.get_output_directory(config_entry)
-        if not os.path.exists(output_directory):
-            os.makedirs(output_directory)
-
-        sddraft = os.path.join(output_directory, '{}.' + "sddraft").format(filename)
-        sd = os.path.join(output_directory, '{}.' + "sd").format(filename)
-        service_name = config_entry['json']['serviceName']
-        folder_name = config_entry["folderName"] if "folderName" in config_entry else None
-        json = config_entry['json']
-        initial_state = config_entry["initialState"] if "initialState" in config_entry else "STARTED"
-
-        self.message("Publishing " + config_entry["input"])
+        self.message("Publishing " + input_path)
         analysis = self._get_method_by_service_type(service_type)(config_entry, filename, sddraft)
         if self.analysis_successful(analysis['errors']):
             self.publish_draft(sddraft, sd, service_name, folder_name, initial_state, json)
-            self.message(config_entry["input"] + " published successfully")
+            self.message(input_path + " published successfully")
         else:
-            self.message("Error publishing " + config_entry['input'] + analysis)
+            self.message("Error publishing " + input_path + analysis)
+
+    def _get_publishing_params_from_config(self, config_entry):
+        input_path = config_entry['input']
+        output_path = config_entry['output'] if 'output' in config_entry else 'output'
+        service_name = self._get_service_name_from_config(config_entry)
+        folder_name = config_entry["folderName"] if "folderName" in config_entry else None
+        json = config_entry['json'] if 'json' in config_entry else {}
+        initial_state = config_entry["initialState"] if "initialState" in config_entry else "STARTED"
+        return input_path, output_path, service_name, folder_name, json, initial_state
+
+    def _get_service_definition_paths(self, output):
+        filename = os.path.splitext(os.path.split(input)[1])[0]
+        output_directory = self.arcpy_helper.get_full_path(output)
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+        sddraft = os.path.join(output_directory, '{}.' + "sddraft").format(filename)
+        sd = os.path.join(output_directory, '{}.' + "sd").format(filename)
+        return filename, sddraft, sd
 
     @staticmethod
     def _get_service_name_from_config(config_entry):
