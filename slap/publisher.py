@@ -65,7 +65,7 @@ class Publisher:
     def publish_service(self, service_type, config_entry):
         input_path, output_path, service_name, folder_name, json, initial_state = \
             self._get_publishing_params_from_config(config_entry)
-        filename, sd, sddraft = self._get_service_definition_paths(output_path)
+        filename, sd, sddraft = self._get_service_definition_paths(input_path, output_path)
 
         self.message("Publishing " + input_path)
         analysis = self._get_method_by_service_type(service_type)(config_entry, filename, sddraft)
@@ -93,14 +93,18 @@ class Publisher:
         else:
             return os.path.splitext(os.path.split(config_entry["input"])[1])[0]
 
-    def _get_service_definition_paths(self, output):
-        filename = os.path.splitext(os.path.split(input)[1])[0]
-        output_directory = self.arcpy_helper.get_full_path(output)
-        if not os.path.exists(output_directory):
-            os.makedirs(output_directory)
+    def _get_service_definition_paths(self, input_path, output_path):
+        filename = os.path.splitext(os.path.split(input_path)[1])[0]
+        output_directory = self._create_output_directory(output_path)
         sddraft = os.path.join(output_directory, '{}.' + "sddraft").format(filename)
         sd = os.path.join(output_directory, '{}.' + "sd").format(filename)
         return filename, sddraft, sd
+
+    def _create_output_directory(self, output_path):
+        output_directory = self.arcpy_helper.get_full_path(output_path)
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+        return output_directory
 
     def _get_method_by_service_type(self, service_type):
         if service_type == 'mapServices':
