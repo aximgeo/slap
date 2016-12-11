@@ -1,3 +1,4 @@
+from os import path
 import json
 import unittest
 from unittest import TestCase
@@ -19,6 +20,14 @@ class TestMapServicePublisher(TestCase):
             }
         }
         self.publisher = Publisher('user', 'pwd', config)
+
+    def test_get_service_definition_paths(self):
+        expected = ('file', path.abspath('output/file.sddraft'), path.abspath('output/file.sd'))
+        actual = self.publisher._get_service_definition_paths('/my/file.mxd', 'output')
+        self.assertEqual(expected, actual)
+
+    def test_create_output_directory(self):
+        pass
 
     def test_set_hostname(self):
         config = {
