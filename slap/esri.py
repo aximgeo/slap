@@ -26,9 +26,6 @@ class ArcpyHelper:
         return os.path.normpath(config_path) if os.path.isabs(config_path) \
             else os.path.normpath(os.path.join(self.cwd, config_path))
 
-    def get_output_directory(self, output_directory):
-        return self.get_full_path(config_entry["output"]) if "output" in config_entry else self.get_full_path('output')
-
     @staticmethod
     def stage_service_definition(sddraft, sd):
         arcpy.StageService_server(sddraft, sd)
