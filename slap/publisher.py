@@ -65,7 +65,7 @@ class Publisher:
     def publish_service(self, service_type, config_entry):
         input_path, output_path, service_name, folder_name, json, initial_state = \
             self._get_publishing_params_from_config(config_entry)
-        filename, sd, sddraft = self._get_service_definition_paths(input_path, output_path)
+        filename, sddraft, sd = self._get_service_definition_paths(input_path, output_path)
 
         self.message("Publishing " + input_path)
         analysis = self._get_method_by_service_type(service_type)(config_entry, filename, sddraft)
