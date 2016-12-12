@@ -69,11 +69,9 @@ class Publisher:
 
         self.message("Publishing " + input_path)
         analysis = self._get_method_by_service_type(service_type)(config_entry, filename, sddraft)
-        if self.analysis_successful(analysis['errors']):
+        if self.analysis_successful(analysis['errors']):  # This may throw an exception
             self.publish_sd_draft(sddraft, sd, service_name, folder_name, initial_state, json)
             self.message(input_path + " published successfully")
-        else:
-            self.message("Error publishing " + input_path + analysis)
 
     def _get_publishing_params_from_config(self, config_entry):
         input_path = config_entry['input']
@@ -128,9 +126,9 @@ class Publisher:
             self.message("Deleting old service...")
             self.api.delete_service(service_name=service_name, folder=folder_name)
 
-    def update_service(self, service_name, json, folder_name=None):
+    def update_service(self, service_name, folder_name=None, json=None):
         default_json = self.api.get_service_params(service_name=service_name, folder=folder_name)
-        json = self.config_parser.merge_json(default_json, json)
+        json = self.config_parser.merge_json(default_json, json if json else {})
         self.api.edit_service(service_name=service_name, folder=folder_name, params=json)
 
     def register_data_sources(self):

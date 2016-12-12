@@ -1,4 +1,6 @@
 from unittest import TestCase
+from mock import patch, mock_open
+import json
 from slap.config import ConfigParser
 
 
@@ -9,6 +11,24 @@ class TestConfigParser(TestCase):
         self.config_parser.map_service_default_json = {}
         self.config_parser.image_service_default_json = {}
         self.config_parser.gp_service_default_json = {}
+
+    def test_load_config_from_file(self):
+        config_data = '{"foo": "bar"}'
+        expected = json.loads(config_data)
+        with patch('__builtin__.open', mock_open(read_data=config_data)):
+            config_parser = ConfigParser()
+            actual = config_parser._load_config_from_file('/path/to/config')
+            self.assertEqual(expected, actual)
+
+    def test_load_config(self):
+        file_path = '/path/to/config'
+        expected_config = dict(foo='bar')
+        with patch('slap.config.ConfigParser._load_config_from_file') as mock_load_file:
+            mock_load_file.return_value = expected_config
+            with patch('slap.config.ConfigParser.parse_config') as mock_parse:
+                self.config_parser.load_config(file_path)
+                mock_load_file.assert_called_once_with(file_path)
+                mock_parse.assert_called_once_with(expected_config)
 
     def test_empty_config(self):
         self.assertEqual(self.config_parser.parse_config({}), {

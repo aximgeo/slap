@@ -13,9 +13,12 @@ class ConfigParser:
         pass
 
     def load_config(self, path_to_config):
+        return self.parse_config(self._load_config_from_file(path_to_config))
+
+    @staticmethod
+    def _load_config_from_file(path_to_config):
         with open(path_to_config) as config_file:
-            config = json.load(config_file)
-        return self.parse_config(config)
+            return json.load(config_file)
 
     def parse_config(self, config):
         parsed = self.get_root_keys(config)
@@ -38,7 +41,8 @@ class ConfigParser:
                 root_keys[key] = config[key]
         return root_keys
 
-    def get_type_keys(self, config, service_type):
+    @staticmethod
+    def get_type_keys(config, service_type):
         type_keys = {}
         for key in config:
             if key == service_type:
@@ -48,13 +52,14 @@ class ConfigParser:
         return type_keys
 
     def merge(self, a, b, path=None):
-        if path is None: path = []
+        if path is None:
+            path = []
         for key in b:
             if key in a:
                 if isinstance(a[key], dict) and isinstance(b[key], dict):
                     self.merge(a[key], b[key], path + [str(key)])
                 elif a[key] == b[key]:
-                    pass # same leaf value
+                    pass  # same leaf value
                 else:
                     a[key] = b[key]  # Always overwrite
             else:
@@ -74,16 +79,6 @@ class ConfigParser:
         url_parts = url_parts._replace(netloc=re.sub('^[^:]*', hostname, url_parts.netloc))
         return urlparse.urlunsplit(url_parts)
 
-    @staticmethod
-    def set_server_properties(config_json, server_input_path, filename):
-        msd_path = ConfigParser.get_msd_path(server_input_path, filename)
-        config_json['properties']['filePath'] = msd_path
-        config_json['serviceName'] = filename
-
     def check_required_keys(self, config):
         for key in self.required_keys:
             test = config[key]
-
-    @staticmethod
-    def get_msd_path(server_input_path, filename):
-        return os.path.join(server_input_path, filename + '.MapServer', 'extracted', 'v101', filename + '.msd')
