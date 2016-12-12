@@ -13,9 +13,12 @@ class ConfigParser:
         pass
 
     def load_config(self, path_to_config):
+        return self.parse_config(self._load_config_from_file(path_to_config))
+
+    @staticmethod
+    def _load_config_from_file(path_to_config):
         with open(path_to_config) as config_file:
-            config = json.load(config_file)
-        return self.parse_config(config)
+            return json.load(config_file)
 
     def parse_config(self, config):
         parsed = self.get_root_keys(config)
