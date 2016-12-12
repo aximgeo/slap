@@ -41,7 +41,8 @@ class ConfigParser:
                 root_keys[key] = config[key]
         return root_keys
 
-    def get_type_keys(self, config, service_type):
+    @staticmethod
+    def get_type_keys(config, service_type):
         type_keys = {}
         for key in config:
             if key == service_type:
@@ -51,13 +52,14 @@ class ConfigParser:
         return type_keys
 
     def merge(self, a, b, path=None):
-        if path is None: path = []
+        if path is None:
+            path = []
         for key in b:
             if key in a:
                 if isinstance(a[key], dict) and isinstance(b[key], dict):
                     self.merge(a[key], b[key], path + [str(key)])
                 elif a[key] == b[key]:
-                    pass # same leaf value
+                    pass  # same leaf value
                 else:
                     a[key] = b[key]  # Always overwrite
             else:

@@ -162,12 +162,12 @@ class TestMapServicePublisher(TestCase):
     def test_update_service(self):
         service_name = 'myService'
         folder_name = 'folder'
-        json = {'foo': 'bar', 'baz': 'quux'}
+        params = {'foo': 'bar', 'baz': 'quux'}
         with patch('slap.api.Api.get_service_params') as mock_get_params:
             mock_get_params.return_value = {'baz': 'quux'}
             with patch('slap.api.Api.edit_service') as mock_edit:
                 self.publisher.update_service(service_name, folder_name, {'foo': 'bar'})
-                mock_edit.assert_called_once_with(service_name=service_name, folder_name=folder_name, params=json)
+                mock_edit.assert_called_once_with(service_name=service_name, folder=folder_name, params=params)
 
 
 @patch('slap.esri.ArcpyHelper.stage_service_definition')

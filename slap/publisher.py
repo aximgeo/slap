@@ -126,9 +126,9 @@ class Publisher:
             self.message("Deleting old service...")
             self.api.delete_service(service_name=service_name, folder=folder_name)
 
-    def update_service(self, service_name, json, folder_name=None):
+    def update_service(self, service_name, folder_name=None, json=None):
         default_json = self.api.get_service_params(service_name=service_name, folder=folder_name)
-        json = self.config_parser.merge_json(default_json, json)
+        json = self.config_parser.merge_json(default_json, json if json else {})
         self.api.edit_service(service_name=service_name, folder=folder_name, params=json)
 
     def register_data_sources(self):
