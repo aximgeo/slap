@@ -5,9 +5,9 @@ from mock import PropertyMock, patch
 
 
 class TestApi(TestCase):
-    api = None
 
-    def create_api(self):
+    @staticmethod
+    def create_api():
         api = Api(
             ags_url='http://myserver/arcgis/admin',
             token_url=None,
@@ -114,6 +114,14 @@ class TestApi(TestCase):
                        {'folderName': 'myFolder', 'serviceName': 'myService', 'f': 'json', 'token': 'my_token_value',
                         'type': 'MapServer'},
                        'myService', 'myFolder')
+
+    def test_build_params(self):
+        with patch('slap.api.Api.token', new_callable=PropertyMock) as mock_token:
+            mock_token.return_value = 'my-token'
+            api = self.create_api()
+            expected = {'foo': 'bar', 'f': 'json', 'token': 'my-token'}
+            actual = api.build_params({'foo': 'bar'})
+            self.assertEqual(expected, actual)
 
 
 if __name__ == '__main__':
