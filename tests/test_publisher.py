@@ -27,6 +27,25 @@ class TestMapServicePublisher(TestCase):
             self.publisher.publish_all()
             mock_publish_services.assert_has_calls(expected_calls)
 
+    def test_get_publishing_params_from_config(self):
+        config = {
+            'input': 'some/input',
+            'output': 'some/output',
+            'serviceName': 'serviceName',
+            'folderName': 'folderName',
+            'json': {'foo': 'bar'},
+            'initialState': 'STOPPED'
+        }
+        expected = ('some/input', 'some/output', 'serviceName', 'folderName', {'foo': 'bar'}, 'STOPPED')
+        self.assertEqual(expected, self.publisher._get_publishing_params_from_config(config))
+
+    def test_get_default_publishing_params_from_config(self):
+        config = {
+            'input': 'some/input'
+        }
+        expected = ('some/input', 'output', 'input', None, {}, 'STARTED')
+        self.assertEqual(expected, self.publisher._get_publishing_params_from_config(config))
+
     def test_get_service_definition_paths(self):
         expected = ('file', path.abspath('output/file.sddraft'), path.abspath('output/file.sd'))
         actual = self.publisher._get_service_definition_paths('/my/file.mxd', 'output')
