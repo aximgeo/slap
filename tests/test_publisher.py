@@ -135,6 +135,48 @@ class TestMapServicePublisher(TestCase):
             self.publisher._get_method_by_service_type('foo')
 
 
+@patch('slap.esri.ArcpyHelper.stage_service_definition')
+@patch('slap.publisher.Publisher.delete_service')
+@patch('slap.esri.ArcpyHelper.upload_service_definition')
+@patch('slap.publisher.Publisher.update_service')
+class TestMapServicePublisher(TestCase):
+
+    def setUp(self):
+        config = {
+            'agsUrl': 'my/server',
+            'mapServices': {
+                'services': [
+                    {
+                        'input': 'foo'
+                    }
+                ]
+            }
+        }
+        self.publisher = Publisher('user', 'pwd', config)
+
+    def test_publish_sd_draft(self, mock_update, mock_upload_sd, mock_delete, mock_stage_sd):
+        sddraft = 'path/to/sddraft'
+        sd = 'path/to/sd'
+        service_name = 'myService'
+        self.publisher.publish_sd_draft(sddraft, sd, service_name)
+        mock_stage_sd.assert_called_once_with(sddraft=sddraft, sd=sd)
+        mock_delete.assert_called_once_with(service_name=service_name, folder_name=None)
+        mock_upload_sd.assert_called_once_with(sd=sd, initial_state='STARTED')
+        mock_update.assert_not_called()
+
+    def test_publish_sd_draft_with_json(self, mock_update, mock_upload_sd, mock_delete, mock_stage_sd):
+        sddraft = 'path/to/sddraft'
+        sd = 'path/to/sd'
+        service_name = 'myService'
+        folder = 'folder'
+        initial_state = 'STOPPED'
+        json = {'foo': 'bar'}
+        self.publisher.publish_sd_draft(sddraft, sd, service_name, folder, initial_state, json)
+        mock_stage_sd.assert_called_once_with(sddraft=sddraft, sd=sd)
+        mock_delete.assert_called_once_with(service_name=service_name, folder_name=folder)
+        mock_upload_sd.assert_called_once_with(sd=sd, initial_state=initial_state)
+        mock_update.assert_called_once_with(service_name=service_name, folder_name=folder, json=json)
+
 @patch('slap.config.ConfigParser.load_config')
 class TestLoadingConfig(TestCase):
 
