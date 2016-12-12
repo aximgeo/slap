@@ -148,6 +148,22 @@ class TestApi(TestCase):
             actual = api.build_params({'foo': 'bar'})
             self.assertEqual(expected, actual)
 
+    def test_create_site(self):
+        api = self.create_api()
+        with patch('slap.api.Api.post') as mock_post:
+            params = {
+                'foo': 'bar'
+            }
+            expected_params = {
+                'foo': 'bar',
+                'username': 'user',
+                'password': 'pwd',
+                'confirmPassword': 'pwd',
+                'f': 'json'
+            }
+            api.create_site(username='user', password='pwd', params=params)
+            mock_post.assert_called_once_with(api._ags_url + '/createNewSite', expected_params)
+
 if __name__ == '__main__':
 
     unittest.main()
