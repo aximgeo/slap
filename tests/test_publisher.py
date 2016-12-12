@@ -137,7 +137,7 @@ class TestMapServicePublisher(TestCase):
     def test_register_data_sources(self):
         data_sources = [{'foo': 'bar'}]
         self.publisher.config = {'dataSources': data_sources}
-        with patch('slap.publisher.Publisher.register_data_sources') as mock_register:
+        with patch('slap.esri.ArcpyHelper.register_data_sources') as mock_register:
             self.publisher.register_data_sources()
             mock_register.assert_called_once_with(data_sources)
 
