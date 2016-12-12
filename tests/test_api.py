@@ -50,6 +50,22 @@ class TestApi(TestCase):
         token = api.token
         self.assertEqual(token, 'my_new_token_value')
 
+    def test_get(self):
+        with patch('slap.api.Api._request') as mock_request:
+            api = self.create_api()
+            url = 'my/url'
+            params = {'foo': 'bar'}
+            api.get(url=url, params=params)
+            mock_request.assert_called_once_with(url, params, 'GET')
+
+    def test_post(self):
+        with patch('slap.api.Api._request') as mock_request:
+            api = self.create_api()
+            url = 'my/url'
+            params = {'foo': 'bar'}
+            api.post(url=url, params=params)
+            mock_request.assert_called_once_with(url, params, 'POST')
+
     def get_mock(self, url, method, *args):
         with patch('slap.api.Api.token', new_callable=PropertyMock) as mock_token:
             with patch('slap.api.Api.get') as mock_method:
@@ -122,7 +138,6 @@ class TestApi(TestCase):
             expected = {'foo': 'bar', 'f': 'json', 'token': 'my-token'}
             actual = api.build_params({'foo': 'bar'})
             self.assertEqual(expected, actual)
-
 
 if __name__ == '__main__':
 
