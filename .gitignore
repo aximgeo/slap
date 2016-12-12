@@ -1,3 +1,4 @@
+publish.sh
 .idea/*
 *.pyc
 build/
