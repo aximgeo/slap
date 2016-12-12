@@ -73,8 +73,7 @@ class ArcpyHelper:
         return os.path.join(output_path, connection_file_name)
 
     def set_workspaces(self, path_to_mxd, workspaces):
-        full_mxd_path = self.get_full_path(path_to_mxd)
-        mxd = arcpy.mapping.MapDocument(full_mxd_path)
+        mxd = self._get_mxd_from_path(path_to_mxd)
         for workspace in workspaces:
             print("Replacing workspace " + workspace["old"]["path"] + " => " + workspace["new"]["path"])
             mxd.replaceWorkspaces(
@@ -87,6 +86,10 @@ class ArcpyHelper:
         mxd.relativePaths = True
         mxd.save()
         del mxd
+
+    def _get_mxd_from_path(self, path_to_mxd):
+        full_mxd_path = self.get_full_path(path_to_mxd)
+        return arcpy.mapping.MapDocument(full_mxd_path)
 
     def publish_gp(self, config_entry, filename, sddraft):
         if "result" in config_entry:
