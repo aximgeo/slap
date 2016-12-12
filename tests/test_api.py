@@ -164,6 +164,12 @@ class TestApi(TestCase):
             api.create_site(username='user', password='pwd', params=params)
             mock_post.assert_called_once_with(api._ags_url + '/createNewSite', expected_params)
 
+    def test_create_default_site(self):
+        api = self.create_api()
+        with patch('slap.api.Api.create_site') as mock_create_site:
+            api.create_default_site()
+            mock_create_site.assert_called_once_with(api._username, api._password, api.get_default_site_params())
+
 if __name__ == '__main__':
 
     unittest.main()
