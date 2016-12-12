@@ -1,8 +1,8 @@
 import os
-import json
+from os import path
 from slap.esri import ArcpyHelper
 from unittest import TestCase
-from mock import MagicMock, patch
+from mock import MagicMock, patch, call
 
 @patch('slap.esri.arcpy')
 class TestRegisterDataSources(TestCase):
@@ -63,7 +63,61 @@ class TestArcpyHelper(TestCase):
     def test_get_full_path(self, mock_arcpy):
         self.assertEqual(os.path.join(os.getcwd(), 'foo'), self.arcpy_helper.get_full_path('foo'))
 
+    def test_get_mxd_from_path(self, mock_arcpy):
+        path_to_mxd = '/path/to/mxd'
+        mock_arcpy.mapping.MapDocument = MagicMock()
+        self.arcpy_helper._get_mxd_from_path(path_to_mxd)
+        mock_arcpy.mapping.MapDocument.assert_called_once_with(path.normpath(path_to_mxd))
+
     def test_set_workspaces(self, mock_arcpy):
+        workspaces = [
+            {
+                "old": {
+                    "path": "c:/path/to/integration/connectionFile1.sde"
+                },
+                "new": {
+                    "path": "c:/path/to/production/connectionFile1.sde",
+                    "type": "FILEGDB_WORKSPACE"
+                }
+            },
+            {
+                "old": {
+                    "path": "c:/path/to/integration/connectionFile2.sde",
+                    "type": "FILEGDB_WORKSPACE"
+                },
+                "new": {
+                    "path": "c:/path/to/production/connectionFile2.sde"
+                }
+            }
+        ]
+        expected_calls = [
+                call(
+                    old_workspace_path="c:/path/to/integration/connectionFile1.sde",
+                    old_workspace_type="SDE_WORKSPACE",
+                    new_workspace_path="c:/path/to/production/connectionFile1.sde",
+                    new_workspace_type="FILEGDB_WORKSPACE",
+                    validate=False
+                ),
+                call(
+                    old_workspace_path="c:/path/to/integration/connectionFile2.sde",
+                    old_workspace_type="FILEGDB_WORKSPACE",
+                    new_workspace_path="c:/path/to/production/connectionFile2.sde",
+                    new_workspace_type="SDE_WORKSPACE",
+                    validate=False
+                ),
+        ]
+        with patch('slap.esri.ArcpyHelper._get_mxd_from_path') as mock_mxd_creator:
+            mock_mxd = MagicMock()
+            mock_mxd.replaceWorkspaces = MagicMock()
+            mock_mxd.save = MagicMock()
+            mock_mxd.relativePaths = False
+            mock_mxd_creator.return_value = mock_mxd
+            self.arcpy_helper.set_workspaces('/path/to/mxd', workspaces)
+            mock_mxd.replaceWorkspaces.assert_has_calls(expected_calls)
+            self.assertTrue(mock_mxd.relativePaths)
+            mock_mxd.save.assert_called_once()
+
+    def test_set_workspaces_is_called(self, mock_arcpy):
         mock_arcpy.mapping.MapDocument = MagicMock(return_value={'mxd': 'myMap'})
         mock_arcpy.mapping.CreateMapSDDraft = MagicMock()
         self.arcpy_helper.set_workspaces = MagicMock()
@@ -228,8 +282,7 @@ class TestArcpyHelper(TestCase):
 
     def test_setting_service_initial_state(self, mock_arcpy):
         mock_arcpy.UploadServiceDefinition_server = MagicMock()
-        config = json.loads('{"initialState": "STOPPED"}')
-        self.arcpy_helper.upload_service_definition("test", config)
+        self.arcpy_helper.upload_service_definition("test", 'STOPPED')
         mock_arcpy.UploadServiceDefinition_server.assert_called_once_with(
             in_sd_file='test',
             in_server=self.arcpy_helper.connection_file_path,
@@ -238,7 +291,7 @@ class TestArcpyHelper(TestCase):
 
     def test_setting_service_initial_state_defaults_to_started(self, mock_arcpy):
         mock_arcpy.UploadServiceDefinition_server = MagicMock()
-        self.arcpy_helper.upload_service_definition("test", [])
+        self.arcpy_helper.upload_service_definition("test")
         mock_arcpy.UploadServiceDefinition_server.assert_called_once_with(
             in_sd_file='test',
             in_server=self.arcpy_helper.connection_file_path,

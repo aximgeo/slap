@@ -11,10 +11,6 @@ class TestGitFileManager(TestCase):
         get_changed_files_mock.return_value = ['foo.mxd', 'bar.txt', 'baz.MXD']
         self.assertEqual(git.get_changed_mxds(), ['foo.mxd', 'baz.MXD'])
 
-    def test_get_args(self, get_changed_files_mock):
-        get_changed_files_mock.return_value = ['foo.mxd', 'bar.txt', 'baz.MXD']
-        self.assertEqual(git.build_args(), '-i foo.mxd -i baz.MXD')
-
 
 @patch('slap.git.check_output')
 class TestGitArguments(TestCase):
