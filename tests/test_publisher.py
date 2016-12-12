@@ -1,3 +1,4 @@
+from os import path
 import json
 import unittest
 from unittest import TestCase
@@ -19,6 +20,14 @@ class TestMapServicePublisher(TestCase):
             }
         }
         self.publisher = Publisher('user', 'pwd', config)
+
+    def test_get_service_definition_paths(self):
+        expected = ('file', path.abspath('output/file.sddraft'), path.abspath('output/file.sd'))
+        actual = self.publisher._get_service_definition_paths('/my/file.mxd', 'output')
+        self.assertEqual(expected, actual)
+
+    def test_create_output_directory(self):
+        pass
 
     def test_set_hostname(self):
         config = {
@@ -68,7 +77,7 @@ class TestMapServicePublisher(TestCase):
         self.publisher.config = json.loads(
             '{"imageServices": {"services": [{"input": "\\\\foo\\bar\\baz",'
             '"connectionFilePath": "my/service/connection"}]}}')
-        self.assertTrue(self.publisher.check_service_type('imageServices', '\\foo\bar\baz'))
+        self.assertTrue(self.publisher._check_service_type('imageServices', '\\foo\bar\baz'))
 
     def test_analysis_successful_true(self):
         self.assertTrue(self.publisher.analysis_successful({}))
@@ -78,12 +87,12 @@ class TestMapServicePublisher(TestCase):
             self.publisher.analysis_successful({'foo': 'bar'})
 
     def test_get_method_by_type(self):
-        self.assertEqual(self.publisher.arcpy_helper.publish_mxd, self.publisher._get_method_by_type('mapServices'))
-        self.assertEqual(self.publisher.arcpy_helper.publish_gp, self.publisher._get_method_by_type('gpServices'))
+        self.assertEqual(self.publisher.arcpy_helper.publish_mxd, self.publisher._get_method_by_service_type('mapServices'))
+        self.assertEqual(self.publisher.arcpy_helper.publish_gp, self.publisher._get_method_by_service_type('gpServices'))
         self.assertEqual(self.publisher.arcpy_helper.publish_image_service,
-                         self.publisher._get_method_by_type('imageServices'))
+                         self.publisher._get_method_by_service_type('imageServices'))
         with self.assertRaises(ValueError):
-            self.publisher._get_method_by_type('foo')
+            self.publisher._get_method_by_service_type('foo')
 
 
 @patch('slap.config.ConfigParser.load_config')
