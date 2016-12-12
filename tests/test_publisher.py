@@ -46,6 +46,21 @@ class TestMapServicePublisher(TestCase):
         expected = ('some/input', 'output', 'input', None, {}, 'STARTED')
         self.assertEqual(expected, self.publisher._get_publishing_params_from_config(config))
 
+    def test_publish_service_no_errors(self):
+        with patch('slap.publisher.Publisher._get_method_by_service_type') as mock_publish_method:
+            mock_publish_method.return_value = MagicMock(return_value={'errors': {}})
+            with patch('slap.publisher.Publisher.publish_sd_draft') as mock_publish_sd_draft:
+                self.publisher.publish_service('some_type', {'input': 'some/input'})
+                mock_publish_sd_draft.assert_called_once()
+
+    def test_publish_service_with_errors(self):
+        with patch('slap.publisher.Publisher._get_method_by_service_type') as mock_publish_method:
+            mock_publish_method.return_value = MagicMock(return_value={'errors': {'something': 'bad'}})
+            with patch('slap.publisher.Publisher.publish_sd_draft') as mock_publish_sd_draft:
+                with self.assertRaises(RuntimeError):
+                    self.publisher.publish_service('some_type', {'input': 'some/input'})
+                mock_publish_sd_draft.assert_not_called()
+
     def test_get_service_definition_paths(self):
         expected = ('file', path.abspath('output/file.sddraft'), path.abspath('output/file.sd'))
         actual = self.publisher._get_service_definition_paths('/my/file.mxd', 'output')

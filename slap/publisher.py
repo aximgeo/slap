@@ -69,11 +69,9 @@ class Publisher:
 
         self.message("Publishing " + input_path)
         analysis = self._get_method_by_service_type(service_type)(config_entry, filename, sddraft)
-        if self.analysis_successful(analysis['errors']):
+        if self.analysis_successful(analysis['errors']):  # This may throw an exception
             self.publish_sd_draft(sddraft, sd, service_name, folder_name, initial_state, json)
             self.message(input_path + " published successfully")
-        else:
-            self.message("Error publishing " + input_path + analysis)
 
     def _get_publishing_params_from_config(self, config_entry):
         input_path = config_entry['input']
