@@ -43,12 +43,21 @@ class TestApi(TestCase):
         self.assertEqual(api.token, 'my_token_value')
         api._token = None
 
-    @patch.object(Api, 'get_token')
-    def test_get_token(self, mock_get_token):
-        mock_get_token.return_value = 'my_new_token_value'
+    @patch.object(Api, 'post')
+    def test_get_token(self, mock_post):
         api = self.create_api()
+        token_params = {
+            'username': api._username,
+            'password': api._password,
+            'client': 'requestip',
+            'expiration': 60,
+            'f': 'json'
+        }
+        token_value = 'my_new_token_value'
+        mock_post.return_value = {'token': token_value}
         token = api.token
-        self.assertEqual(token, 'my_new_token_value')
+        mock_post.assert_called_once_with(api._token_url, token_params)
+        self.assertEqual(token, token_value)
 
     def test_get(self):
         with patch('slap.api.Api._request') as mock_request:
