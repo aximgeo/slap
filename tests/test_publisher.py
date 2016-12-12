@@ -134,12 +134,41 @@ class TestMapServicePublisher(TestCase):
         with self.assertRaises(ValueError):
             self.publisher._get_method_by_service_type('foo')
 
+    def test_register_data_sources(self):
+        data_sources = [{'foo': 'bar'}]
+        self.publisher.config = {'dataSources': data_sources}
+        with patch('slap.publisher.Publisher.register_data_sources') as mock_register:
+            self.publisher.register_data_sources()
+            mock_register.assert_called_once_with(data_sources)
+
+    def test_delete_service(self):
+        service_name = 'myService'
+        folder_name = 'folder'
+        with patch('slap.api.Api.service_exists') as mock_exists:
+            mock_exists.return_value = {'exists': True}
+            with patch('slap.api.Api.delete_service') as mock_delete:
+                self.publisher.delete_service(service_name, folder_name)
+                mock_delete.assert_called_once_with(service_name, folder_name)
+                mock_exists.return_value = {'exists': False}
+                self.publisher.delete_service(service_name, folder_name)
+                mock_delete.assert_not_called()
+
+    def test_update_service(self):
+        service_name = 'myService'
+        folder_name = 'folder'
+        json = {'foo': 'bar', 'baz': 'quux'}
+        with patch('slap.api.Api.get_service_params') as mock_get_params:
+            mock_get_params.return_value = {'baz': 'quux'}
+            with patch('slap.api.Api.edit_service') as mock_edit:
+                self.publisher.update_service(service_name, folder_name, {'foo': 'bar'})
+                mock_edit.assert_called_once_with(service_name=service_name, folder_name=folder_name, params=json)
+
 
 @patch('slap.esri.ArcpyHelper.stage_service_definition')
 @patch('slap.publisher.Publisher.delete_service')
 @patch('slap.esri.ArcpyHelper.upload_service_definition')
 @patch('slap.publisher.Publisher.update_service')
-class TestMapServicePublisher(TestCase):
+class TestMapServicePublisherSdDraft(TestCase):
 
     def setUp(self):
         config = {
@@ -176,6 +205,7 @@ class TestMapServicePublisher(TestCase):
         mock_delete.assert_called_once_with(service_name=service_name, folder_name=folder)
         mock_upload_sd.assert_called_once_with(sd=sd, initial_state=initial_state)
         mock_update.assert_called_once_with(service_name=service_name, folder_name=folder, json=json)
+
 
 @patch('slap.config.ConfigParser.load_config')
 class TestLoadingConfig(TestCase):
