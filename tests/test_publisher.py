@@ -2,7 +2,7 @@ from os import path
 import json
 import unittest
 from unittest import TestCase
-from mock import MagicMock, patch
+from mock import MagicMock, patch, call
 from slap.publisher import Publisher
 
 
@@ -20,6 +20,12 @@ class TestMapServicePublisher(TestCase):
             }
         }
         self.publisher = Publisher('user', 'pwd', config)
+
+    def test_publish_all(self):
+        expected_calls = [call(x) for x in self.publisher.config_parser.service_types]
+        with patch('slap.publisher.Publisher.publish_services') as mock_publish_services:
+            self.publisher.publish_all()
+            mock_publish_services.assert_has_calls(expected_calls)
 
     def test_get_service_definition_paths(self):
         expected = ('file', path.abspath('output/file.sddraft'), path.abspath('output/file.sd'))
