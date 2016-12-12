@@ -148,8 +148,14 @@ class TestMapServicePublisher(TestCase):
             mock_exists.return_value = {'exists': True}
             with patch('slap.api.Api.delete_service') as mock_delete:
                 self.publisher.delete_service(service_name, folder_name)
-                mock_delete.assert_called_once_with(service_name, folder_name)
-                mock_exists.return_value = {'exists': False}
+                mock_delete.assert_called_once_with(service_name=service_name, folder=folder_name)
+
+    def test_delete_service_only_if_exists(self):
+        service_name = 'myService'
+        folder_name = 'folder'
+        with patch('slap.api.Api.service_exists') as mock_exists:
+            mock_exists.return_value = {'exists': False}
+            with patch('slap.api.Api.delete_service') as mock_delete:
                 self.publisher.delete_service(service_name, folder_name)
                 mock_delete.assert_not_called()
 
