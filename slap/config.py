@@ -74,16 +74,6 @@ class ConfigParser:
         url_parts = url_parts._replace(netloc=re.sub('^[^:]*', hostname, url_parts.netloc))
         return urlparse.urlunsplit(url_parts)
 
-    @staticmethod
-    def set_server_properties(config_json, server_input_path, filename):
-        msd_path = ConfigParser.get_msd_path(server_input_path, filename)
-        config_json['properties']['filePath'] = msd_path
-        config_json['serviceName'] = filename
-
     def check_required_keys(self, config):
         for key in self.required_keys:
             test = config[key]
-
-    @staticmethod
-    def get_msd_path(server_input_path, filename):
-        return os.path.join(server_input_path, filename + '.MapServer', 'extracted', 'v101', filename + '.msd')
