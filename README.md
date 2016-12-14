@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/gisinc/slap.svg?branch=master)](https://travis-ci.org/gisinc/slap)
-[![Coverage Status](https://coveralls.io/repos/github/gisinc/slap/badge.svg?branch=add-coverage)](https://coveralls.io/github/gisinc/slap?branch=add-coverage)
+[![Coverage Status](https://coveralls.io/repos/github/gisinc/slap/badge.svg?branch=master)](https://coveralls.io/github/gisinc/slap?branch=master)
 [![PyPI version](https://badge.fury.io/py/slap.svg)](https://badge.fury.io/py/slap)
 
 # SLAP Maps: Simple Library for Automated Publishing of Map Services
