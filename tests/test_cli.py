@@ -1,9 +1,9 @@
 from unittest import TestCase
 from mock import MagicMock, patch
+from slap import cli
 mock_arcpy = MagicMock()
 module_patcher = patch.dict('sys.modules', {'arcpy': mock_arcpy})
 module_patcher.start()
-from slap import cli
 
 
 class TestCli(TestCase):
@@ -16,3 +16,7 @@ class TestCli(TestCase):
         self.assertTrue(cli.only_one([True, False]))
         self.assertFalse(cli.only_one([True, True]))
         self.assertFalse(cli.only_one([True, ['foo'], False]))
+
+    def test_throws_if_no_config(self):
+        with self.assertRaises(SystemExit):
+            cli.main(['-u', 'user', '-p', 'pass'])
