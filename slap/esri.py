@@ -18,7 +18,6 @@ class ArcpyHelper:
             connection_file_name
         )
 
-
     @property
     def cwd(self):
         return self._cwd
@@ -26,9 +25,6 @@ class ArcpyHelper:
     def get_full_path(self, config_path):
         return os.path.normpath(config_path) if os.path.isabs(config_path) \
             else os.path.normpath(os.path.join(self.cwd, config_path))
-
-    def get_output_directory(self, config_entry):
-        return self.get_full_path(config_entry["output"]) if "output" in config_entry else self.get_full_path('output')
 
     @staticmethod
     def stage_service_definition(sddraft, sd):
@@ -53,11 +49,11 @@ class ArcpyHelper:
             client_path=self.get_full_path(client_path)
         )
 
-    def upload_service_definition(self, sd, config):
+    def upload_service_definition(self, sd, initial_state="STARTED"):
         arcpy.UploadServiceDefinition_server(
             in_sd_file=sd,
             in_server=self.connection_file_path,
-            in_startupType=config["initialState"] if "initialState" in config else "STARTED"
+            in_startupType=initial_state
         )
 
     def create_server_connection_file(self, username, password, ags_admin_url, connection_file_name='temp.ags'):
@@ -77,8 +73,7 @@ class ArcpyHelper:
         return os.path.join(output_path, connection_file_name)
 
     def set_workspaces(self, path_to_mxd, workspaces):
-        full_mxd_path = self.get_full_path(path_to_mxd)
-        mxd = arcpy.mapping.MapDocument(full_mxd_path)
+        mxd = self._get_mxd_from_path(path_to_mxd)
         for workspace in workspaces:
             print("Replacing workspace " + workspace["old"]["path"] + " => " + workspace["new"]["path"])
             mxd.replaceWorkspaces(
@@ -91,6 +86,10 @@ class ArcpyHelper:
         mxd.relativePaths = True
         mxd.save()
         del mxd
+
+    def _get_mxd_from_path(self, path_to_mxd):
+        full_mxd_path = self.get_full_path(path_to_mxd)
+        return arcpy.mapping.MapDocument(full_mxd_path)
 
     def publish_gp(self, config_entry, filename, sddraft):
         if "result" in config_entry:
