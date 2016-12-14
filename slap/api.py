@@ -25,13 +25,11 @@ class Api:
         }
 
     def post(self, url, params):
-        return self._request(requests.post, url, params)
+        response = requests.post(url, data=params, verify=self._verify_certs)
+        return self.parse_response(response)
 
     def get(self, url, params):
-        return self._request(requests.get, url, params)
-
-    def _request(self, request_method, url, params):
-        response = request_method(url, params=params, verify=self._verify_certs)
+        response = requests.get(url, params=params, verify=self._verify_certs)
         return self.parse_response(response)
 
     @staticmethod
@@ -91,7 +89,6 @@ class Api:
         new_params['password'] = password
         new_params['confirmPassword'] = password
         new_params['f'] = 'json'
-        # new_params.update(self.params)
         return self.post('{0}/createNewSite'.format(self._ags_url), new_params)
     
     def create_default_site(self):

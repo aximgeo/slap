@@ -63,20 +63,20 @@ class TestApi(TestCase):
             self.assertEqual(token, token_value)
 
     def test_get(self):
-        with patch('slap.api.Api._request') as mock_request:
+        with patch('requests.get') as mock_request:
             api = self.create_api()
             url = 'my/url'
             params = {'foo': 'bar'}
             api.get(url=url, params=params)
-            mock_request.assert_called_once_with(requests.get, url, params)
+            mock_request.assert_called_once_with(url, params=params, verify=api._verify_certs)
 
     def test_post(self):
-        with patch('slap.api.Api._request') as mock_request:
+        with patch('requests.post') as mock_request:
             api = self.create_api()
             url = 'my/url'
             params = {'foo': 'bar'}
             api.post(url=url, params=params)
-            mock_request.assert_called_once_with(requests.post, url, params)
+            mock_request.assert_called_once_with(url, data=params, verify=api._verify_certs)
 
     def test_parse_response_with_bad_return_code(self):
         api = self.create_api()
