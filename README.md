@@ -67,6 +67,7 @@ An example configuration file might look like below.  *Note:* The comments would
 {
     "agsUrl": "https://myagsserver.com:6443/arcgis/admin", // Required, URL for AGS admin endpoint
     "tokenUrl": "https://myagsserver.com:6443/arcgis/tokens/generateToken", // Optional, URL for token service; defaults to AGS token endpoint
+    "verifyCerts": "/path/to/certs.pem", // Optional, either True to use default store, False to not verify, or path to cert file. Defaults to False.
     "site": {}, // Optional, directory structure for creating a site
     "json": {}, // Optional, specific parameters to use for all services, of all types.
     "dataSources": [ // Optional, list of data items to add to the server store

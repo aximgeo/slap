@@ -1,3 +1,4 @@
+.idea/*
 cover/
 publish.sh
 
@@ -15,6 +16,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+>>>>>>> cli-tests
 build/
 develop-eggs/
 dist/
