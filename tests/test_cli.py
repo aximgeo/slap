@@ -35,6 +35,12 @@ class TestCli(TestCase):
         with self.assertRaises(SystemExit):
             cli.main(['-u', 'user', '-p', 'pass', '-c', 'config.json', '-i', 'some/file', '-g', 'some-hash'])
 
+    def test_set_hostname(self):
+        with patch('slap.cli.Publisher') as mock_publisher:
+            with patch('slap.publisher.ConfigParser.load_config'):
+                cli.main(self.required_args + ['-n', 'host'])
+                mock_publisher.assert_called_once_with('user', 'pass', 'config.json', 'host')
+
     def test_register_data_sources(self):
         with patch('slap.publisher.Publisher.register_data_sources') as mock_register:
             with patch('slap.publisher.ConfigParser.load_config'):
