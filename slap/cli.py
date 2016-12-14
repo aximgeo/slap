@@ -59,8 +59,8 @@ def main(raw_args):
 
     if args.site:
         print "Creating site..."
-        if "site" in publisher.config and "json" in publisher.config["site"]:
-            publisher.api.create_site(args.username, args.password, publisher.config["site"]["json"])
+        if "site" in publisher.config:
+            publisher.api.create_site(args.username, args.password, publisher.config["site"])
         else:
             publisher.api.create_default_site()
 
