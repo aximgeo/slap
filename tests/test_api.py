@@ -90,6 +90,14 @@ class TestApi(TestCase):
         response = {'status': 'error', 'messages': ['an error occurred']}
         self.assertRaises(requests.exceptions.RequestException, api.check_parsed_response, response)
 
+    def test_check_parsed_token_response(self):
+        api = self.create_api()
+        response = {'messages': ['an error occurred']}  # no 'status'
+        try:
+            api.check_parsed_response(response)
+        except requests.exceptions.RequestException:
+            self.fail()
+
     def get_mock(self, url, method, *args):
         with patch('slap.api.Api.token', new_callable=PropertyMock) as mock_token:
             with patch('slap.api.Api.get') as mock_method:

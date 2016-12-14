@@ -43,8 +43,9 @@ class Api:
 
     @staticmethod
     def check_parsed_response(parsed_response):
-        if parsed_response['status'] == 'error':  # handle a 200 response with an error
-            raise requests.exceptions.RequestException(parsed_response['messages'][0])
+        if 'status' in parsed_response:  # token requests don't have this
+            if parsed_response['status'] == 'error':  # handle a 200 response with an error
+                raise requests.exceptions.RequestException(parsed_response['messages'][0])
 
     def get_token(self):
         params = {
