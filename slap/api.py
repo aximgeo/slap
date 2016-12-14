@@ -32,15 +32,21 @@ class Api:
 
     def _request(self, request_method, url, params):
         response = request_method(url, params=params, verify=self._verify_certs)
+        return self.parse_response(response)
 
-        if response.status_code != requests.codes.ok:
+    @staticmethod
+    def parse_response(response):
+        if not response.ok:
             response.raise_for_status()
 
         parsed_response = response.json()
+        Api.check_parsed_response(parsed_response)
+        return parsed_response
+
+    @staticmethod
+    def check_parsed_response(parsed_response):
         if parsed_response['status'] == 'error':  # handle a 200 response with an error
             raise requests.exceptions.RequestException(parsed_response['messages'][0])
-
-        return parsed_response
 
     def get_token(self):
         params = {
