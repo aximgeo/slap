@@ -58,3 +58,21 @@ class TestCli(TestCase):
             with patch('slap.publisher.ConfigParser.load_config'):
                 cli.main(self.required_args + ['-s'])
                 mock_create_site.assert_called_once()
+
+    def test_publish_inputs(self):
+        with patch('slap.publisher.Publisher.publish_input') as mock_publish:
+            with patch('slap.publisher.ConfigParser.load_config'):
+                input_file = 'my/file'
+                cli.main(self.required_args + ['-i', input_file])
+                mock_publish.assert_called_once_with(input_file)
+
+    def test_publish_git(self):
+        with patch('slap.cli.Publisher.publish_input') as mock_publisher:
+            with patch('slap.publisher.ConfigParser.load_config'):
+                with patch('slap.git.get_changed_mxds') as mock_git:
+                    sha = 'some-hash'
+                    file = 'some/file'
+                    mock_git.return_value = [file]
+                    cli.main(self.required_args + ['-g', sha])
+                    mock_git.assert_called_once_with(sha)
+                    mock_publisher.assert_called_once_with(file)
