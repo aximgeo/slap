@@ -8,6 +8,8 @@ module_patcher.start()
 
 class TestCli(TestCase):
 
+    required_args = ['-u', 'user', '-p', 'pass', '-c', 'config.json']
+
     def test_only_one(self):
         self.assertTrue(cli.only_one([True, False, False]))
         self.assertTrue(cli.only_one([False, ['foo', 'bar'], False]))
@@ -32,3 +34,21 @@ class TestCli(TestCase):
     def test_throws_if_both_git_and_inputs_specified(self):
         with self.assertRaises(SystemExit):
             cli.main(['-u', 'user', '-p', 'pass', '-c', 'config.json', '-i', 'some/file', '-g', 'some-hash'])
+
+    def test_register_data_sources(self):
+        with patch('slap.publisher.Publisher.register_data_sources') as mock_register:
+            with patch('slap.publisher.ConfigParser.load_config'):
+                cli.main(self.required_args)
+                mock_register.assert_called_once()
+
+    def test_publish_all(self):
+        with patch('slap.publisher.Publisher.publish_all') as mock_publish:
+            with patch('slap.publisher.ConfigParser.load_config'):
+                cli.main(self.required_args)
+                mock_publish.assert_called_once()
+
+    def test_create_site(self):
+        with patch('slap.api.Api.create_site') as mock_create_site:
+            with patch('slap.publisher.ConfigParser.load_config'):
+                cli.main(self.required_args + ['-s'])
+                mock_create_site.assert_called_once()
