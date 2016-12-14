@@ -1,17 +1,16 @@
-import os
-import urllib
-import urllib2
+import requests
 import json
 
 
 class Api:
 
-    def __init__(self, ags_url, token_url, portal_url, username, password):
+    def __init__(self, ags_url, token_url, portal_url, username, password, verify_certs=False):
         self._ags_url = ags_url
         self._token_url = token_url if token_url else ags_url + '/generateToken'
         self._portal_url = portal_url
         self._username = username
         self._password = password
+        self._verify_certs = verify_certs
         self._token = None
 
     @property
@@ -26,23 +25,27 @@ class Api:
         }
 
     def post(self, url, params):
-        return self._request(url, params, 'POST')
+        response = requests.post(url, data=params, verify=self._verify_certs)
+        return self.parse_response(response)
 
     def get(self, url, params):
-        return self._request(url, params, 'GET')
+        response = requests.get(url, params=params, verify=self._verify_certs)
+        return self.parse_response(response)
 
     @staticmethod
-    def _request(url, params, method):
-        encoded_params = urllib.urlencode(json.loads(json.dumps(params)))
-        request = urllib2.Request(url + '?' + encoded_params) if method == 'GET' else urllib2.Request(url, encoded_params)
-        request.get_method = lambda: method
-        response = urllib2.urlopen(request)
-        parsed_response = json.loads(response.read())
+    def parse_response(response):
+        if not response.ok:
+            response.raise_for_status()
 
-        if 'status' in parsed_response and parsed_response['status'] == 'error':  # handle a 200 response with an error
-            raise urllib2.URLError(parsed_response['status'] + ','.join(parsed_response['messages']))
-
+        parsed_response = response.json()
+        Api.check_parsed_response(parsed_response)
         return parsed_response
+
+    @staticmethod
+    def check_parsed_response(parsed_response):
+        if 'status' in parsed_response:  # token requests don't have this
+            if parsed_response['status'] == 'error':  # handle a 200 response with an error
+                raise requests.exceptions.RequestException(parsed_response['messages'][0])
 
     def get_token(self):
         params = {
@@ -87,7 +90,6 @@ class Api:
         new_params['password'] = password
         new_params['confirmPassword'] = password
         new_params['f'] = 'json'
-        # new_params.update(self.params)
         return self.post('{0}/createNewSite'.format(self._ags_url), new_params)
     
     def create_default_site(self):

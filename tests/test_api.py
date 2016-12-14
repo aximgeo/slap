@@ -1,5 +1,7 @@
 import unittest
 import json
+import requests
+from requests import Response
 from unittest import TestCase
 from slap.api import Api
 from mock import PropertyMock, patch
@@ -61,20 +63,40 @@ class TestApi(TestCase):
             self.assertEqual(token, token_value)
 
     def test_get(self):
-        with patch('slap.api.Api._request') as mock_request:
+        with patch('requests.get') as mock_request:
             api = self.create_api()
             url = 'my/url'
             params = {'foo': 'bar'}
             api.get(url=url, params=params)
-            mock_request.assert_called_once_with(url, params, 'GET')
+            mock_request.assert_called_once_with(url, params=params, verify=api._verify_certs)
 
     def test_post(self):
-        with patch('slap.api.Api._request') as mock_request:
+        with patch('requests.post') as mock_request:
             api = self.create_api()
             url = 'my/url'
             params = {'foo': 'bar'}
             api.post(url=url, params=params)
-            mock_request.assert_called_once_with(url, params, 'POST')
+            mock_request.assert_called_once_with(url, data=params, verify=api._verify_certs)
+
+    def test_parse_response_with_bad_return_code(self):
+        api = self.create_api()
+        response = Response()
+        response.status_code = 500
+        response._content = '{"status":"success"}'
+        self.assertRaises(requests.HTTPError, api.parse_response, response)
+
+    def test_check_parsed_response(self):
+        api = self.create_api()
+        response = {'status': 'error', 'messages': ['an error occurred']}
+        self.assertRaises(requests.exceptions.RequestException, api.check_parsed_response, response)
+
+    def test_check_parsed_token_response(self):
+        api = self.create_api()
+        response = {'messages': ['an error occurred']}  # no 'status'
+        try:
+            api.check_parsed_response(response)
+        except requests.exceptions.RequestException:
+            self.fail()
 
     def get_mock(self, url, method, *args):
         with patch('slap.api.Api.token', new_callable=PropertyMock) as mock_token:

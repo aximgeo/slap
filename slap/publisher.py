@@ -18,7 +18,8 @@ class Publisher:
             token_url=self.config['tokenUrl'] if 'tokenUrl' in self.config else None,
             portal_url=self.config['portalUrl'] if 'portalUrl' in self.config else None,
             username=username,
-            password=password
+            password=password,
+            verify_certs=self.config['verifyCerts'] if 'verifyCerts' in self.config else False
         )
 
         # This is a S-L-O-W import, so defer as long as possible

@@ -1,3 +1,4 @@
+import sys
 import argparse
 from slap.publisher import Publisher
 from slap import git
@@ -8,7 +9,7 @@ def only_one(iterable):
     return any(it) and not any(it)
 
 
-def get_args():
+def _create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-u", "--username",
                         required=True,
@@ -30,7 +31,12 @@ def get_args():
     parser.add_argument("-g", "--git",
                         help="publish all mxd files that have changed between HEAD and this commit "
                              "(ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4")
-    args = parser.parse_args()
+    return parser
+
+
+def get_args(raw_args):
+    parser = _create_parser()
+    args = parser.parse_args(raw_args)
 
     if not args.username:
         parser.error("username is required")
@@ -47,17 +53,16 @@ def get_args():
     return args
 
 
-def main():
-    args = get_args()
+def main(raw_args):
+    args = get_args(raw_args)
     publisher = Publisher(args.username, args.password, args.config, args.name)
 
     if args.site:
         print "Creating site..."
         if "site" in publisher.config:
-            if "json" in publisher.config["site"]:
-                publisher.api.create_site(args.username, args.password, publisher.config["site"]["json"])
-            else:
-                publisher.api.create_default_site()
+            publisher.api.create_site(args.username, args.password, publisher.config["site"])
+        else:
+            publisher.api.create_default_site()
 
     print "Registering data sources..."
     publisher.register_data_sources()
@@ -77,4 +82,4 @@ def main():
         publisher.publish_all()
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
