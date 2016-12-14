@@ -1,5 +1,6 @@
 import unittest
 import json
+import requests
 from unittest import TestCase
 from slap.api import Api
 from mock import PropertyMock, patch
@@ -66,7 +67,7 @@ class TestApi(TestCase):
             url = 'my/url'
             params = {'foo': 'bar'}
             api.get(url=url, params=params)
-            mock_request.assert_called_once_with(url, params, 'GET')
+            mock_request.assert_called_once_with(requests.get, url, params)
 
     def test_post(self):
         with patch('slap.api.Api._request') as mock_request:
@@ -74,7 +75,7 @@ class TestApi(TestCase):
             url = 'my/url'
             params = {'foo': 'bar'}
             api.post(url=url, params=params)
-            mock_request.assert_called_once_with(url, params, 'POST')
+            mock_request.assert_called_once_with(requests.post, url, params)
 
     def get_mock(self, url, method, *args):
         with patch('slap.api.Api.token', new_callable=PropertyMock) as mock_token:
