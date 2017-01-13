@@ -18,8 +18,8 @@ def _create_parser():
                         required=True,
                         help="Portal or AGS password (ex: --password myPassword)")
     parser.add_argument("-c", "--config",
-                        required=True,
-                        help="full path to config file (ex: --config c:/configs/int_config.json)")
+                        default="config.json",
+                        help="path to config file (ex: --config configs/int_config.json)")
     parser.add_argument("-s", "--site",
                         action="store_true",
                         help="create a site before publishing")
@@ -43,9 +43,6 @@ def get_args(raw_args):
 
     if not args.password:
         parser.error("password is required")
-
-    if not args.config:
-        parser.error("Full path to config file is required")
 
     if args.git and args.inputs:
         parser.error("Specify only one of --git or --inputs")

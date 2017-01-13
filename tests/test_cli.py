@@ -19,10 +19,6 @@ class TestCli(TestCase):
         self.assertFalse(cli.only_one([True, True]))
         self.assertFalse(cli.only_one([True, ['foo'], False]))
 
-    def test_throws_if_no_config(self):
-        with self.assertRaises(SystemExit):
-            cli.main(['-u', 'user', '-p', 'pass'])
-
     def test_throws_if_no_username(self):
         with self.assertRaises(SystemExit):
             cli.main(['-c', 'config.json', '-p', 'pass'])
@@ -34,6 +30,12 @@ class TestCli(TestCase):
     def test_throws_if_both_git_and_inputs_specified(self):
         with self.assertRaises(SystemExit):
             cli.main(['-u', 'user', '-p', 'pass', '-c', 'config.json', '-i', 'some/file', '-g', 'some-hash'])
+
+    def test_uses_default_config(self):
+        with patch('slap.cli.Publisher') as mock_publisher:
+            with patch('slap.publisher.ConfigParser.load_config'):
+                cli.main(['-u', 'user', '-p', 'pass'])
+                mock_publisher.assert_called_once_with('user', 'pass', 'config.json', None)
 
     def test_set_hostname(self):
         with patch('slap.cli.Publisher') as mock_publisher:
