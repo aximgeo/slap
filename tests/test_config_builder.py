@@ -9,11 +9,22 @@ class TestConfigBuilder(TestCase):
 
     def test_get_file_from_directory(self):
         test_file = os.path.join('test', 'testFile.mxd')
+        expected = [test_file]
         fs = fake_filesystem.FakeFilesystem()
         fs.CreateFile(test_file)
         fake_os = fake_filesystem.FakeOsModule(fs)
-        expected = [test_file]
         with patch('slap.config_builder.os', fake_os):
             actual = config_builder.get_mxds(['test'])
             self.assertEqual(expected, actual)
 
+    def test_gets_files_from_directory_list(self):
+        test_file_1 = os.path.join('test', 'test.mxd')
+        test_file_2 = os.path.join('test2', 'test.mxd')
+        fs = fake_filesystem.FakeFilesystem()
+        fake_os = fake_filesystem.FakeOsModule(fs)
+        fs.CreateFile(test_file_1)
+        fs.CreateFile(test_file_2)
+        expected = [test_file_1, test_file_2]
+        with patch('slap.config_builder.os', fake_os):
+            actual = config_builder.get_mxds(['test', 'test2'])
+            self.assertEqual(expected, actual)
