@@ -35,7 +35,7 @@ def _add_publish_arguments(parser):
                         help="override the hostname in config")
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-i", "--inputs",
+    group.add_argument("-i", "--input",
                        action="append",
                        help="one or more inputs to publish (ex: -i mxd/bar.mxd -i mxd/foo.mxd")
     group.add_argument("-g", "--git",
@@ -63,8 +63,8 @@ def publish(args):
     print "Registering data sources..."
     publisher.register_data_sources()
 
-    if args.inputs:
-        for i in args.inputs:
+    if args.input:
+        for i in args.input:
             print "Publishing {}...".format(i)
             publisher.publish_input(i)
     elif args.git:
