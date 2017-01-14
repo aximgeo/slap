@@ -32,10 +32,12 @@ class TestConfigBuilder(TestCase):
     def test_gets_only_mxd_files(self):
         test_file = os.path.join('test', 'testFile.mxd')
         test_file_2 = os.path.join('test', 'badTestFile.txt')
-        expected = [test_file]
+        test_file_3 = os.path.join('test', 'testFileCaps.MXD')
+        expected = [test_file, test_file_3]
         fs = fake_filesystem.FakeFilesystem()
         fs.CreateFile(test_file)
         fs.CreateFile(test_file_2)
+        fs.CreateFile(test_file_3)
         fake_os = fake_filesystem.FakeOsModule(fs)
         with patch('slap.config_builder.os', fake_os):
             actual = config_builder.get_mxds(['test'])
