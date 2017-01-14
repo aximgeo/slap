@@ -8,10 +8,10 @@ def create_config(directories, filename='config.json'):
         json.dump(config, fp, indent=4)
 
 
-def create_config_dictionary(directories):
+def create_config_dictionary(directories, hostname='hostname'):
     services = [{'input': path_to_mxd} for path_to_mxd in get_mxds(directories)]
     config = {
-        'agsUrl': 'https://<hostname>:6443/arcgis/admin',
+        'agsUrl': 'https://{}:6443/arcgis/admin'.format(hostname),
         'mapServices': {
             'services': services
         }

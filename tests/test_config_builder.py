@@ -35,7 +35,7 @@ class TestConfigBuilder(TestCase):
 
     def test_returns_empty_config_dict(self):
         expected = {
-            'agsUrl': 'https://<hostname>:6443/arcgis/admin',
+            'agsUrl': 'https://hostname:6443/arcgis/admin',
             'mapServices': {
                 'services': []
             }
@@ -43,11 +43,21 @@ class TestConfigBuilder(TestCase):
         actual = config_builder.create_config_dictionary([])
         self.assertEqual(expected, actual)
 
+    def test_returns_empty_config_dict_with_hostname(self):
+        expected = {
+            'agsUrl': 'https://myhostname:6443/arcgis/admin',
+            'mapServices': {
+                'services': []
+            }
+        }
+        actual = config_builder.create_config_dictionary([], 'myhostname')
+        self.assertEqual(expected, actual)
+
     def test_returns_config_with_one_service(self):
         test_file = os.path.join('test', 'testFile.mxd')
 
         expected = {
-            'agsUrl': 'https://<hostname>:6443/arcgis/admin',
+            'agsUrl': 'https://hostname:6443/arcgis/admin',
             'mapServices': {
                 'services': [
                     {'input': test_file}
