@@ -17,6 +17,25 @@ class TestConfigBuilder(TestCase):
         actual = config_builder.build_config([])
         self.assertEqual(expected, actual)
 
+    def test_returns_config_with_one_service(self):
+        test_file = os.path.join('test', 'testFile.mxd')
+
+        expected = {
+            'agsUrl': 'https://<hostname>:6443/arcgis/admin',
+            'mapServices': {
+                'services': [
+                    {'input': test_file}
+                ]
+            }
+        }
+
+        fs = fake_filesystem.FakeFilesystem()
+        fs.CreateFile(test_file)
+        fake_os = fake_filesystem.FakeOsModule(fs)
+        with patch('slap.config_builder.os', fake_os):
+            actual = config_builder.build_config(['test'])
+            self.assertEqual(expected, actual)
+
 
 class TestConfigBuilderFileList(TestCase):
 

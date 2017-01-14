@@ -2,10 +2,11 @@ import os
 
 
 def build_config(directories):
+    services = [{'input': path_to_mxd} for path_to_mxd in get_mxds(directories)]
     config = {
         'agsUrl': 'https://<hostname>:6443/arcgis/admin',
         'mapServices': {
-            'services': []
+            'services': services
         }
     }
     return config
