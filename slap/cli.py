@@ -11,6 +11,18 @@ def only_one(iterable):
 
 def _create_parser():
     parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(help='commands')
+
+    publish_parser = subparsers.add_parser('publish', help='publish services')
+    _add_publish_arguments(publish_parser)
+
+    init_parser = subparsers.add_parser('init', help='initialize config')
+    _add_init_arguments(init_parser)
+
+    return parser
+
+
+def _add_publish_arguments(parser):
     parser.add_argument("-u", "--username",
                         required=True,
                         help="Portal or AGS username (ex: --username john)")
@@ -31,7 +43,12 @@ def _create_parser():
     parser.add_argument("-g", "--git",
                         help="publish all mxd files that have changed between HEAD and this commit "
                              "(ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4")
-    return parser
+
+
+def _add_init_arguments(parser):
+    parser.add_argument("-f", "--folder",
+                        required=True,
+                        help="path to a folder containing MXDs to publish (ex: --folder c:/my/maps")
 
 
 def get_args(raw_args):
