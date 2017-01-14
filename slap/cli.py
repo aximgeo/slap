@@ -32,22 +32,24 @@ def _add_publish_arguments(parser):
                         action="store_true",
                         help="create a site before publishing")
     parser.add_argument("-n", "--name",
-                        help="override the hostname in config")
+                        help="override the hostname in config (ex: --name $HOSTNAME)")
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-i", "--input",
                        action="append",
-                       help="one or more inputs to publish (ex: -i mxd/bar.mxd -i mxd/foo.mxd")
+                       help="one or more inputs to publish (ex: -input mxd/bar.mxd -input mxd/foo.mxd")
     group.add_argument("-g", "--git",
-                       help="publish all mxd files that have changed between HEAD and this commit "
-                            "(ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4")
+                       help="publish all files that have changed between HEAD and this commit "
+                            "(ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4)")
 
 
 def _add_init_arguments(parser):
     parser.set_defaults(func=initialize_config)
     parser.add_argument("-i", "--input",
                         required=True,
-                        help="path to a directory containing MXDs to publish (ex: --folder c:/my/maps")
+                        action="append",
+                        help="one or more directories containing files to add to add to config "
+                             "(ex: --input c:/my/maps --input c:/my/other/maps)")
 
 
 def publish(args):
