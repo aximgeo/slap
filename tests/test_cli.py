@@ -16,15 +16,6 @@ class TestPublishCli(TestCase):
 
     required_args = ['publish', '-u', 'user', '-p', 'pass']
 
-    def test_only_one(self):
-        self.assertTrue(cli.only_one([True, False, False]))
-        self.assertTrue(cli.only_one([False, ['foo', 'bar'], False]))
-        self.assertTrue(cli.only_one([True, [], False]))
-        self.assertTrue(cli.only_one(["some sha", False, False]))
-        self.assertTrue(cli.only_one([True, False]))
-        self.assertFalse(cli.only_one([True, True]))
-        self.assertFalse(cli.only_one([True, ['foo'], False]))
-
     def test_throws_if_no_username(self):
         with self.assertRaises(SystemExit):
             cli.main(['publish', '-c', 'config.json', '-p', 'pass'])

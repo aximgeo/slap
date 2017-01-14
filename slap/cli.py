@@ -3,12 +3,6 @@ import argparse
 from slap.publisher import Publisher
 from slap import git
 
-
-def only_one(iterable):
-    it = iter(iterable)
-    return any(it) and not any(it)
-
-
 def _create_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help='commands')
@@ -37,12 +31,14 @@ def _add_publish_arguments(parser):
                         help="create a site before publishing")
     parser.add_argument("-n", "--name",
                         help="override the hostname in config")
-    parser.add_argument("-i", "--inputs",
-                        action="append",
-                        help="one or more inputs to publish (ex: -i mxd/bar.mxd -i mxd/foo.mxd")
-    parser.add_argument("-g", "--git",
-                        help="publish all mxd files that have changed between HEAD and this commit "
-                             "(ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4")
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-i", "--inputs",
+                       action="append",
+                       help="one or more inputs to publish (ex: -i mxd/bar.mxd -i mxd/foo.mxd")
+    group.add_argument("-g", "--git",
+                       help="publish all mxd files that have changed between HEAD and this commit "
+                            "(ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4")
 
 
 def _add_init_arguments(parser):
@@ -51,24 +47,9 @@ def _add_init_arguments(parser):
                         help="path to a folder containing MXDs to publish (ex: --folder c:/my/maps")
 
 
-def get_args(raw_args):
+def main(raw_args):
     parser = _create_parser()
     args = parser.parse_args(raw_args)
-
-    if not args.username:
-        parser.error("username is required")
-
-    if not args.password:
-        parser.error("password is required")
-
-    if args.git and args.inputs:
-        parser.error("Specify only one of --git or --inputs")
-
-    return args
-
-
-def main(raw_args):
-    args = get_args(raw_args)
     publisher = Publisher(args.username, args.password, args.config, args.name)
 
     if args.site:
