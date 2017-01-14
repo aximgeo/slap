@@ -78,7 +78,7 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         'dev': ['check-manifest'],
-        'test': ['mock', 'coverage'],
+        'test': ['mock', 'coverage', 'pyfakefs'],
     },
 
     # If there are data files included in your packages that need to be
