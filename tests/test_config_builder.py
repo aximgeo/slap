@@ -1,6 +1,6 @@
 import os
 from unittest import TestCase
-from mock import patch
+from mock import patch, mock_open
 from pyfakefs import fake_filesystem
 from slap import config_builder
 
@@ -11,10 +11,26 @@ class TestConfigBuilder(TestCase):
         test_file = os.path.join('test', 'testFile.mxd')
         fs = fake_filesystem.FakeFilesystem()
         fs.CreateFile(test_file)
+        fake_open = fake_filesystem.FakeFileOpen(fs)
         fake_os = fake_filesystem.FakeOsModule(fs)
         with patch('slap.config_builder.os', fake_os):
-            config_builder.create_config(['test'])
-            self.assertTrue(os.path.exists('config.json'))
+            with patch('__builtin__.open', fake_open):
+                config_builder.create_config(['test'])
+                self.assertTrue(fake_os.path.isfile('config.json'))
+
+    def test_saves_named_config_file(self):
+        test_file = os.path.join('test', 'testFile.mxd')
+        test_directory = os.path.join('output', 'somewhere')
+        config_file = os.path.join(test_directory, 'test-config.json')
+        fs = fake_filesystem.FakeFilesystem()
+        fs.CreateFile(test_file)
+        fs.CreateDirectory(test_directory)
+        fake_open = fake_filesystem.FakeFileOpen(fs)
+        fake_os = fake_filesystem.FakeOsModule(fs)
+        with patch('slap.config_builder.os', fake_os):
+            with patch('__builtin__.open', fake_open):
+                config_builder.create_config(['test'], config_file)
+                self.assertTrue(fake_os.path.isfile(config_file))
 
     def test_returns_empty_config_dict(self):
         expected = {

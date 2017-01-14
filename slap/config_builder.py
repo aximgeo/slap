@@ -4,8 +4,8 @@ import json
 
 def create_config(directories, filename='config.json'):
     config = create_config_dictionary(directories)
-    with open(filename, 'w') as fp:
-        json.dump(config, fp)
+    with open(filename, 'w+') as fp:
+        json.dump(config, fp, indent=4)
 
 
 def create_config_dictionary(directories):
