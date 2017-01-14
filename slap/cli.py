@@ -1,7 +1,7 @@
 import sys
 import argparse
 from slap.publisher import Publisher
-from slap import git
+from slap import git, config_builder
 
 
 def _create_parser():
@@ -48,8 +48,12 @@ def _add_init_arguments(parser):
     parser.add_argument("-i", "--input",
                         required=True,
                         action="append",
-                        help="one or more directories containing files to add to add to config "
+                        help="one or more directories containing files to add to config "
                              "(ex: --input c:/my/maps --input c:/my/other/maps)")
+    parser.add_argument("-c", "--config",
+                        help="path to output config file (ex: --config configs/int_config.json)")
+    parser.add_argument("-n", "--name",
+                        help="set the hostname in config (ex: --name $HOSTNAME)")
 
 
 def publish(args):
@@ -81,7 +85,7 @@ def publish(args):
 
 
 def initialize_config(args):
-    print "not implemented"
+    config_builder.create_config(directories=args.input, filename=args.config, hostname=args.name)
 
 
 def main(raw_args):
