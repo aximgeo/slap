@@ -1,6 +1,16 @@
 import os
 
 
+def build_config(directories):
+    config = {
+        'agsUrl': 'https://<hostname>:6443/arcgis/admin',
+        'mapServices': {
+            'services': []
+        }
+    }
+    return config
+
+
 def get_mxds(directories):
     mxds = []
     for directory in directories:

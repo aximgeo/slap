@@ -7,6 +7,19 @@ from slap import config_builder
 
 class TestConfigBuilder(TestCase):
 
+    def test_returns_empty_config_dict(self):
+        expected = {
+            'agsUrl': 'https://<hostname>:6443/arcgis/admin',
+            'mapServices': {
+                'services': []
+            }
+        }
+        actual = config_builder.build_config([])
+        self.assertEqual(expected, actual)
+
+
+class TestConfigBuilderFileList(TestCase):
+
     def test_get_file_from_directory(self):
         test_file = os.path.join('test', 'testFile.mxd')
         expected = [test_file]
