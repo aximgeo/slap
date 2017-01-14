@@ -7,6 +7,15 @@ from slap import config_builder
 
 class TestConfigBuilder(TestCase):
 
+    def test_saves_default_config_file(self):
+        test_file = os.path.join('test', 'testFile.mxd')
+        fs = fake_filesystem.FakeFilesystem()
+        fs.CreateFile(test_file)
+        fake_os = fake_filesystem.FakeOsModule(fs)
+        with patch('slap.config_builder.os', fake_os):
+            config_builder.create_config(['test'])
+            self.assertTrue(os.path.exists('config.json'))
+
     def test_returns_empty_config_dict(self):
         expected = {
             'agsUrl': 'https://<hostname>:6443/arcgis/admin',
@@ -14,7 +23,7 @@ class TestConfigBuilder(TestCase):
                 'services': []
             }
         }
-        actual = config_builder.build_config([])
+        actual = config_builder.create_config_dictionary([])
         self.assertEqual(expected, actual)
 
     def test_returns_config_with_one_service(self):
@@ -33,7 +42,7 @@ class TestConfigBuilder(TestCase):
         fs.CreateFile(test_file)
         fake_os = fake_filesystem.FakeOsModule(fs)
         with patch('slap.config_builder.os', fake_os):
-            actual = config_builder.build_config(['test'])
+            actual = config_builder.create_config_dictionary(['test'])
             self.assertEqual(expected, actual)
 
 

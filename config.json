@@ -1,0 +1,1 @@
+{"agsUrl": "https://<hostname>:6443/arcgis/admin", "mapServices": {"services": [{"input": "test\\testFile.mxd"}]}}

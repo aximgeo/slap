@@ -1,7 +1,14 @@
 import os
+import json
 
 
-def build_config(directories):
+def create_config(directories, filename='config.json'):
+    config = create_config_dictionary(directories)
+    with open(filename, 'w') as fp:
+        json.dump(config, fp)
+
+
+def create_config_dictionary(directories):
     services = [{'input': path_to_mxd} for path_to_mxd in get_mxds(directories)]
     config = {
         'agsUrl': 'https://<hostname>:6443/arcgis/admin',
