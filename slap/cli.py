@@ -88,10 +88,10 @@ def initialize_config(args):
     config_builder.create_config(directories=args.input, filename=args.config, hostname=args.name)
 
 
-def main(raw_args):
+def main(raw_args=sys.argv[1:]):
     parser = _create_parser()
     args = parser.parse_args(raw_args)
     args.func(args)
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
