@@ -38,6 +38,14 @@ class ArcpyHelper:
                 self.register_data_source(data_source)
 
     @staticmethod
+    def list_data_sources(mxd_paths):
+        data_sources = set()
+        for mxd_path in mxd_paths:
+            mxd = arcpy.mapping.MapDocument(mxd_path)
+            data_sources.update(ArcpyHelper.list_data_sources_for_mxd(mxd))
+        return list(data_sources)
+
+    @staticmethod
     def list_data_sources_for_mxd(mxd):
         data_sources = set()
         layers = arcpy.mapping.ListLayers(mxd)
