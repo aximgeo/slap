@@ -37,6 +37,15 @@ class ArcpyHelper:
             if data_source["name"] not in existing_data_sources:
                 self.register_data_source(data_source)
 
+    @staticmethod
+    def list_data_sources_for_mxd(mxd):
+        data_sources = set()
+        layers = arcpy.mapping.ListLayers(mxd)
+        for layer in layers:
+            if layer.supports("dataSource"):
+                data_sources.add(layer.dataSource)
+        return list(data_sources)
+
     def register_data_source(self, data_source):
         server_path = data_source["serverPath"]
         client_path = data_source["clientPath"] if "clientPath" in data_source else server_path

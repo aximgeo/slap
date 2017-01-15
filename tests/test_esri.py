@@ -4,6 +4,36 @@ from slap.esri import ArcpyHelper
 from unittest import TestCase
 from mock import MagicMock, patch, call
 
+
+@patch('slap.esri.arcpy')
+class TestListDataSources(TestCase):
+
+    @staticmethod
+    def create_mock_layer(data_source):
+        layer = MagicMock()
+        layer.supports = MagicMock(return_value=True)
+        layer.dataSource = data_source
+        return layer
+
+    def test_list_single_data_source(self, mock_arcpy):
+        data_source = 'layer1'
+        layer = self.create_mock_layer(data_source)
+        mock_arcpy.mapping.ListLayers = MagicMock(return_value=[layer])
+        expected = [data_source]
+        actual = ArcpyHelper.list_data_sources_for_mxd({})
+        self.assertEqual(expected, actual)
+
+    def test_lists_unique_data_source(self, mock_arcpy):
+        data_source1 = 'layer1'
+        data_source2 = 'layer2'
+        layer1 = self.create_mock_layer(data_source1)
+        layer2 = self.create_mock_layer(data_source2)
+        mock_arcpy.mapping.ListLayers = MagicMock(return_value=[layer1, layer1, layer2])
+        expected = [data_source2, data_source1]
+        actual = ArcpyHelper.list_data_sources_for_mxd({})
+        self.assertEqual(expected, actual)
+
+
 @patch('slap.esri.arcpy')
 class TestRegisterDataSources(TestCase):
 
