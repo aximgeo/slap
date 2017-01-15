@@ -101,3 +101,19 @@ class TestConfigBuilder(TestCase):
         with patch('slap.config_builder.os', self.fake_os):
             actual = config_builder.get_mxds(['test'])
             self.assertEqual(expected, actual)
+
+    def test_register_data_sources(self):
+        expected = [
+            {
+                "name": "dataSource1",
+                "serverPath": "dataSource1",
+                "clientPath": "dataSource1"
+            },
+            {
+                "name": "dataSource2",
+                "serverPath": "dataSource2",
+                "clientPath": "dataSource2"
+            }
+        ]
+        actual = config_builder.add_data_sources(['dataSource1', 'dataSource2'])
+        self.assertEqual(expected, actual)

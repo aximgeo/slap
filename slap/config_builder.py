@@ -27,3 +27,14 @@ def get_mxds(directories):
         for f in files
         if f.lower().endswith('mxd')
     ]
+
+
+def add_data_sources(data_sources):
+    return [
+        {
+            'name': data_source,
+            'serverPath': data_source,
+            'clientPath': data_source
+        }
+        for data_source in data_sources
+    ]
