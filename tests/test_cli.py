@@ -6,12 +6,6 @@ module_patcher = patch.dict('sys.modules', {'arcpy': mock_arcpy})
 module_patcher.start()
 
 
-class TestInitCli(TestCase):
-    def test_throws_if_no_folder(self):
-        with self.assertRaises(SystemExit):
-            cli.main(['init'])
-
-
 class TestPublishCli(TestCase):
 
     required_args = ['publish', '-u', 'user', '-p', 'pass']

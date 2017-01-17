@@ -46,7 +46,6 @@ def _add_publish_arguments(parser):
 def _add_init_arguments(parser):
     parser.set_defaults(func=initialize_config)
     parser.add_argument("-i", "--input",
-                        required=True,
                         action="append",
                         help="one or more directories containing files to add to config "
                              "(ex: --input c:/my/maps --input c:/my/other/maps)")
@@ -89,10 +88,10 @@ def publish(args):
 
 def initialize_config(args):
     config_builder.create_config(
-        directories=args.input,
-        filename=args.config,
-        hostname=args.name,
-        register_data_sources=args.register
+        directories=args.input if args.input else None,
+        filename=args.config if args.input else 'config.json',
+        hostname=args.name if args.name else 'hostname',
+        register_data_sources=args.register if args.register else False
     )
 
 

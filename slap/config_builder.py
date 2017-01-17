@@ -2,8 +2,8 @@ import os
 import json
 
 
-def create_config(directories, filename='config.json', hostname='hostname', register_data_sources=False):
-    config = create_config_dictionary(directories, hostname, register_data_sources)
+def create_config(directories=None, filename='config.json', hostname='hostname', register_data_sources=False):
+    config = create_config_dictionary(directories if directories else [os.getcwd()], hostname, register_data_sources)
     with open(filename, 'w+') as fp:
         json.dump(config, fp, indent=4)
 
