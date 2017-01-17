@@ -8,6 +8,7 @@ from slap import config_builder
 class TestConfigBuilder(TestCase):
 
     def setUp(self):
+
         self.fs = fake_filesystem.FakeFilesystem()
         self.fake_os = fake_filesystem.FakeOsModule(self.fs)
 
@@ -115,5 +116,5 @@ class TestConfigBuilder(TestCase):
                 "clientPath": "dataSource2"
             }
         ]
-        actual = config_builder.add_data_sources(['dataSource1', 'dataSource2'])
+        actual = config_builder.create_data_sources_config(['dataSource1', 'dataSource2'])
         self.assertEqual(expected, actual)

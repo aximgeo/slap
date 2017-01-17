@@ -52,6 +52,9 @@ def _add_init_arguments(parser):
                              "(ex: --input c:/my/maps --input c:/my/other/maps)")
     parser.add_argument("-c", "--config",
                         help="path to output config file (ex: --config configs/int_config.json)")
+    parser.add_argument("-r", "--register",
+                        action="store_true",
+                        help="find all data sources in inputs and register them with the geodatabase")
     parser.add_argument("-n", "--name",
                         help="set the hostname in config (ex: --name $HOSTNAME)")
 
@@ -85,7 +88,12 @@ def publish(args):
 
 
 def initialize_config(args):
-    config_builder.create_config(directories=args.input, filename=args.config, hostname=args.name)
+    config_builder.create_config(
+        directories=args.input,
+        filename=args.config,
+        hostname=args.name,
+        register_data_sources=args.register
+    )
 
 
 def main(raw_args=sys.argv[1:]):
