@@ -41,7 +41,8 @@ class ArcpyHelper:
     def list_data_sources(mxd_paths):
         data_sources = set()
         for mxd_path in mxd_paths:
-            mxd = arcpy.mapping.MapDocument(mxd_path)
+            full_mxd_path = os.path.abspath(mxd_path)
+            mxd = arcpy.mapping.MapDocument(full_mxd_path)
             data_sources.update(ArcpyHelper.list_data_sources_for_mxd(mxd))
         return list(data_sources)
 
