@@ -122,13 +122,16 @@ class TestConfigBuilder(TestCase):
     def test_create_data_sources_config(self):
         expected = [
             {
-                "name": "dataSource1",
+                "name": "server1-database1-user1",
                 "serverPath": "dataSource1"
             },
             {
-                "name": "dataSource2",
+                "name": "server2-database2-user2",
                 "serverPath": "dataSource2"
             }
         ]
-        actual = config_builder.create_data_sources_config(['dataSource1', 'dataSource2'])
+        actual = config_builder.create_data_sources_config([
+            {'name': 'server1-database1-user1', 'workspacePath': 'dataSource1'},
+            {'name': 'server2-database2-user2', 'workspacePath': 'dataSource2'}
+        ])
         self.assertEqual(expected, actual)
