@@ -44,11 +44,7 @@ class ArcpyHelper:
         for workspace in workspaces:
             desc = arcpy.Describe(workspace)
             workspaces_with_names.append({
-                'name': '{server}-{database}-{user}'.format(
-                    server=desc.connectionProperties.server,
-                    database=desc.connectionProperties.database,
-                    user=desc.connectionProperties.user
-                ),
+                'name': '{}'.format(desc.name),
                 'workspacePath': workspace
             })
             return workspaces_with_names

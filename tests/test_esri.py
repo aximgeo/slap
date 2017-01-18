@@ -45,12 +45,9 @@ class TestListDataSources(TestCase):
 
     def test_list_data_sources_with_names(self, mock_arcpy):
         data_source = 'layer1'
-        expected = [{'name': 'server-database-user', 'workspacePath': data_source}]
-
-        Description = namedtuple('Description', 'connectionProperties')
-        ConnectionProperties = namedtuple('ConnectionProperties', 'server database user')
-        connectionProperties = ConnectionProperties('server', 'database', 'user')
-        description = Description(connectionProperties)
+        expected = [{'name': 'testName', 'workspacePath': data_source}]
+        Description = namedtuple('Description', 'name')
+        description = Description('testName')
         with patch('slap.esri.arcpy.Describe') as mock_describe:
             with patch('slap.esri.ArcpyHelper.list_workspaces') as mock:
                 mock_describe.return_value = description
