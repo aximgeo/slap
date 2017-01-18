@@ -8,7 +8,6 @@ from slap import config_builder
 class TestConfigBuilder(TestCase):
 
     def setUp(self):
-
         self.fs = fake_filesystem.FakeFilesystem()
         self.fake_os = fake_filesystem.FakeOsModule(self.fs)
 
@@ -111,7 +110,16 @@ class TestConfigBuilder(TestCase):
             actual = config_builder.get_mxds(['test'])
             self.assertEqual(expected, actual)
 
-    def test_register_data_sources(self):
+    def test_get_data_sources(self):
+        with patch('__builtin__.open'):
+            with patch('slap.config_builder.get_mxds'):
+                with patch('slap.esri.ArcpyHelper'):
+                    with patch('slap.config_builder.create_data_sources_config') as mock:
+                        mock.return_value = {}
+                        config_builder.create_config(register_data_sources=True)
+                        mock.assert_called_once()
+
+    def test_create_data_sources_config(self):
         expected = [
             {
                 "name": "dataSource1",
