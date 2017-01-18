@@ -38,22 +38,22 @@ class ArcpyHelper:
                 self.register_data_source(data_source)
 
     @staticmethod
-    def list_data_sources(mxd_paths):
-        data_sources = set()
+    def list_workspaces(mxd_paths):
+        workspaces = set()
         for mxd_path in mxd_paths:
             full_mxd_path = os.path.abspath(mxd_path)
             mxd = arcpy.mapping.MapDocument(full_mxd_path)
-            data_sources.update(ArcpyHelper.list_data_sources_for_mxd(mxd))
-        return list(data_sources)
+            workspaces.update(ArcpyHelper.list_workspaces_for_mxd(mxd))
+        return list(workspaces)
 
     @staticmethod
-    def list_data_sources_for_mxd(mxd):
-        data_sources = set()
+    def list_workspaces_for_mxd(mxd):
+        workspaces = set()
         layers = arcpy.mapping.ListLayers(mxd)
         for layer in layers:
-            if layer.supports("dataSource"):
-                data_sources.add(layer.dataSource)
-        return list(data_sources)
+            if layer.supports("WORKSPACEPATH"):
+                workspaces.add(layer.workspacePath)
+        return list(workspaces)
 
     def register_data_source(self, data_source):
         server_path = data_source["serverPath"]

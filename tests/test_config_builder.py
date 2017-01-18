@@ -115,13 +115,11 @@ class TestConfigBuilder(TestCase):
         expected = [
             {
                 "name": "dataSource1",
-                "serverPath": "dataSource1",
-                "clientPath": "dataSource1"
+                "serverPath": "dataSource1"
             },
             {
                 "name": "dataSource2",
-                "serverPath": "dataSource2",
-                "clientPath": "dataSource2"
+                "serverPath": "dataSource2"
             }
         ]
         actual = config_builder.create_data_sources_config(['dataSource1', 'dataSource2'])

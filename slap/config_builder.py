@@ -35,15 +35,14 @@ def get_mxds(directories):
 
 def get_data_sources(mxds):
     from slap.esri import ArcpyHelper
-    return create_data_sources_config(ArcpyHelper.list_data_sources(mxds))
+    return create_data_sources_config(ArcpyHelper.list_workspaces(mxds))
 
 
 def create_data_sources_config(data_sources):
     return [
         {
             'name': data_source,
-            'serverPath': data_source,
-            'clientPath': data_source
+            'serverPath': data_source
         }
         for data_source in data_sources
     ]

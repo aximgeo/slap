@@ -9,10 +9,10 @@ from mock import MagicMock, patch, call
 class TestListDataSources(TestCase):
 
     @staticmethod
-    def create_mock_layer(data_source):
+    def create_mock_layer(workspace):
         layer = MagicMock()
         layer.supports = MagicMock(return_value=True)
-        layer.dataSource = data_source
+        layer.workspacePath = workspace
         return layer
 
     def test_list_single_data_source(self, mock_arcpy):
@@ -20,7 +20,7 @@ class TestListDataSources(TestCase):
         layer = self.create_mock_layer(data_source)
         mock_arcpy.mapping.ListLayers = MagicMock(return_value=[layer])
         expected = [data_source]
-        actual = ArcpyHelper.list_data_sources_for_mxd({})
+        actual = ArcpyHelper.list_workspaces_for_mxd({})
         self.assertEqual(expected, actual)
 
     def test_lists_unique_data_sources(self, mock_arcpy):
@@ -30,7 +30,7 @@ class TestListDataSources(TestCase):
         layer2 = self.create_mock_layer(data_source2)
         mock_arcpy.mapping.ListLayers = MagicMock(return_value=[layer1, layer1, layer2])
         expected = [data_source2, data_source1]
-        actual = ArcpyHelper.list_data_sources_for_mxd({})
+        actual = ArcpyHelper.list_workspaces_for_mxd({})
         self.assertEqual(expected, actual)
 
     def test_list_data_sources(self, mock_arcpy):
@@ -39,7 +39,7 @@ class TestListDataSources(TestCase):
         mock_arcpy.mapping.MapDocument = MagicMock(return_value={})
         mock_arcpy.mapping.ListLayers = MagicMock(return_value=[layer])
         expected = [data_source]
-        actual = ArcpyHelper.list_data_sources(['mxd1'])
+        actual = ArcpyHelper.list_workspaces(['mxd1'])
         self.assertEqual(expected, actual)
 
 
