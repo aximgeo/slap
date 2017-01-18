@@ -38,6 +38,22 @@ class ArcpyHelper:
                 self.register_data_source(data_source)
 
     @staticmethod
+    def get_workspaces_with_names(mxd_paths):
+        workspaces = ArcpyHelper.list_workspaces(mxd_paths)
+        workspaces_with_names = []
+        for workspace in workspaces:
+            desc = arcpy.Describe(workspace)
+            workspaces_with_names.append({
+                'name': '{server}-{database}-{user}'.format(
+                    server=desc.connectionProperties.server,
+                    database=desc.connectionProperties.database,
+                    user=desc.connectionProperties.user
+                ),
+                'workspacePath': workspace
+            })
+            return workspaces_with_names
+
+    @staticmethod
     def list_workspaces(mxd_paths):
         workspaces = set()
         for mxd_path in mxd_paths:

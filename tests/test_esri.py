@@ -1,5 +1,6 @@
 import os
 from os import path
+from collections import namedtuple
 from slap.esri import ArcpyHelper
 from unittest import TestCase
 from mock import MagicMock, patch, call
@@ -41,6 +42,21 @@ class TestListDataSources(TestCase):
         expected = [data_source]
         actual = ArcpyHelper.list_workspaces(['mxd1'])
         self.assertEqual(expected, actual)
+
+    def test_list_data_sources_with_names(self, mock_arcpy):
+        data_source = 'layer1'
+        expected = [{'name': 'server-database-user', 'workspacePath': data_source}]
+
+        Description = namedtuple('Description', 'connectionProperties')
+        ConnectionProperties = namedtuple('ConnectionProperties', 'server database user')
+        connectionProperties = ConnectionProperties('server', 'database', 'user')
+        description = Description(connectionProperties)
+        with patch('slap.esri.arcpy.Describe') as mock_describe:
+            with patch('slap.esri.ArcpyHelper.list_workspaces') as mock:
+                mock_describe.return_value = description
+                mock.return_value = [data_source]
+                actual = ArcpyHelper.get_workspaces_with_names(['mxd1'])
+                self.assertEqual(expected, actual)
 
 
 @patch('slap.esri.arcpy')
