@@ -6,34 +6,33 @@ module_patcher = patch.dict('sys.modules', {'arcpy': mock_arcpy})
 module_patcher.start()
 
 
-class TestCli(TestCase):
-
-    required_args = ['-u', 'user', '-p', 'pass', '-c', 'config.json']
-
-    def test_only_one(self):
-        self.assertTrue(cli.only_one([True, False, False]))
-        self.assertTrue(cli.only_one([False, ['foo', 'bar'], False]))
-        self.assertTrue(cli.only_one([True, [], False]))
-        self.assertTrue(cli.only_one(["some sha", False, False]))
-        self.assertTrue(cli.only_one([True, False]))
-        self.assertFalse(cli.only_one([True, True]))
-        self.assertFalse(cli.only_one([True, ['foo'], False]))
-
-    def test_throws_if_no_config(self):
+class TestInitCli(TestCase):
+    def test_throws_if_no_folder(self):
         with self.assertRaises(SystemExit):
-            cli.main(['-u', 'user', '-p', 'pass'])
+            cli.main(['init'])
+
+
+class TestPublishCli(TestCase):
+
+    required_args = ['publish', '-u', 'user', '-p', 'pass']
 
     def test_throws_if_no_username(self):
         with self.assertRaises(SystemExit):
-            cli.main(['-c', 'config.json', '-p', 'pass'])
+            cli.main(['publish', '-c', 'config.json', '-p', 'pass'])
 
     def test_throws_if_no_password(self):
         with self.assertRaises(SystemExit):
-            cli.main(['-u', 'user', '-c', 'config.json'])
+            cli.main(['publish', '-u', 'user', '-c', 'config.json'])
 
     def test_throws_if_both_git_and_inputs_specified(self):
         with self.assertRaises(SystemExit):
-            cli.main(['-u', 'user', '-p', 'pass', '-c', 'config.json', '-i', 'some/file', '-g', 'some-hash'])
+            cli.main(['publish', '-u', 'user', '-p', 'pass', '-c', 'config.json', '-i', 'some/file', '-g', 'some-hash'])
+
+    def test_uses_default_config(self):
+        with patch('slap.cli.Publisher') as mock_publisher:
+            with patch('slap.publisher.ConfigParser.load_config'):
+                cli.main(['publish', '-u', 'user', '-p', 'pass'])
+                mock_publisher.assert_called_once_with('user', 'pass', 'config.json', None)
 
     def test_set_hostname(self):
         with patch('slap.cli.Publisher') as mock_publisher:
