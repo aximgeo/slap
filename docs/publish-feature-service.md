@@ -6,7 +6,7 @@ extension in the service `json` parameter - the easiet way to get the
 feature access enabled, copy it, and modify it for your needs.
 
 
-```` javascript
+```javascript
 {
     "input": "D:\\path-to\\my.mxd",
     "output": "output/",

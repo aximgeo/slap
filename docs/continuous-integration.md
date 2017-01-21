@@ -21,7 +21,6 @@ Assuming we want to publish both services with schema locks disabled, our config
 ``` json
 {
     "agsUrl": "https://myagsserver.com:6443/arcgis/admin",
-    "tokenUrl": "https://myagsserver.com:6443/arcgis/tokens/generateToken",
     "mapServices": {
         "json": {
             "properties": {

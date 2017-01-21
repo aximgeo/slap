@@ -106,9 +106,9 @@ C:\maps\map3.mxd published successfully
 
 Now if you navigate to your REST service endpoint, you should see:
 
-![slap1](slap1.png)
+![slap1](images/slap1.png)
 
-![slap2](slap2.png)
+![slap2](images/slap2.png)
 
 Note that slap will automatically overwrite any existing services; if you run the same command again, you can see this from the output:
 

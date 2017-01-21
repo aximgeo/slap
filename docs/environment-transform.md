@@ -11,7 +11,6 @@ Our config file should look like:
 ``` json
 {
     "agsUrl": "https://prodagsserver.com:6443/arcgis/admin",
-    "tokenUrl": "https://prodagsserver.com:6443/arcgis/tokens/generateToken",
     "mapServices": {
         "json": {
             "maxIdleTime": 300,
