@@ -37,6 +37,36 @@ class ArcpyHelper:
             if data_source["name"] not in existing_data_sources:
                 self.register_data_source(data_source)
 
+    @staticmethod
+    def get_workspaces_with_names(mxd_paths):
+        workspaces = ArcpyHelper.list_workspaces(mxd_paths)
+        workspaces_with_names = []
+        for workspace in workspaces:
+            desc = arcpy.Describe(workspace)
+            workspaces_with_names.append({
+                'name': '{}'.format(desc.name),
+                'workspacePath': workspace
+            })
+            return workspaces_with_names
+
+    @staticmethod
+    def list_workspaces(mxd_paths):
+        workspaces = set()
+        for mxd_path in mxd_paths:
+            full_mxd_path = os.path.abspath(mxd_path)
+            mxd = arcpy.mapping.MapDocument(full_mxd_path)
+            workspaces.update(ArcpyHelper.list_workspaces_for_mxd(mxd))
+        return list(workspaces)
+
+    @staticmethod
+    def list_workspaces_for_mxd(mxd):
+        workspaces = set()
+        layers = arcpy.mapping.ListLayers(mxd)
+        for layer in layers:
+            if layer.supports("WORKSPACEPATH"):
+                workspaces.add(layer.workspacePath)
+        return list(workspaces)
+
     def register_data_source(self, data_source):
         server_path = data_source["serverPath"]
         client_path = data_source["clientPath"] if "clientPath" in data_source else server_path

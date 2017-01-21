@@ -6,14 +6,15 @@ publishing. This scenario works for when you have a folder structure full
 of production MXDs and a SLAP configuration file with all the MXDs in it 
 and you want to perhaps replicate your services in another environment.
 
-```
+```python
 from slap import publisher
 import glob
 import os
 
 username = "user"
 password = "pass"
-slap_config = "path_to_confg"
+slap_config = "path_to_config"
+
 # Get list of input MXDs
 inputs = glob.glob(os.path.join("path_to_mxds", "*.mxd"))
 
