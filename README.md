@@ -121,7 +121,7 @@ An example configuration file might look like below.  *Note:* The comments would
 }
 ```
 
-### "Mixing in" service parameters
+### Mixing in service parameters
 Service properties can be specified at multiple levels in the file; the most 
 specific property will be used (i.e., service level, then type level, then 
 global).  This allows for a minimum of configuration, while also allowing 
