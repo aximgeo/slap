@@ -35,11 +35,11 @@ def _add_publish_arguments(parser):
     parser.add_argument("-g", "--git",
                         help="publish all files that have changed between HEAD and this commit "
                              "(ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4)")
+    parser.add_argument("-n", "--name",
+                        help="override the hostname in config (ex: --name $HOSTNAME)")
     parser.add_argument("-s", "--site",
                         action="store_true",
                         help="create a site before publishing")
-    parser.add_argument("-n", "--name",
-                        help="override the hostname in config (ex: --name $HOSTNAME)")
 
 
 def _add_init_arguments(parser):
@@ -50,11 +50,11 @@ def _add_init_arguments(parser):
     parser.add_argument("-c", "--config",
                         help="path to output config file (ex: --config configs/int_config.json)",
                         default="config.json")
+    parser.add_argument("-n", "--name",
+                        help="set the hostname in config (ex: --name $HOSTNAME)")
     parser.add_argument("-r", "--register",
                         action="store_true",
                         help="find all data sources in inputs and register them with the geodatabase")
-    parser.add_argument("-n", "--name",
-                        help="set the hostname in config (ex: --name $HOSTNAME)")
 
 
 def publish(args):
