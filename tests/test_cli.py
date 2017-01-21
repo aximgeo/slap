@@ -1,9 +1,33 @@
+import os
 from unittest import TestCase
 from mock import MagicMock, patch
 from slap import cli
 mock_arcpy = MagicMock()
 module_patcher = patch.dict('sys.modules', {'arcpy': mock_arcpy})
 module_patcher.start()
+
+
+class TestInitCli(TestCase):
+
+    def test_default_args(self):
+        with patch('slap.cli.config_builder.create_config') as mock:
+            cli.main(['init'])
+            mock.assert_called_once_with(
+                directories=[os.getcwd()],
+                filename='config.json',
+                hostname='hostname',
+                register_data_sources=False
+            )
+
+    def test_inputs(self):
+        with patch('slap.cli.config_builder.create_config') as mock:
+            cli.main(['init', 'foo', 'bar', 'baz'])
+            mock.assert_called_once_with(
+                directories=['foo', 'bar', 'baz'],
+                filename='config.json',
+                hostname='hostname',
+                register_data_sources=False
+            )
 
 
 class TestPublishCli(TestCase):

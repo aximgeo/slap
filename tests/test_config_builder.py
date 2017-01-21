@@ -15,8 +15,9 @@ class TestConfigBuilder(TestCase):
         with patch('slap.config_builder.create_config_dictionary') as mock_config:
             with patch('__builtin__.open') as mock_open:
                 mock_config.return_value = {}
-                config_builder.create_config()
-                mock_config.assert_called_once_with([os.getcwd()], 'hostname', False)
+                directories = [os.getcwd()]
+                config_builder.create_config(directories)
+                mock_config.assert_called_once_with(directories, 'hostname', False)
                 mock_open.assert_called_once_with('config.json', 'w+')
 
     def test_saves_default_config_file(self):
@@ -116,7 +117,7 @@ class TestConfigBuilder(TestCase):
                 with patch('slap.esri.ArcpyHelper'):
                     with patch('slap.config_builder.create_data_sources_config') as mock:
                         mock.return_value = {}
-                        config_builder.create_config(register_data_sources=True)
+                        config_builder.create_config(directories=[], register_data_sources=True)
                         mock.assert_called_once()
 
     def test_create_data_sources_config(self):

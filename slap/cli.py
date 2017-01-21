@@ -1,3 +1,4 @@
+import os
 import sys
 import argparse
 from slap.publisher import Publisher
@@ -45,12 +46,11 @@ def _add_publish_arguments(parser):
 
 def _add_init_arguments(parser):
     parser.set_defaults(func=initialize_config)
-    parser.add_argument("-i", "--input",
-                        action="append",
-                        help="one or more directories containing files to add to config "
-                             "(ex: --input c:/my/maps --input c:/my/other/maps)")
+    parser.add_argument("inputs",
+                        nargs="*")
     parser.add_argument("-c", "--config",
-                        help="path to output config file (ex: --config configs/int_config.json)")
+                        help="path to output config file (ex: --config configs/int_config.json)",
+                        default="config.json")
     parser.add_argument("-r", "--register",
                         action="store_true",
                         help="find all data sources in inputs and register them with the geodatabase")
@@ -88,8 +88,8 @@ def publish(args):
 
 def initialize_config(args):
     config_builder.create_config(
-        directories=args.input if args.input else None,
-        filename=args.config if args.input else 'config.json',
+        directories=args.inputs if args.inputs else [os.getcwd()],
+        filename=args.config if args.config else 'config.json',
         hostname=args.name if args.name else 'hostname',
         register_data_sources=args.register if args.register else False
     )
