@@ -20,6 +20,9 @@ def _create_parser():
 
 def _add_publish_arguments(parser):
     parser.set_defaults(func=publish)
+    parser.add_argument("inputs",
+                        nargs="*",
+                        help="inputs to publish")
     parser.add_argument("-u", "--username",
                         required=True,
                         help="Portal or AGS username (ex: --username john)")
@@ -29,25 +32,21 @@ def _add_publish_arguments(parser):
     parser.add_argument("-c", "--config",
                         default="config.json",
                         help="path to config file (ex: --config configs/int_config.json)")
+    parser.add_argument("-g", "--git",
+                        help="publish all files that have changed between HEAD and this commit "
+                             "(ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4)")
     parser.add_argument("-s", "--site",
                         action="store_true",
                         help="create a site before publishing")
     parser.add_argument("-n", "--name",
                         help="override the hostname in config (ex: --name $HOSTNAME)")
 
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument("-i", "--input",
-                       action="append",
-                       help="one or more inputs to publish (ex: -input mxd/bar.mxd -input mxd/foo.mxd")
-    group.add_argument("-g", "--git",
-                       help="publish all files that have changed between HEAD and this commit "
-                            "(ex: -g b45e095834af1bc8f4c348bb4aad66bddcadeab4)")
-
 
 def _add_init_arguments(parser):
     parser.set_defaults(func=initialize_config)
     parser.add_argument("inputs",
-                        nargs="*")
+                        nargs="*",
+                        help="directories to use when constructing config file")
     parser.add_argument("-c", "--config",
                         help="path to output config file (ex: --config configs/int_config.json)",
                         default="config.json")
@@ -71,16 +70,16 @@ def publish(args):
     print "Registering data sources..."
     publisher.register_data_sources()
 
-    if args.input:
-        for i in args.input:
-            print "Publishing {}...".format(i)
-            publisher.publish_input(i)
-    elif args.git:
+    if args.git:
         print "Getting changes from git..."
         changed_files = git.get_changed_mxds(args.git)
         print changed_files
-        for i in changed_files:
-            publisher.publish_input(i)
+        for input in changed_files:
+            publisher.publish_input(input)
+    elif args.inputs:
+        for input in args.inputs:
+            print "Publishing {}...".format(input)
+            publisher.publish_input(input)
     else:
         print "Publishing all..."
         publisher.publish_all()
