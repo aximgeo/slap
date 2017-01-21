@@ -20,6 +20,10 @@ class ConfigParser:
         with open(path_to_config) as config_file:
             return json.load(config_file)
 
+    @staticmethod
+    def _get_full_config_path(path_to_config):
+        return path_to_config if os.path.isabs(path_to_config) else os.path.join(os.getcwd(), path_to_config)
+
     def parse_config(self, config):
         parsed = self.get_root_keys(config)
         for service_type in self.service_types:
