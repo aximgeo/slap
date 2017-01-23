@@ -33,13 +33,13 @@ usage: slap init [-h] [-c CONFIG] [-n NAME] [-r] [inputs [inputs ...]]
 #### inputs
 A list of directories to search for map documents when building the config; defaults to the current working directory.
 
-#### --name <NAME>
+#### -n, --name \<NAME>
 Sets the hostname of the AGS server in config; defaults to `hostname`.
 
-#### --config <CONFIG>
+#### -c, --config \<CONFIG>
 Overrides the default config file path and name; defaults to `config.json` in the current working directory.
 
-#### --register
+#### -r, --register
 Searches all map documents for data sources, and registers them with the geodatabase.
 
 ### publish
@@ -52,22 +52,22 @@ usage: slap publish [-h] -u USERNAME -p PASSWORD [-c CONFIG] [-g GIT] [-n NAME] 
 #### inputs
 A list of map documents to publish; defaults to all documents listed in the config file.
 
-#### --username <USERNAME>
+#### -u, --username \<USERNAME>
 Username for the AGS publisher account.
 
-#### --password <PASSWORD>
+#### -p, --password \<PASSWORD>
 Password for the AGS publisher account.
 
-#### --config <CONFIG>
+#### -c, --config \<CONFIG>
 Path to the config file to use for publishing; defaults to `config.json` in the current working directory.
 
-#### --git <COMMIT>
+#### -g, --git \<COMMIT>
 Republish all inputs that have changed since the previous commit; useful when publishing from a CI job.
 
-#### --name
+#### -n, --name
 Overrides the hostname of the AGS server in config; useful when publishing during a docker build.
 
-#### --site
+#### -s, --site
 Creates a new site before publishing; useful when publishing during a docker build.
 
 ## Config files
@@ -127,7 +127,7 @@ specific property will be used (i.e., service level, then type level, then
 global).  This allows for a minimum of configuration, while also allowing 
 for service parameters to vary.  Note that the `json` parameter is identical 
 what's specified in ESRI's [REST API](http://resources.arcgis.com/en/help/arcgis-rest-api/index.html#/Create_Service/02r3000001tr000000/). 
-An example of the utilizing the `json` parameter is [enabling feature access](docs/publishfeatureservice.md) 
+An example of the utilizing the `json` parameter is [enabling feature access](docs/publish-feature-service.md) 
 on a service.
 
 ### Replacing workspace paths
