@@ -3,14 +3,13 @@ import json
 import requests
 from requests import Response
 from unittest import TestCase
-from slap.api import Api
+from slap.api import Api, check_parsed_response, parse_response
 from mock import PropertyMock, patch
 
 from slap.auth.token import TokenAuth
 
 
 class TestApi(TestCase):
-
     @staticmethod
     def create_api(auth=None, verify_certs=False):
         api = Api(
@@ -39,53 +38,46 @@ class TestApi(TestCase):
             mock_request.assert_called_once_with(url, data=params, auth=auth, verify=False)
 
     def test_parse_response_with_bad_return_code(self):
-        api = self.create_api()
         response = Response()
         response.status_code = 500
         response._content = '{"status":"success"}'
-        self.assertRaises(requests.HTTPError, api.parse_response, response)
+        self.assertRaises(requests.HTTPError, parse_response, response)
 
     def test_check_parsed_response(self):
-        api = self.create_api()
         response = {'status': 'error', 'messages': ['an error occurred']}
-        self.assertRaises(requests.exceptions.RequestException, api.check_parsed_response, response)
+        self.assertRaises(requests.exceptions.RequestException, check_parsed_response, response)
 
     def test_check_parsed_token_response(self):
-        api = self.create_api()
         response = {'messages': ['an error occurred']}  # no 'status'
         try:
-            api.check_parsed_response(response)
+            check_parsed_response(response)
         except requests.exceptions.RequestException:
             self.fail()
 
     def get_mock(self, url, method, *args):
-        with patch('slap.api.Api.token', new_callable=PropertyMock) as mock_token:
-            with patch('slap.api.Api.get') as mock_method:
-                mock_token.return_value = 'my_token_value'
-                api = self.create_api()
-                getattr(api, method)(*args)
-                mock_token.assert_called_once_with()
-                mock_method.assert_called_once_with(url, {'f': 'json', 'token': 'my_token_value'})
+        with patch('slap.api.Api.get') as mock_method:
+            api = self.create_api()
+            getattr(api, method)(*args)
+            mock_method.assert_called_once_with(url, {'f': 'json'})
 
     def post_mock(self, url, method, expected, *args):
-        with patch('slap.api.Api.token', new_callable=PropertyMock) as mock_token:
-            with patch('slap.api.Api.post') as mock_method:
-                mock_token.return_value = 'my_token_value'
-                api = self.create_api()
-                getattr(api, method)(*args)
-                mock_token.assert_called_once_with()
-                mock_method.assert_called_once_with(url, expected)
+        with patch('slap.api.Api.post') as mock_method:
+            api = self.create_api()
+            getattr(api, method)(*args)
+            mock_method.assert_called_once_with(url, expected)
 
     def test_delete_map_service(self):
-        self.post_mock('http://myserver/arcgis/admin/services/myService.MapServer/delete',
-                       'delete_service',
-                       {'f': 'json', 'token': 'my_token_value'},
-                       'myService')
+        self.post_mock(
+            'http://myserver/arcgis/admin/services/myService.MapServer/delete',
+            'delete_service',
+            {'f': 'json'},
+            'myService'
+        )
 
     def test_delete_map_service_with_folder(self):
         self.post_mock('http://myserver/arcgis/admin/services/myFolder/myService.MapServer/delete',
                        'delete_service',
-                       {'f': 'json', 'token': 'my_token_value'},
+                       {'f': 'json'},
                        'myService', 'myFolder')
 
     def test_get_map_service(self):
@@ -94,7 +86,7 @@ class TestApi(TestCase):
 
     def test_get_map_service_with_folder(self):
         self.get_mock('http://myserver/arcgis/admin/services/myFolder/myService.MapServer',
-                          'get_service_params', 'myService', 'myFolder')
+                      'get_service_params', 'myService', 'myFolder')
 
     def test_get_other_service(self):
         self.get_mock('http://myserver/arcgis/admin/services/myFolder/myService.ImageServer',
@@ -102,34 +94,26 @@ class TestApi(TestCase):
 
     def test_edit_map_service(self):
         self.post_mock('http://myserver/arcgis/admin/services/myService.MapServer/edit', 'edit_service',
-                       {'service': '{"foo": "bar"}', 'f': 'json', 'token': 'my_token_value'},
+                       {'service': '{"foo": "bar"}', 'f': 'json'},
                        'myService', {'foo': 'bar'})
 
     def test_edit_map_service_with_folder(self):
         self.post_mock('http://myserver/arcgis/admin/services/myFolder/myService.MapServer/edit', 'edit_service',
-                       {'service': '{"foo": "bar"}', 'f': 'json', 'token': 'my_token_value'},
+                       {'service': '{"foo": "bar"}', 'f': 'json'},
                        'myService', {'foo': 'bar'}, 'myFolder')
 
     def test_edit_other_service(self):
         self.post_mock('http://myserver/arcgis/admin/services/myFolder/myService.ImageServer/edit', 'edit_service',
-                       {'service': '{"foo": "bar"}', 'f': 'json', 'token': 'my_token_value'},
+                       {'service': '{"foo": "bar"}', 'f': 'json'},
                        'myService', {'foo': 'bar'}, 'myFolder',
                        'ImageServer')
 
     def test_map_service_exists(self):
         self.post_mock('http://myserver/arcgis/admin/services/exists/exists',
                        'service_exists',
-                       {'folderName': 'myFolder', 'serviceName': 'myService', 'f': 'json', 'token': 'my_token_value',
+                       {'folderName': 'myFolder', 'serviceName': 'myService', 'f': 'json',
                         'type': 'MapServer'},
                        'myService', 'myFolder')
-
-    def test_build_params(self):
-        with patch('slap.api.Api.token', new_callable=PropertyMock) as mock_token:
-            mock_token.return_value = 'my-token'
-            api = self.create_api()
-            expected = {'foo': 'bar', 'f': 'json', 'token': 'my-token'}
-            actual = api.build_params({'foo': 'bar'})
-            self.assertEqual(expected, actual)
 
     def test_create_site(self):
         api = self.create_api()
@@ -207,5 +191,4 @@ class TestApi(TestCase):
 
 
 if __name__ == '__main__':
-
     unittest.main()

@@ -2,6 +2,21 @@ import requests
 import json
 
 
+def parse_response(response):
+    if not response.ok:
+        response.raise_for_status()
+
+    parsed_response = response.json()
+    check_parsed_response(parsed_response)
+    return parsed_response
+
+
+def check_parsed_response(parsed_response):
+    if 'status' in parsed_response:  # token requests don't have this
+        if parsed_response['status'] == 'error':  # handle a 200 response with an error
+            raise requests.exceptions.RequestException(parsed_response['messages'][0])
+
+
 class Api:
 
     def __init__(self, ags_url, auth, verify_certs=False):
@@ -10,50 +25,18 @@ class Api:
         self.__verify_certs = verify_certs
 
     @property
-    def token(self):
-        return self._token if self._token else self.get_token()
-
-    @property
     def params(self):
         return {
-            'token': self.token,
             'f': 'json'
         }
 
     def post(self, url, params):
         response = requests.post(url, data=params, auth=self.__auth, verify=self.__verify_certs)
-        return self.parse_response(response)
+        return parse_response(response)
 
     def get(self, url, params):
         response = requests.get(url, params=params, auth=self.__auth, verify=self.__verify_certs)
-        return self.parse_response(response)
-
-    @staticmethod
-    def parse_response(response):
-        if not response.ok:
-            response.raise_for_status()
-
-        parsed_response = response.json()
-        Api.check_parsed_response(parsed_response)
-        return parsed_response
-
-    @staticmethod
-    def check_parsed_response(parsed_response):
-        if 'status' in parsed_response:  # token requests don't have this
-            if parsed_response['status'] == 'error':  # handle a 200 response with an error
-                raise requests.exceptions.RequestException(parsed_response['messages'][0])
-
-    def get_token(self):
-        params = {
-            'username': self._username,
-            'password': self._password,
-            'client': 'requestip',
-            'expiration': 60,
-            'f': 'json'
-        }
-        response = self.post(self._token_url, params)
-        self._token = response['token']
-        return self._token
+        return parse_response(response)
 
     def get_service_params(self, service_name, folder='', service_type='MapServer'):
         folder = self.build_folder_string(folder)
@@ -154,9 +137,4 @@ class Api:
     @staticmethod
     def build_folder_string(folder):
         return folder + '/' if folder else ''
-
-    def build_params(self, params):
-        params['f'] = 'json'
-        params['token'] = self.token
-        return params
 
