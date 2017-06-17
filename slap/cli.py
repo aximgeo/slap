@@ -65,7 +65,7 @@ def publish(args):
         if "site" in publisher.config:
             publisher.api.create_site(args.username, args.password, publisher.config["site"])
         else:
-            publisher.api.create_default_site()
+            publisher.api.create_default_site(args.username, args.password)
 
     print "Registering data sources..."
     publisher.register_data_sources()

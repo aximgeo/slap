@@ -6,77 +6,37 @@ from unittest import TestCase
 from slap.api import Api
 from mock import PropertyMock, patch
 
+from slap.auth.token import TokenAuth
+
 
 class TestApi(TestCase):
 
     @staticmethod
-    def create_api():
+    def create_api(auth=None, verify_certs=False):
         api = Api(
             ags_url='http://myserver/arcgis/admin',
-            token_url=None,
-            portal_url=None,
-            username='user',
-            password='pass'
+            auth=TokenAuth(username='user', password='pass', token_url='get/my/token') if auth is None else auth,
+            verify_certs=verify_certs
         )
         return api
 
-    def test_token_url_no_portal(self):
-        api = Api(
-            ags_url='http://myserver/arcgis/admin',
-            token_url=None,
-            portal_url=None,
-            username='user',
-            password='pass'
-        )
-        self.assertEqual(api._token_url, 'http://myserver/arcgis/admin/generateToken')
-
-    def test_token_url_with_portal(self):
-        api = Api(
-            ags_url='http://myserver/arcgis/admin',
-            token_url='foo/generateToken',
-            portal_url='http://myserver/portal/sharing/rest',
-            username='user',
-            password='pass'
-        )
-        self.assertEqual(api._token_url, 'foo/generateToken')
-
-    def test_token(self):
-        api = self.create_api()
-        api._token = 'my_token_value'
-        self.assertEqual(api.token, 'my_token_value')
-        api._token = None
-
-    def test_get_token(self):
-        with patch('slap.api.Api.post') as mock_post:
-            api = self.create_api()
-            token_params = {
-                'username': api._username,
-                'password': api._password,
-                'client': 'requestip',
-                'expiration': 60,
-                'f': 'json'
-            }
-            token_value = 'my_new_token_value'
-            mock_post.return_value = {'token': token_value}
-            token = api.token
-            mock_post.assert_called_once_with(api._token_url, token_params)
-            self.assertEqual(token, token_value)
-
     def test_get(self):
         with patch('requests.get') as mock_request:
-            api = self.create_api()
+            auth = TokenAuth(username='user', password='pass', token_url='get/my/token')
+            api = self.create_api(auth)
             url = 'my/url'
             params = {'foo': 'bar'}
             api.get(url=url, params=params)
-            mock_request.assert_called_once_with(url, params=params, verify=api._verify_certs)
+            mock_request.assert_called_once_with(url, params=params, auth=auth, verify=False)
 
     def test_post(self):
         with patch('requests.post') as mock_request:
-            api = self.create_api()
+            auth = TokenAuth(username='user', password='pass', token_url='get/my/token')
+            api = self.create_api(auth)
             url = 'my/url'
             params = {'foo': 'bar'}
             api.post(url=url, params=params)
-            mock_request.assert_called_once_with(url, data=params, verify=api._verify_certs)
+            mock_request.assert_called_once_with(url, data=params, auth=auth, verify=False)
 
     def test_parse_response_with_bad_return_code(self):
         api = self.create_api()
@@ -189,9 +149,11 @@ class TestApi(TestCase):
 
     def test_create_default_site(self):
         api = self.create_api()
+        username = 'user'
+        password = 'pass'
         with patch('slap.api.Api.create_site') as mock_create_site:
-            api.create_default_site()
-            mock_create_site.assert_called_once_with(api._username, api._password, api.get_default_site_params())
+            api.create_default_site(username=username, password=password)
+            mock_create_site.assert_called_once_with(username, password, api.get_default_site_params())
 
     def test_get_default_site_params(self):
         self.maxDiff = None

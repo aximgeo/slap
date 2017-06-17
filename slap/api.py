@@ -4,14 +4,10 @@ import json
 
 class Api:
 
-    def __init__(self, ags_url, token_url, portal_url, username, password, verify_certs=False):
+    def __init__(self, ags_url, auth, verify_certs=False):
         self._ags_url = ags_url
-        self._token_url = token_url if token_url else ags_url + '/generateToken'
-        self._portal_url = portal_url
-        self._username = username
-        self._password = password
-        self._verify_certs = verify_certs
-        self._token = None
+        self.__auth = auth
+        self.__verify_certs = verify_certs
 
     @property
     def token(self):
@@ -25,11 +21,11 @@ class Api:
         }
 
     def post(self, url, params):
-        response = requests.post(url, data=params, verify=self._verify_certs)
+        response = requests.post(url, data=params, auth=self.__auth, verify=self.__verify_certs)
         return self.parse_response(response)
 
     def get(self, url, params):
-        response = requests.get(url, params=params, verify=self._verify_certs)
+        response = requests.get(url, params=params, auth=self.__auth, verify=self.__verify_certs)
         return self.parse_response(response)
 
     @staticmethod
@@ -92,8 +88,8 @@ class Api:
         new_params['f'] = 'json'
         return self.post('{0}/createNewSite'.format(self._ags_url), new_params)
     
-    def create_default_site(self):
-        return self.create_site(self._username, self._password, self.get_default_site_params())
+    def create_default_site(self, username, password):
+        return self.create_site(username, password, self.get_default_site_params())
 
     @staticmethod
     def get_default_site_params():
