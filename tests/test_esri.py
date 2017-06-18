@@ -32,7 +32,7 @@ class TestListDataSources(TestCase):
         mock_arcpy.mapping.ListLayers = MagicMock(return_value=[layer1, layer1, layer2])
         expected = [data_source2, data_source1]
         actual = ArcpyHelper.list_workspaces_for_mxd({})
-        self.assertEqual(expected, actual)
+        self.assertEqual(sorted(expected), sorted(actual))
 
     def test_list_data_sources(self, mock_arcpy):
         data_source = 'layer1'
