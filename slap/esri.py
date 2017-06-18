@@ -1,9 +1,10 @@
 from __future__ import print_function
+from builtins import object
 import arcpy
 import os
 
 
-class ArcpyHelper:
+class ArcpyHelper(object):
 
     def __init__(self, username, password, ags_admin_url, connection_file_name='temp.ags'):
 

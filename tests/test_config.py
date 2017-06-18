@@ -15,7 +15,7 @@ class TestConfigParser(TestCase):
     def test_load_config_from_file(self):
         config_data = '{"foo": "bar"}'
         expected = json.loads(config_data)
-        with patch('__builtin__.open', mock_open(read_data=config_data)):
+        with patch('builtins.open', mock_open(read_data=config_data)):
             config_parser = ConfigParser()
             actual = config_parser._load_config_from_file('/path/to/config')
             self.assertEqual(expected, actual)

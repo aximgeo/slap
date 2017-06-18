@@ -1,11 +1,15 @@
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 import os
 import json
-import urlparse
+import urllib.parse
 import re
 from functools import reduce
 
 
-class ConfigParser:
+class ConfigParser(object):
 
     service_types = ['mapServices', 'gpServices', 'imageServices']
     required_keys = ['input', 'agsUrl']
@@ -80,9 +84,9 @@ class ConfigParser:
 
     @staticmethod
     def update_hostname(url, hostname):
-        url_parts = urlparse.urlsplit(url)
+        url_parts = urllib.parse.urlsplit(url)
         url_parts = url_parts._replace(netloc=re.sub('^[^:]*', hostname, url_parts.netloc))
-        return urlparse.urlunsplit(url_parts)
+        return urllib.parse.urlunsplit(url_parts)
 
     def check_required_keys(self, config):
         for key in self.required_keys:
