@@ -11,9 +11,10 @@ class TokenAuth(AuthBase):
         self._password = password
         self._token = None
 
-    def __call__(self, r):
-        r.params['token'] = self._get_token() if self._token is None else self._token
-        return r
+    def __call__(self, prepared_request):
+        token = self._get_token() if self._token is None else self._token
+        prepared_request.prepare_url(prepared_request.url, token)
+        return prepared_request
 
     def _get_token(self):
         params = {
