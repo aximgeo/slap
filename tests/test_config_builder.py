@@ -1,8 +1,12 @@
+import sys
 import os
 from unittest import TestCase
 from mock import patch
 from pyfakefs import fake_filesystem
 from slap import config_builder
+
+
+OPEN_MOCK = ('builtins.%s' if sys.version_info >= (3,) else '__builtin__.%s') % 'open'
 
 
 class TestConfigBuilder(TestCase):
@@ -13,7 +17,7 @@ class TestConfigBuilder(TestCase):
 
     def test_default_args(self):
         with patch('slap.config_builder.create_config_dictionary') as mock_config:
-            with patch('builtins.open') as mock_open:
+            with patch(OPEN_MOCK) as mock_open:
                 mock_config.return_value = {}
                 directories = [os.getcwd()]
                 config_builder.create_config(directories)
@@ -25,7 +29,7 @@ class TestConfigBuilder(TestCase):
         self.fs.CreateFile(test_file)
         fake_open = fake_filesystem.FakeFileOpen(self.fs)
         with patch('slap.config_builder.os', self.fake_os):
-            with patch('builtins.open', fake_open):
+            with patch(OPEN_MOCK, fake_open):
                 config_builder.create_config(['test'])
                 self.assertTrue(self.fake_os.path.isfile('config.json'))
 
@@ -38,7 +42,7 @@ class TestConfigBuilder(TestCase):
         fake_open = fake_filesystem.FakeFileOpen(self.fs)
 
         with patch('slap.config_builder.os', self.fake_os):
-            with patch('builtins.open', fake_open):
+            with patch(OPEN_MOCK, fake_open):
                 config_builder.create_config(['test'], config_file)
                 self.assertTrue(self.fake_os.path.isfile(config_file))
 
@@ -112,7 +116,7 @@ class TestConfigBuilder(TestCase):
             self.assertEqual(expected, actual)
 
     def test_get_data_sources(self):
-        with patch('builtins.open'):
+        with patch(OPEN_MOCK):
             with patch('slap.config_builder.get_mxds'):
                 with patch('slap.esri.ArcpyHelper'):
                     with patch('slap.config_builder.create_data_sources_config') as mock:
