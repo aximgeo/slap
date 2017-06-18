@@ -138,7 +138,7 @@ class Publisher:
 
     @staticmethod
     def message(message):
-        print message
+        print(message)
 
 
 
