@@ -1,5 +1,6 @@
 from future import standard_library
 standard_library.install_aliases()
+from past.builtins import basestring
 from builtins import str
 from builtins import object
 import os
@@ -76,7 +77,7 @@ class ConfigParser(object):
         return a
 
     def merge_json(self, default_json, config_json):
-        if isinstance(default_json, str):
+        if isinstance(default_json, basestring):
             default_json_copy = json.loads(default_json)
         else:
             default_json_copy = default_json.copy()
