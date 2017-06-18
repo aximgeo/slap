@@ -106,13 +106,13 @@ class TestConfigBuilder(TestCase):
         test_file = os.path.join('test', 'testFile.mxd')
         test_file_2 = os.path.join('test', 'badTestFile.txt')
         test_file_3 = os.path.join('test', 'testFileCaps.MXD')
-        expected = [test_file, test_file_3]
+        expected = sorted([test_file, test_file_3])
         self.fs.CreateFile(test_file)
         self.fs.CreateFile(test_file_2)
         self.fs.CreateFile(test_file_3)
 
         with patch('slap.config_builder.os', self.fake_os):
-            actual = config_builder.get_mxds(['test'])
+            actual = sorted(config_builder.get_mxds(['test']))
             self.assertEqual(expected, actual)
 
     def test_get_data_sources(self):
