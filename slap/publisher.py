@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 from slap.api import Api
 from slap.config import ConfigParser

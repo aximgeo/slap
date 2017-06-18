@@ -2,6 +2,7 @@ import os
 import json
 import urlparse
 import re
+from functools import reduce
 
 
 class ConfigParser:
