@@ -9,9 +9,10 @@ class TokenAuth(AuthBase):
         self._token_url = token_url
         self._username = username
         self._password = password
+        self._token = None
 
     def __call__(self, r):
-        r.params['token'] = self._get_token()
+        r.params['token'] = self._get_token() if self._token is None else self._token
         return r
 
     def _get_token(self):
@@ -24,4 +25,5 @@ class TokenAuth(AuthBase):
         }
         response = requests.post(self._token_url, params)
         parsed_response = parse_response(response)
-        return parsed_response['token']
+        self._token = parsed_response['token']
+        return self._token
