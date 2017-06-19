@@ -14,7 +14,7 @@ class TokenAuth(AuthBase):
 
     def __call__(self, prepared_request):
         token = self._get_token() if self._token is None else self._token
-        prepared_request.prepare_url(prepared_request.url, token)
+        prepared_request.prepare_url(prepared_request.url, {'token': token})
         return prepared_request
 
     def _get_token(self):
