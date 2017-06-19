@@ -23,7 +23,7 @@ class TestTokenAuth(TestCase):
             }
             auth = TokenAuth(username, password, token_url)
             auth._get_token()
-            mock_post.assert_called_once_with(token_url, token_params)
+            mock_post.assert_called_once_with(token_url, token_params, verify=False)
 
     def test_caches_token(self):
         with requests_mock.mock() as mock_request:
