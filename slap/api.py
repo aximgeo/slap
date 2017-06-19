@@ -1,3 +1,4 @@
+from builtins import object
 import requests
 import json
 
@@ -17,8 +18,7 @@ def check_parsed_response(parsed_response):
             raise requests.exceptions.RequestException(parsed_response['messages'][0])
 
 
-class Api:
-
+class Api(object):
     def __init__(self, ags_url, auth, verify_certs=False):
         self._ags_url = ags_url
         self.__auth = auth
