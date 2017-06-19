@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import argparse
@@ -61,27 +62,27 @@ def publish(args):
     publisher = Publisher(args.username, args.password, args.config, args.name)
 
     if args.site:
-        print "Creating site..."
+        print("Creating site...")
         if "site" in publisher.config:
             publisher.api.create_site(args.username, args.password, publisher.config["site"])
         else:
             publisher.api.create_default_site()
 
-    print "Registering data sources..."
+    print("Registering data sources...")
     publisher.register_data_sources()
 
     if args.git:
-        print "Getting changes from git..."
+        print("Getting changes from git...")
         changed_files = git.get_changed_mxds(args.git)
-        print changed_files
+        print(changed_files)
         for input in changed_files:
             publisher.publish_input(input)
     elif args.inputs:
         for input in args.inputs:
-            print "Publishing {}...".format(input)
+            print("Publishing {}...".format(input))
             publisher.publish_input(input)
     else:
-        print "Publishing all..."
+        print("Publishing all...")
         publisher.publish_all()
 
 

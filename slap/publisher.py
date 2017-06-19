@@ -1,9 +1,12 @@
+from __future__ import print_function
+from past.builtins import basestring
+from builtins import object
 import os
 from slap.api import Api
 from slap.config import ConfigParser
 
 
-class Publisher:
+class Publisher(object):
 
     def __init__(self, username, password, config, hostname=None):
         self.config_parser = ConfigParser()
@@ -138,7 +141,7 @@ class Publisher:
 
     @staticmethod
     def message(message):
-        print message
+        print(message)
 
 
 

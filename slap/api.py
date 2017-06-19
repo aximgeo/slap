@@ -1,8 +1,9 @@
+from builtins import object
 import requests
 import json
 
 
-class Api:
+class Api(object):
 
     def __init__(self, ags_url, token_url, portal_url, username, password, verify_certs=False):
         self._ags_url = ags_url
