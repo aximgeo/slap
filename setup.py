@@ -21,7 +21,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='3.1.0',
+    version='3.2.0',
     description='A set of scripts for publishing ESRI services',
     long_description='A set of scripts for publishing ESRI services',
 
@@ -81,7 +81,7 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         'dev': ['check-manifest'],
-        'test': ['mock', 'coverage', 'pyfakefs', 'pytest', 'pytest-cov'],
+        'test': ['mock', 'coverage', 'pyfakefs', 'pytest', 'pytest-cov', 'requests_mock'],
     },
 
     # If there are data files included in your packages that need to be

@@ -3,6 +3,7 @@ from past.builtins import basestring
 from builtins import object
 import os
 from slap.api import Api
+from slap.auth.token import TokenAuth
 from slap.config import ConfigParser
 
 
@@ -16,14 +17,8 @@ class Publisher(object):
         if hostname:
             self.config['agsUrl'] = self.config_parser.update_hostname(self.config['agsUrl'], hostname)
 
-        self.api = Api(
-            ags_url=self.config['agsUrl'],
-            token_url=self.config['tokenUrl'] if 'tokenUrl' in self.config else None,
-            portal_url=self.config['portalUrl'] if 'portalUrl' in self.config else None,
-            username=username,
-            password=password,
-            verify_certs=self.config['verifyCerts'] if 'verifyCerts' in self.config else False
-        )
+        verify_certs = self.config['verifyCerts'] if 'verifyCerts' in self.config else False
+        self.api = self.__build_api(username=username, password=password, verify_certs=verify_certs)
 
         # This is a S-L-O-W import, so defer as long as possible
         from slap.esri import ArcpyHelper
@@ -31,6 +26,22 @@ class Publisher(object):
             username=username,
             password=password,
             ags_admin_url=self.config['agsUrl']
+        )
+
+    def __build_api(self, username, password, verify_certs):
+        auth = self.__build_auth(username=username, password=password, verify_certs=verify_certs)
+        return Api(
+            ags_url=self.config['agsUrl'],
+            auth=auth,
+            verify_certs=verify_certs
+        )
+
+    def __build_auth(self, username, password, verify_certs):
+        return TokenAuth(
+            username=username,
+            password=password,
+            token_url=self.config['tokenUrl'] if 'tokenUrl' in self.config else self.config['agsUrl'] + '/generateToken',
+            verify_certs=verify_certs
         )
 
     @staticmethod
