@@ -63,13 +63,19 @@ class Api(object):
         new_params['type'] = service_type
         return self.post(url, new_params)
 
+    # This doesn't use a token, and so we don't give it auth
     def create_site(self, username, password, params):
         new_params = params.copy()
         new_params['username'] = username
         new_params['password'] = password
         new_params['confirmPassword'] = password
         new_params['f'] = 'json'
-        return self.post('{0}/createNewSite'.format(self._ags_url), new_params)
+        response = requests.post(
+            url='{0}/createNewSite'.format(self._ags_url),
+            data=new_params,
+            verify=self.__verify_certs
+        )
+        return parse_response(response)
     
     def create_default_site(self, username, password):
         return self.create_site(username, password, self.get_default_site_params())

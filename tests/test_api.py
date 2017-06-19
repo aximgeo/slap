@@ -117,7 +117,7 @@ class TestApi(TestCase):
 
     def test_create_site(self):
         api = self.create_api()
-        with patch('slap.api.Api.post') as mock_post:
+        with patch('slap.api.requests.post') as mock_post:
             params = {
                 'foo': 'bar'
             }
@@ -129,7 +129,7 @@ class TestApi(TestCase):
                 'f': 'json'
             }
             api.create_site(username='user', password='pwd', params=params)
-            mock_post.assert_called_once_with(api._ags_url + '/createNewSite', expected_params)
+            mock_post.assert_called_once_with(url=api._ags_url + '/createNewSite', data=expected_params, verify=False)
 
     def test_create_default_site(self):
         api = self.create_api()
