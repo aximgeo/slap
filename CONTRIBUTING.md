@@ -38,4 +38,16 @@ Issue #5
 * All new features should include tests as well
 * If you are fixing a bug, please provide a test that would have caught the bug in the first place, if possible
 * When you submit a pull request, the CI server will automatically run all the tests; before a pull request can be approved, all tests must pass
-* To run the tests locally, you can use `python -m unittest discover tests`, or any other python test runner
+
+## Basic Development Setup
+Fork the repository, and clone the repo to your local machine.  To create a new virtual environment, install dependencies, and 
+run the tests, do the following:
+
+```bash
+cd slap # or wherever you've cloned the repository to
+virtualenv slap # create a virtualenv
+./slap/bin/activate # activate it
+pip install . # install the dependencies
+pip install .[dev,test] # install dev dependencies
+pytest # run the tests
+```

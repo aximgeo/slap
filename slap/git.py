@@ -1,3 +1,4 @@
+from builtins import str
 import sys
 from subprocess import check_output
 

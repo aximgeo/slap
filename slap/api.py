@@ -1,63 +1,42 @@
+from builtins import object
 import requests
 import json
 
 
-class Api:
+def parse_response(response):
+    if not response.ok:
+        response.raise_for_status()
 
-    def __init__(self, ags_url, token_url, portal_url, username, password, verify_certs=False):
+    parsed_response = response.json()
+    check_parsed_response(parsed_response)
+    return parsed_response
+
+
+def check_parsed_response(parsed_response):
+    if 'status' in parsed_response:  # token requests don't have this
+        if parsed_response['status'] == 'error':  # handle a 200 response with an error
+            raise requests.exceptions.RequestException(parsed_response['messages'][0])
+
+
+class Api(object):
+    def __init__(self, ags_url, auth, verify_certs=False):
         self._ags_url = ags_url
-        self._token_url = token_url if token_url else ags_url + '/generateToken'
-        self._portal_url = portal_url
-        self._username = username
-        self._password = password
-        self._verify_certs = verify_certs
-        self._token = None
-
-    @property
-    def token(self):
-        return self._token if self._token else self.get_token()
+        self.__auth = auth
+        self.__verify_certs = verify_certs
 
     @property
     def params(self):
         return {
-            'token': self.token,
             'f': 'json'
         }
 
     def post(self, url, params):
-        response = requests.post(url, data=params, verify=self._verify_certs)
-        return self.parse_response(response)
+        response = requests.post(url, data=params, auth=self.__auth, verify=self.__verify_certs)
+        return parse_response(response)
 
     def get(self, url, params):
-        response = requests.get(url, params=params, verify=self._verify_certs)
-        return self.parse_response(response)
-
-    @staticmethod
-    def parse_response(response):
-        if not response.ok:
-            response.raise_for_status()
-
-        parsed_response = response.json()
-        Api.check_parsed_response(parsed_response)
-        return parsed_response
-
-    @staticmethod
-    def check_parsed_response(parsed_response):
-        if 'status' in parsed_response:  # token requests don't have this
-            if parsed_response['status'] == 'error':  # handle a 200 response with an error
-                raise requests.exceptions.RequestException(parsed_response['messages'][0])
-
-    def get_token(self):
-        params = {
-            'username': self._username,
-            'password': self._password,
-            'client': 'requestip',
-            'expiration': 60,
-            'f': 'json'
-        }
-        response = self.post(self._token_url, params)
-        self._token = response['token']
-        return self._token
+        response = requests.get(url, params=params, auth=self.__auth, verify=self.__verify_certs)
+        return parse_response(response)
 
     def get_service_params(self, service_name, folder='', service_type='MapServer'):
         folder = self.build_folder_string(folder)
@@ -84,16 +63,22 @@ class Api:
         new_params['type'] = service_type
         return self.post(url, new_params)
 
+    # This doesn't use a token, and so we don't give it auth
     def create_site(self, username, password, params):
         new_params = params.copy()
         new_params['username'] = username
         new_params['password'] = password
         new_params['confirmPassword'] = password
         new_params['f'] = 'json'
-        return self.post('{0}/createNewSite'.format(self._ags_url), new_params)
+        response = requests.post(
+            url='{0}/createNewSite'.format(self._ags_url),
+            data=new_params,
+            verify=self.__verify_certs
+        )
+        return parse_response(response)
     
-    def create_default_site(self):
-        return self.create_site(self._username, self._password, self.get_default_site_params())
+    def create_default_site(self, username, password):
+        return self.create_site(username, password, self.get_default_site_params())
 
     @staticmethod
     def get_default_site_params():
@@ -158,9 +143,4 @@ class Api:
     @staticmethod
     def build_folder_string(folder):
         return folder + '/' if folder else ''
-
-    def build_params(self, params):
-        params['f'] = 'json'
-        params['token'] = self.token
-        return params
 
