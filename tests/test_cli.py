@@ -10,7 +10,7 @@ module_patcher.start()
 class TestInitCli(TestCase):
 
     def test_default_args(self):
-        with patch('slap.cli.config_builder.create_config') as mock:
+        with patch('slap.cli.create_config') as mock:
             cli.main(['init'])
             mock.assert_called_once_with(
                 directories=[os.getcwd()],
@@ -20,7 +20,7 @@ class TestInitCli(TestCase):
             )
 
     def test_inputs(self):
-        with patch('slap.cli.config_builder.create_config') as mock:
+        with patch('slap.cli.create_config') as mock:
             cli.main(['init', 'foo', 'bar', 'baz'])
             mock.assert_called_once_with(
                 directories=['foo', 'bar', 'baz'],

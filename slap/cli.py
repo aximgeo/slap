@@ -1,9 +1,13 @@
 from __future__ import print_function
-import os
-import sys
+
 import argparse
+import sys
+
+import os
+
+from slap import git
+from slap.config.builder import create_config
 from slap.publisher import Publisher
-from slap import git, config_builder
 
 
 def _create_parser():
@@ -87,7 +91,7 @@ def publish(args):
 
 
 def initialize_config(args):
-    config_builder.create_config(
+    create_config(
         directories=args.inputs if args.inputs else [os.getcwd()],
         filename=args.config if args.config else 'config.json',
         hostname=args.name if args.name else 'hostname',

@@ -1,10 +1,11 @@
 import sys
-import os
 from unittest import TestCase
+
+import os
 from mock import patch
 from pyfakefs import fake_filesystem
-from slap import config_builder
 
+from slap.config import builder
 
 OPEN_MOCK = ('builtins.%s' if sys.version_info >= (3,) else '__builtin__.%s') % 'open'
 
@@ -16,11 +17,11 @@ class TestConfigBuilder(TestCase):
         self.fake_os = fake_filesystem.FakeOsModule(self.fs)
 
     def test_default_args(self):
-        with patch('slap.config_builder.create_config_dictionary') as mock_config:
+        with patch('slap.config.builder._create_config_dictionary') as mock_config:
             with patch(OPEN_MOCK) as mock_open:
                 mock_config.return_value = {}
                 directories = [os.getcwd()]
-                config_builder.create_config(directories)
+                builder.create_config(directories)
                 mock_config.assert_called_once_with(directories, 'hostname', False)
                 mock_open.assert_called_once_with('config.json', 'w+')
 
@@ -28,9 +29,9 @@ class TestConfigBuilder(TestCase):
         test_file = os.path.join('test', 'testFile.mxd')
         self.fs.CreateFile(test_file)
         fake_open = fake_filesystem.FakeFileOpen(self.fs)
-        with patch('slap.config_builder.os', self.fake_os):
+        with patch('slap.config.builder.os', self.fake_os):
             with patch(OPEN_MOCK, fake_open):
-                config_builder.create_config(['test'])
+                builder.create_config(['test'])
                 self.assertTrue(self.fake_os.path.isfile('config.json'))
 
     def test_saves_named_config_file(self):
@@ -41,9 +42,9 @@ class TestConfigBuilder(TestCase):
         self.fs.CreateDirectory(test_directory)
         fake_open = fake_filesystem.FakeFileOpen(self.fs)
 
-        with patch('slap.config_builder.os', self.fake_os):
+        with patch('slap.config.builder.os', self.fake_os):
             with patch(OPEN_MOCK, fake_open):
-                config_builder.create_config(['test'], config_file)
+                builder.create_config(['test'], config_file)
                 self.assertTrue(self.fake_os.path.isfile(config_file))
 
     def test_returns_empty_config_dict(self):
@@ -53,7 +54,7 @@ class TestConfigBuilder(TestCase):
                 'services': []
             }
         }
-        actual = config_builder.create_config_dictionary([])
+        actual = builder._create_config_dictionary([])
         self.assertEqual(expected, actual)
 
     def test_returns_empty_config_dict_with_hostname(self):
@@ -63,7 +64,7 @@ class TestConfigBuilder(TestCase):
                 'services': []
             }
         }
-        actual = config_builder.create_config_dictionary([], 'myhostname')
+        actual = builder._create_config_dictionary([], 'myhostname')
         self.assertEqual(expected, actual)
 
     def test_returns_config_with_one_service(self):
@@ -79,8 +80,8 @@ class TestConfigBuilder(TestCase):
         }
 
         self.fs.CreateFile(test_file)
-        with patch('slap.config_builder.os', self.fake_os):
-            actual = config_builder.create_config_dictionary(['test'])
+        with patch('slap.config.builder.os', self.fake_os):
+            actual = builder._create_config_dictionary(['test'])
             self.assertEqual(expected, actual)
 
     def test_get_file_from_directory(self):
@@ -88,8 +89,8 @@ class TestConfigBuilder(TestCase):
         expected = [test_file]
         self.fs.CreateFile(test_file)
 
-        with patch('slap.config_builder.os', self.fake_os):
-            actual = config_builder.get_mxds(['test'])
+        with patch('slap.config.builder.os', self.fake_os):
+            actual = builder._get_mxds(['test'])
             self.assertEqual(expected, actual)
 
     def test_gets_files_from_directory_list(self):
@@ -98,8 +99,8 @@ class TestConfigBuilder(TestCase):
         self.fs.CreateFile(test_file)
         self.fs.CreateFile(test_file_2)
         expected = [test_file, test_file_2]
-        with patch('slap.config_builder.os', self.fake_os):
-            actual = config_builder.get_mxds(['test', 'test2'])
+        with patch('slap.config.builder.os', self.fake_os):
+            actual = builder._get_mxds(['test', 'test2'])
             self.assertEqual(expected, actual)
 
     def test_gets_only_mxd_files(self):
@@ -111,17 +112,17 @@ class TestConfigBuilder(TestCase):
         self.fs.CreateFile(test_file_2)
         self.fs.CreateFile(test_file_3)
 
-        with patch('slap.config_builder.os', self.fake_os):
-            actual = sorted(config_builder.get_mxds(['test']))
+        with patch('slap.config.builder.os', self.fake_os):
+            actual = sorted(builder._get_mxds(['test']))
             self.assertEqual(expected, actual)
 
     def test_get_data_sources(self):
         with patch(OPEN_MOCK):
-            with patch('slap.config_builder.get_mxds'):
+            with patch('slap.config.builder._get_mxds'):
                 with patch('slap.esri.ArcpyHelper'):
-                    with patch('slap.config_builder.create_data_sources_config') as mock:
+                    with patch('slap.config.builder._create_data_sources_config') as mock:
                         mock.return_value = {}
-                        config_builder.create_config(directories=[], register_data_sources=True)
+                        builder.create_config(directories=[], register_data_sources=True)
                         mock.assert_called_once()
 
     def test_create_data_sources_config(self):
@@ -135,7 +136,7 @@ class TestConfigBuilder(TestCase):
                 "serverPath": "dataSource2"
             }
         ]
-        actual = config_builder.create_data_sources_config([
+        actual = builder._create_data_sources_config([
             {'name': 'server1-database1-user1', 'workspacePath': 'dataSource1'},
             {'name': 'server2-database2-user2', 'workspacePath': 'dataSource2'}
         ])
